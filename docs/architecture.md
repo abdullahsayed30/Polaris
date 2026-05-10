@@ -26,7 +26,7 @@ flowchart LR
 | Order Service | Public order API, order lifecycle, orchestration, and order event publishing |
 | Inventory Service | Stock checks over gRPC, inventory reservations, stock persistence, inventory events |
 | Notification Service | Asynchronous event consumer for confirmation and inventory notifications |
-| Shared | Shared contracts, common error models, events, protobuf stubs, and utility code |
+| Shared | Shared Java events, common error models, and utility code |
 
 ## Communication Patterns
 
@@ -44,7 +44,7 @@ Each service owns its PostgreSQL database and applies Liquibase migrations as pa
 
 - Maven multi-module keeps the blueprint easy to build while preserving service boundaries.
 - Java 25 sets the runtime baseline for the blueprint.
-- PostgreSQL 16 is a practical default for transactional service data.
+- PostgreSQL 18 is the transactional database baseline for service-owned data.
 - Liquibase makes schema evolution reviewable and repeatable.
 - Kafka demonstrates event-driven choreography and eventual consistency.
 - gRPC demonstrates internal synchronous contracts without leaking them to the edge.
@@ -59,3 +59,11 @@ Each service owns its PostgreSQL database and applies Liquibase migrations as pa
 - 0003 - Database per service
 - 0004 - Event-driven choreography with Kafka
 - 0005 - Saga for multi-service transactions
+
+## Service Code Standard
+
+Polaris services follow a lightweight ports-and-adapters architecture. The package and dependency rules are documented in [Service Architecture Standard](service-architecture-standard.md).
+
+## Contract Packaging
+
+The current monorepo can generate gRPC sources from the repository-level `proto/` directory. Before `v1.0.0`, protobuf definitions should move into a versioned Maven module named `proto-contracts` so services can consume contracts as a package. See [Proto Contracts](proto-contracts.md).

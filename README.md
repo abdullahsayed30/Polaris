@@ -35,7 +35,7 @@ flowchart LR
 | Java              | 25                                           |
 | Spring Boot       | 3.4.x                                        |
 | Spring Cloud      | 2024.0.x                                     |
-| Database          | PostgreSQL 16, one database per service      |
+| Database          | PostgreSQL 18, one database per service      |
 | Schema migrations | Liquibase                                    |
 | Async messaging   | Apache Kafka 3.7                             |
 | Internal RPC      | gRPC + Protobuf                              |
@@ -118,11 +118,18 @@ mvn clean verify
 
 ## Roadmap
 
+Before `v1.0.0`, Polaris is intended to move from a clean blueprint skeleton to a runnable, tested, deployable reference system. The project should preserve real service boundaries throughout that path, including a dedicated versioned [`proto-contracts`](docs/proto-contracts.md) package so gRPC contracts can be consumed by services without copying `.proto` files.
+
 - `v0.1.0`: repository skeleton, architecture docs, parent build.
-- `v0.2.0`: order, inventory, and notification service skeletons.
-- `v0.3.0`: Docker Compose end-to-end order flow.
-- `v0.4.0`: gateway auth, observability, CI, and integration tests.
-- `v1.0.0`: Helm chart, deployment docs, completed ADR set.
+- `v0.2.0`: order service with REST, JPA, SQL Liquibase, Kafka publishing, gRPC inventory client, and Testcontainers.
+- `v0.3.0`: `proto-contracts` Maven module and inventory service with gRPC server, SQL Liquibase, Kafka consumer/producer, and Testcontainers.
+- `v0.4.0`: notification service with Kafka listeners, retry, dead-letter topic, and tests.
+- `v0.5.0`: gateway routes, JWT resource server, CORS, request logging, and rate limiting.
+- `v0.6.0`: Docker Compose local stack for Postgres, Kafka, services, Prometheus, Grafana, and Jaeger.
+- `v0.7.0`: GitHub Actions CI, CodeQL, integration test automation, and README badges.
+- `v0.8.0`: observability polish with dashboards, tracing conventions, and structured logging.
+- `v0.9.0`: Helm chart, Kubernetes manifests, deployment docs, ADR set, and final README polish.
+- `v1.0.0`: stable portfolio-ready blueprint with local runtime, CI proof, and deployment artifacts.
 
 ## License
 
