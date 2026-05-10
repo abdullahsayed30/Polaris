@@ -1,0 +1,52 @@
+# Java and Maven
+target/
+*.class
+*.log
+*.jar
+*.war
+*.ear
+dependency-reduced-pom.xml
+
+# Maven wrapper and build metadata
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# Test and coverage output
+surefire-reports/
+failsafe-reports/
+jacoco.exec
+coverage/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# VS Code
+.vscode/
+
+# Eclipse and Spring Tool Suite
+.classpath
+.project
+.settings/
+.springBeans
+.sts4-cache/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Docker and local runtime
+.env
+.env.*
+!.env.example
+docker-compose.override.yml
+
+# OS and editor swap files
+Thumbs.db
+*.swp
+*.swo
+*~
