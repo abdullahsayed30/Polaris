@@ -52,7 +52,8 @@ flowchart LR
 
 | Module                 | Responsibility                                                                    |
 |------------------------|-----------------------------------------------------------------------------------|
-| `shared`               | Shared DTOs, events, exceptions, and cross-service support code                   |
+| `proto-contracts`      | Versioned protobuf contracts and generated gRPC Java stubs                        |
+| `shared`               | Shared Java events, error models, and cross-service support code                  |
 | `gateway`              | Spring Cloud Gateway routes, JWT validation, CORS, rate limiting, request logging |
 | `order-service`        | Order REST API, order lifecycle, Postgres persistence, Kafka event publishing     |
 | `inventory-service`    | gRPC inventory API, stock reservations, inventory persistence, Kafka consumers    |
@@ -100,10 +101,11 @@ mvn clean verify
 
 1. A client places an order through the gateway.
 2. `order-service` persists the order as `PENDING`.
-3. `order-service` calls `inventory-service` over gRPC to check and reserve stock.
-4. `order-service` publishes `polaris.orders.created` to Kafka.
-5. `inventory-service` consumes order events and updates stock projections.
-6. `notification-service` consumes order and inventory events and emits notification logs.
+3. `order-service` calls `inventory-service` over gRPC `CheckStock`.
+4. If stock is available, `order-service` calls `ReserveStock` over gRPC.
+5. `inventory-service` reserves stock in its own database and publishes `polaris.inventory.adjusted`.
+6. `order-service` confirms or cancels the order and publishes `polaris.orders.created`.
+7. `notification-service` consumes order and inventory events and emits notification logs.
 
 ## Production Conventions
 
@@ -118,7 +120,7 @@ mvn clean verify
 
 ## Roadmap
 
-Before `v1.0.0`, Polaris is intended to move from a clean blueprint skeleton to a runnable, tested, deployable reference system. The project should preserve real service boundaries throughout that path, including a dedicated versioned [`proto-contracts`](docs/proto-contracts.md) package so gRPC contracts can be consumed by services without copying `.proto` files.
+Before `v1.0.0`, Polaris is intended to move from a clean blueprint skeleton to a runnable, tested, deployable reference system. The project preserves real service boundaries throughout that path, including a dedicated versioned [`proto-contracts`](docs/proto-contracts.md) package so gRPC contracts can be consumed by services without copying `.proto` files.
 
 - `v0.1.0`: repository skeleton, architecture docs, parent build.
 - `v0.2.0`: order service with REST, JPA, SQL Liquibase, Kafka publishing, gRPC inventory client, and Testcontainers.
@@ -126,8 +128,8 @@ Before `v1.0.0`, Polaris is intended to move from a clean blueprint skeleton to 
 - `v0.4.0`: notification service with Kafka listeners, retry, dead-letter topic, and tests.
 - `v0.5.0`: gateway routes, JWT resource server, CORS, request logging, and rate limiting.
 - `v0.6.0`: Docker Compose local stack for Postgres, Kafka, services, Prometheus, Grafana, and Jaeger.
-- `v0.7.0`: GitHub Actions CI, CodeQL, integration test automation, and README badges.
-- `v0.8.0`: observability polish with dashboards, tracing conventions, and structured logging.
+- `v0.7.0`: GitHub Actions CI, CodeQL, Spotless, Checkstyle, Lefthook, integration test automation, and README badges.
+- `v0.8.0`: migrate manual gRPC server wiring to a Spring gRPC starter, then add gRPC interceptors, health/reflection support, dashboards, tracing conventions, and structured logging.
 - `v0.9.0`: Helm chart, Kubernetes manifests, deployment docs, ADR set, and final README polish.
 - `v1.0.0`: stable portfolio-ready blueprint with local runtime, CI proof, and deployment artifacts.
 

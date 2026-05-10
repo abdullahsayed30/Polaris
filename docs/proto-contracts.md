@@ -1,10 +1,10 @@
 # Proto Contracts
 
-Polaris currently keeps protobuf definitions in the repository-level `proto/` directory and lets service modules generate Java and gRPC sources from that path. This is acceptable for the first monorepo implementation, but it should not become the long-term sharing model.
+Polaris keeps protobuf definitions in a dedicated Maven module named `proto-contracts`. Service modules consume generated Java and gRPC classes from that artifact instead of copying `.proto` files or generating stubs from another service's source tree.
 
 ## Target Model
 
-Before `v1.0.0`, protobuf definitions should move into a dedicated Maven module named `proto-contracts`.
+The module owns protobuf definitions and generated gRPC Java stubs.
 
 ```text
 proto-contracts/

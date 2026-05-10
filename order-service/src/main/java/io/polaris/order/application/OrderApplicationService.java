@@ -36,7 +36,9 @@ public class OrderApplicationService {
         Order order = Order.place(customerId, items);
         orderRepository.save(order);
 
-        if (inventoryClient.checkStock(order).available()) {
+        if (!inventoryClient.checkStock(order).available()) {
+            order.cancel();
+        } else if (inventoryClient.reserveStock(order).reserved()) {
             order.confirm();
         } else {
             order.cancel();

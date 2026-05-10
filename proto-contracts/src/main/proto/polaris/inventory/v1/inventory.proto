@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+package polaris.inventory.v1;
+
+option java_multiple_files = true;
+option java_outer_classname = "InventoryProto";
+option java_package = "io.polaris.inventory.grpc";
+
+service InventoryService {
+  rpc CheckStock(StockRequest) returns (StockResponse);
+  rpc ReserveStock(ReserveRequest) returns (ReserveResponse);
+}
+
+enum InventoryDecision {
+  INVENTORY_DECISION_UNSPECIFIED = 0;
+  INVENTORY_DECISION_AVAILABLE = 1;
+  INVENTORY_DECISION_RESERVED = 2;
+  INVENTORY_DECISION_INSUFFICIENT_STOCK = 3;
+}
+
+message StockRequest {
+  string order_id = 1;
+  repeated StockItem items = 2;
+}
+
+message StockItem {
+  string sku = 1;
+  int32 quantity = 2;
+}
+
+message StockResponse {
+  bool available = 1;
+  InventoryDecision reason = 2;
+  repeated StockItemAvailability items = 3;
+}
+
+message StockItemAvailability {
+  string sku = 1;
+  int32 requested_quantity = 2;
+  int32 available_quantity = 3;
+  bool available = 4;
+}
+
+message ReserveRequest {
+  string order_id = 1;
+  repeated StockItem items = 2;
+}
+
+message ReserveResponse {
+  bool reserved = 1;
+  InventoryDecision reason = 2;
+  repeated StockItemReservation items = 3;
+}
+
+message StockItemReservation {
+  string sku = 1;
+  int32 requested_quantity = 2;
+  int32 reserved_quantity = 3;
+  int32 remaining_quantity = 4;
+  bool reserved = 5;
+}

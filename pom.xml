@@ -6,12 +6,12 @@
 
     <groupId>io.polaris</groupId>
     <artifactId>polaris</artifactId>
-    <version>0.2.0-SNAPSHOT</version>
+    <version>0.3.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Polaris</name>
     <description>Production-grade Spring Boot microservices blueprint.</description>
-    <url>https://github.com/your-org/polaris</url>
+    <url>https://github.com/abdullahsayed30/Polaris</url>
 
     <licenses>
         <license>
@@ -22,13 +22,14 @@
     </licenses>
 
     <scm>
-        <connection>scm:git:https://github.com/your-org/polaris.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com/your-org/polaris.git</developerConnection>
-        <url>https://github.com/your-org/polaris</url>
+        <connection>scm:git:https://github.com/abdullahsayed30/Polaris.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/abdullahsayed30/Polaris.git</developerConnection>
+        <url>https://github.com/abdullahsayed30/Polaris</url>
         <tag>HEAD</tag>
     </scm>
 
     <modules>
+        <module>proto-contracts</module>
         <module>shared</module>
         <module>gateway</module>
         <module>order-service</module>

@@ -26,6 +26,7 @@ flowchart LR
 | Order Service | Public order API, order lifecycle, orchestration, and order event publishing |
 | Inventory Service | Stock checks over gRPC, inventory reservations, stock persistence, inventory events |
 | Notification Service | Asynchronous event consumer for confirmation and inventory notifications |
+| Proto Contracts | Versioned protobuf contracts and generated gRPC Java stubs |
 | Shared | Shared Java events, common error models, and utility code |
 
 ## Communication Patterns
@@ -66,4 +67,4 @@ Polaris services follow a lightweight ports-and-adapters architecture. The packa
 
 ## Contract Packaging
 
-The current monorepo can generate gRPC sources from the repository-level `proto/` directory. Before `v1.0.0`, protobuf definitions should move into a versioned Maven module named `proto-contracts` so services can consume contracts as a package. See [Proto Contracts](proto-contracts.md).
+Polaris keeps protobuf definitions in a versioned Maven module named `proto-contracts`. Services consume generated gRPC stubs through that artifact instead of copying `.proto` files or reading another service's source tree. See [Proto Contracts](proto-contracts.md).

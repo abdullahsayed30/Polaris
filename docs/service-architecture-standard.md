@@ -8,7 +8,7 @@ Every service should follow this package shape unless there is a clear reason to
 
 | Package | Purpose |
 | --- | --- |
-| `api` | Inbound REST controllers, request/response DTOs, and API exception handling |
+| `api` | Inbound REST/gRPC adapters, request/response DTOs, and API exception handling |
 | `application` | Use cases, transaction boundaries, orchestration, and application events |
 | `domain` | Entities, enums, value objects, and domain behavior |
 | `persistence` | Spring Data repositories and persistence-specific adapters |
@@ -27,6 +27,17 @@ Every service should follow this package shape unless there is a clear reason to
 - `inventory`: defines the `InventoryClient` port and the gRPC adapter.
 - `messaging`: publishes `OrderCreatedEvent` to Kafka after transaction commit.
 - `config`: wires Kafka topic creation and the Inventory gRPC channel.
+
+## Inventory Service Shape
+
+`inventory-service` currently applies the standard as follows:
+
+- `api`: exposes the Inventory gRPC controller.
+- `application`: owns stock checks, reservations, transaction boundaries, and application events.
+- `domain`: owns `InventoryItem`.
+- `persistence`: owns `InventoryItemRepository`.
+- `messaging`: observes order events and publishes `InventoryAdjustedEvent` after reservation commit.
+- `config`: starts the gRPC server and owns typed gRPC properties.
 
 ## Why This Architecture
 

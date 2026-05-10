@@ -3,8 +3,12 @@ package io.polaris.order;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.grpc.Server;
 import io.grpc.stub.StreamObserver;
+import io.polaris.inventory.grpc.InventoryDecision;
 import io.polaris.inventory.grpc.InventoryServiceGrpc;
+import io.polaris.inventory.grpc.ReserveRequest;
+import io.polaris.inventory.grpc.ReserveResponse;
 import io.polaris.inventory.grpc.StockItemAvailability;
+import io.polaris.inventory.grpc.StockItemReservation;
 import io.polaris.inventory.grpc.StockRequest;
 import io.polaris.inventory.grpc.StockResponse;
 import io.polaris.order.api.OrderItemRequest;
@@ -42,6 +46,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -99,6 +104,8 @@ class OrderServiceIntegrationTest {
     @BeforeEach
     void setUp() {
         fakeInventoryService.setAvailable(true);
+        fakeInventoryService.setReserved(true);
+        fakeInventoryService.resetCalls();
     }
 
     @AfterAll
@@ -135,6 +142,8 @@ class OrderServiceIntegrationTest {
         assertThat(event.customerId()).isEqualTo(order.customerId());
         assertThat(event.status()).isEqualTo(OrderCreatedEvent.OrderStatus.CONFIRMED);
         assertThat(event.items()).hasSize(2);
+        assertThat(fakeInventoryService.checkStockCalls()).isEqualTo(1);
+        assertThat(fakeInventoryService.reserveStockCalls()).isEqualTo(1);
     }
 
     @Test
@@ -154,6 +163,30 @@ class OrderServiceIntegrationTest {
 
         OrderCreatedEvent event = awaitOrderCreatedEvent(order.id());
         assertThat(event.status()).isEqualTo(OrderCreatedEvent.OrderStatus.CANCELLED);
+        assertThat(fakeInventoryService.checkStockCalls()).isEqualTo(1);
+        assertThat(fakeInventoryService.reserveStockCalls()).isZero();
+    }
+
+    @Test
+    void placeOrderWhenReservationFailsCancelsOrderAndPublishesEvent() throws Exception {
+        fakeInventoryService.setAvailable(true);
+        fakeInventoryService.setReserved(false);
+
+        ResponseEntity<OrderResponse> response = restTemplate.postForEntity(
+                "/api/v1/orders",
+                placeOrderRequest(),
+                OrderResponse.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        OrderResponse order = response.getBody();
+        assertThat(order).isNotNull();
+        assertThat(order.status()).isEqualTo(OrderStatus.CANCELLED);
+
+        OrderCreatedEvent event = awaitOrderCreatedEvent(order.id());
+        assertThat(event.status()).isEqualTo(OrderCreatedEvent.OrderStatus.CANCELLED);
+        assertThat(fakeInventoryService.checkStockCalls()).isEqualTo(1);
+        assertThat(fakeInventoryService.reserveStockCalls()).isEqualTo(1);
     }
 
     @Test
@@ -223,23 +256,68 @@ class OrderServiceIntegrationTest {
 
     private static final class FakeInventoryService extends InventoryServiceGrpc.InventoryServiceImplBase {
         private final AtomicBoolean available = new AtomicBoolean(true);
+        private final AtomicBoolean reserved = new AtomicBoolean(true);
+        private final AtomicInteger checkStockCalls = new AtomicInteger();
+        private final AtomicInteger reserveStockCalls = new AtomicInteger();
 
         void setAvailable(boolean available) {
             this.available.set(available);
         }
 
+        void setReserved(boolean reserved) {
+            this.reserved.set(reserved);
+        }
+
+        void resetCalls() {
+            checkStockCalls.set(0);
+            reserveStockCalls.set(0);
+        }
+
+        int checkStockCalls() {
+            return checkStockCalls.get();
+        }
+
+        int reserveStockCalls() {
+            return reserveStockCalls.get();
+        }
+
         @Override
         public void checkStock(StockRequest request, StreamObserver<StockResponse> responseObserver) {
+            checkStockCalls.incrementAndGet();
             boolean stockAvailable = available.get();
             StockResponse.Builder response = StockResponse.newBuilder()
                     .setAvailable(stockAvailable)
-                    .setReason(stockAvailable ? "available" : "insufficient_stock");
+                    .setReason(stockAvailable
+                            ? InventoryDecision.INVENTORY_DECISION_AVAILABLE
+                            : InventoryDecision.INVENTORY_DECISION_INSUFFICIENT_STOCK);
 
             request.getItemsList().forEach(item -> response.addItems(StockItemAvailability.newBuilder()
                     .setSku(item.getSku())
                     .setRequestedQuantity(item.getQuantity())
                     .setAvailableQuantity(stockAvailable ? item.getQuantity() : 0)
                     .setAvailable(stockAvailable)
+                    .build()));
+
+            responseObserver.onNext(response.build());
+            responseObserver.onCompleted();
+        }
+
+        @Override
+        public void reserveStock(ReserveRequest request, StreamObserver<ReserveResponse> responseObserver) {
+            reserveStockCalls.incrementAndGet();
+            boolean stockReserved = reserved.get();
+            ReserveResponse.Builder response = ReserveResponse.newBuilder()
+                    .setReserved(stockReserved)
+                    .setReason(stockReserved
+                            ? InventoryDecision.INVENTORY_DECISION_RESERVED
+                            : InventoryDecision.INVENTORY_DECISION_INSUFFICIENT_STOCK);
+
+            request.getItemsList().forEach(item -> response.addItems(StockItemReservation.newBuilder()
+                    .setSku(item.getSku())
+                    .setRequestedQuantity(item.getQuantity())
+                    .setReservedQuantity(stockReserved ? item.getQuantity() : 0)
+                    .setRemainingQuantity(stockReserved ? 0 : item.getQuantity())
+                    .setReserved(stockReserved)
                     .build()));
 
             responseObserver.onNext(response.build());

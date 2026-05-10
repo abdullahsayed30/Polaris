@@ -10,12 +10,12 @@ COPY inventory-service/pom.xml inventory-service/pom.xml
 COPY notification-service/pom.xml notification-service/pom.xml
 COPY proto-contracts/src proto-contracts/src
 COPY shared/src shared/src
-COPY order-service/src order-service/src
+COPY inventory-service/src inventory-service/src
 
-RUN mvn -pl order-service -am -DskipTests package
+RUN mvn -pl inventory-service -am -DskipTests package
 
 FROM gcr.io/distroless/java25-debian13:nonroot
 WORKDIR /app
-COPY --from=build /workspace/order-service/target/order-service.jar /app/order-service.jar
-EXPOSE 8081
-ENTRYPOINT ["java", "-jar", "/app/order-service.jar"]
+COPY --from=build /workspace/inventory-service/target/inventory-service.jar /app/inventory-service.jar
+EXPOSE 8082 9090
+ENTRYPOINT ["java", "-jar", "/app/inventory-service.jar"]
