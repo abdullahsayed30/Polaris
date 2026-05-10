@@ -1,0 +1,49 @@
+spring:
+  application:
+    name: notification-service
+  main:
+    web-application-type: none
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: notification-service
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
+
+management:
+  endpoints:
+    jmx:
+      exposure:
+        include: health,info,prometheus
+
+polaris:
+  kafka:
+    topics:
+      orders-created: polaris.orders.created
+      inventory-adjusted: polaris.inventory.adjusted
+      notifications-dlq: polaris.notifications.dlq
+  notifications:
+    retry:
+      max-attempts: 3
+      initial-interval: 250ms
+      multiplier: 2.0
+
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+
+---
+spring:
+  config:
+    activate:
+      on-profile: docker
+  kafka:
+    bootstrap-servers: kafka:9092

@@ -15,7 +15,6 @@ flowchart LR
 
     Gateway -->|REST /api/v1/orders| Order[Order Service]
     Gateway -->|REST internal admin| Inventory[Inventory Service]
-    Gateway -->|REST health and ops| Notification[Notification Service]
 
     Order <-->|gRPC CheckStock / ReserveStock| Inventory
 
@@ -80,7 +79,7 @@ Expected local endpoints once the service skeleton and compose stack are in plac
 | Gateway                       | `http://localhost:8080`                 |
 | Order Service actuator        | `http://localhost:8081/actuator/health` |
 | Inventory Service actuator    | `http://localhost:8082/actuator/health` |
-| Notification Service actuator | `http://localhost:8083/actuator/health` |
+| Notification Service          | Kafka consumer only, no HTTP listener   |
 | Prometheus                    | `http://localhost:9090`                 |
 | Grafana                       | `http://localhost:3000`                 |
 | Jaeger                        | `http://localhost:16686`                |

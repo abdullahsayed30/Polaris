@@ -8,7 +8,6 @@ flowchart LR
 
     Gateway -->|REST| Order[Order Service]
     Gateway -->|REST| Inventory[Inventory Service]
-    Gateway -->|REST| Notification[Notification Service]
 
     Order <-->|gRPC stock checks and reservations| Inventory
 
