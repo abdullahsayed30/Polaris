@@ -16,11 +16,21 @@ spring:
       properties:
         spring.json.add.type.headers: false
 
+server:
+  port: 8083
+
 management:
   endpoints:
     jmx:
       exposure:
+        include: health,info
+    web:
+      exposure:
         include: health,info,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
 
 polaris:
   kafka:
@@ -45,5 +55,7 @@ spring:
   config:
     activate:
       on-profile: docker
+  main:
+    web-application-type: servlet
   kafka:
     bootstrap-servers: kafka:9092

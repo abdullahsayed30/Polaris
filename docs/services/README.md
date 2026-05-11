@@ -9,7 +9,7 @@ Polaris has four deployable runtime services and two supporting build modules. R
 | Gateway | `8080` | External HTTP edge, JWT validation, CORS, request logging, rate limiting | [Gateway](gateway.md) |
 | Order Service | `8081` | Public order API, order lifecycle, inventory orchestration, order event publishing | [Order Service](order-service.md) |
 | Inventory Service | `8082` HTTP, `9090` gRPC | Stock checks, stock reservations, inventory persistence, inventory event publishing | [Inventory Service](inventory-service.md) |
-| Notification Service | No HTTP listener | Kafka-driven notification workflow with retry and dead-letter handling | [Notification Service](notification-service.md) |
+| Notification Service | `8083` actuator in Docker | Kafka-driven notification workflow with retry and dead-letter handling | [Notification Service](notification-service.md) |
 
 ## Supporting Modules
 

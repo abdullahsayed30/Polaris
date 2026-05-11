@@ -21,3 +21,4 @@ Polaris records significant architecture choices as lightweight ADRs. Each recor
 | [0013](0013-use-jwt-oauth2-resource-server-at-the-gateway.md) | Accepted | Use JWT OAuth2 resource server at the gateway |
 | [0014](0014-use-notification-retry-and-dead-letter-topic.md) | Accepted | Use notification retry and dead-letter topic |
 | [0015](0015-use-records-for-configuration-properties.md) | Accepted | Use records for configuration properties |
+| [0016](0016-use-tempo-for-distributed-tracing.md) | Accepted | Use Tempo for distributed tracing |

@@ -14,7 +14,15 @@ COPY inventory-service/src inventory-service/src
 
 RUN mvn -pl inventory-service -am -DskipTests package
 
-FROM gcr.io/distroless/java25-debian13:nonroot
+FROM eclipse-temurin:25-jre AS local-runtime
+WORKDIR /app
+COPY deploy/scripts/wait-for-it.sh /usr/local/bin/wait-for-it
+RUN chmod +x /usr/local/bin/wait-for-it
+COPY --from=build /workspace/inventory-service/target/inventory-service.jar /app/inventory-service.jar
+EXPOSE 8082 9090
+ENTRYPOINT ["java", "-jar", "/app/inventory-service.jar"]
+
+FROM gcr.io/distroless/java25-debian13:nonroot AS production
 WORKDIR /app
 COPY --from=build /workspace/inventory-service/target/inventory-service.jar /app/inventory-service.jar
 EXPOSE 8082 9090

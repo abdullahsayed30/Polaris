@@ -1,0 +1,350 @@
+name: polaris
+
+x-service-common: &service-common
+  restart: unless-stopped
+  networks:
+    - polaris-net
+
+x-postgres-healthcheck: &postgres-healthcheck
+  interval: 10s
+  timeout: 5s
+  retries: 10
+  start_period: 10s
+
+x-spring-healthcheck: &spring-healthcheck
+  interval: 10s
+  timeout: 5s
+  retries: 12
+  start_period: 30s
+
+services:
+  order-postgres:
+    <<: *service-common
+    image: postgres:18
+    environment:
+      POSTGRES_DB: polaris_orders
+      POSTGRES_USER: polaris_order
+      POSTGRES_PASSWORD: polaris_order
+    ports:
+      - "5432:5432"
+    volumes:
+      - order-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      <<: *postgres-healthcheck
+      test: ["CMD-SHELL", "pg_isready -U polaris_order -d polaris_orders"]
+
+  inventory-postgres:
+    <<: *service-common
+    image: postgres:18
+    environment:
+      POSTGRES_DB: polaris_inventory
+      POSTGRES_USER: polaris_inventory
+      POSTGRES_PASSWORD: polaris_inventory
+    ports:
+      - "5433:5432"
+    volumes:
+      - inventory-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      <<: *postgres-healthcheck
+      test: ["CMD-SHELL", "pg_isready -U polaris_inventory -d polaris_inventory"]
+
+  notification-postgres:
+    <<: *service-common
+    image: postgres:18
+    environment:
+      POSTGRES_DB: polaris_notifications
+      POSTGRES_USER: polaris_notification
+      POSTGRES_PASSWORD: polaris_notification
+    ports:
+      - "5434:5432"
+    volumes:
+      - notification-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      <<: *postgres-healthcheck
+      test: ["CMD-SHELL", "pg_isready -U polaris_notification -d polaris_notifications"]
+
+  kafka:
+    <<: *service-common
+    image: bitnami/kafka:3.7.2
+    environment:
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+      KAFKA_ENABLE_KRAFT: "yes"
+      KAFKA_CFG_NODE_ID: "1"
+      KAFKA_CFG_PROCESS_ROLES: controller,broker
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,EXTERNAL://localhost:9092
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+      KAFKA_CFG_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: "1"
+      KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR: "1"
+      KAFKA_CFG_GROUP_INITIAL_REBALANCE_DELAY_MS: "0"
+    ports:
+      - "9092:9094"
+    volumes:
+      - kafka-data:/bitnami/kafka
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+      start_period: 30s
+
+  redis:
+    <<: *service-common
+    image: redis:7.4-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+
+  tempo:
+    <<: *service-common
+    image: grafana/tempo:2.6.1
+    command:
+      - -config.file=/etc/tempo/tempo.yml
+    ports:
+      - "3200:3200"
+      - "4317:4317"
+      - "4318:4318"
+    volumes:
+      - ./deploy/tempo/tempo.yml:/etc/tempo/tempo.yml:ro
+      - tempo-data:/var/tempo
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:3200/ready || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+  inventory-service:
+    <<: *service-common
+    build:
+      context: .
+      dockerfile: inventory-service/Dockerfile
+      target: local-runtime
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      OTEL_SERVICE_NAME: inventory-service
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://tempo:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+    ports:
+      - "8082:8082"
+      - "19090:9090"
+    depends_on:
+      inventory-postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      tempo:
+        condition: service_healthy
+    entrypoint:
+      - wait-for-it
+      - inventory-postgres:5432
+      - --timeout=60
+      - --strict
+      - --
+      - wait-for-it
+      - kafka:9092
+      - --timeout=60
+      - --strict
+      - --
+      - java
+      - -jar
+      - /app/inventory-service.jar
+    healthcheck:
+      <<: *spring-healthcheck
+      test: ["CMD", "wait-for-it", "localhost:8082", "--timeout=3", "--quiet"]
+
+  order-service:
+    <<: *service-common
+    build:
+      context: .
+      dockerfile: order-service/Dockerfile
+      target: local-runtime
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      OTEL_SERVICE_NAME: order-service
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://tempo:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+    ports:
+      - "8081:8081"
+    depends_on:
+      order-postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      inventory-service:
+        condition: service_healthy
+      tempo:
+        condition: service_healthy
+    entrypoint:
+      - wait-for-it
+      - order-postgres:5432
+      - --timeout=60
+      - --strict
+      - --
+      - wait-for-it
+      - kafka:9092
+      - --timeout=60
+      - --strict
+      - --
+      - wait-for-it
+      - inventory-service:9090
+      - --timeout=60
+      - --strict
+      - --
+      - java
+      - -jar
+      - /app/order-service.jar
+    healthcheck:
+      <<: *spring-healthcheck
+      test: ["CMD", "wait-for-it", "localhost:8081", "--timeout=3", "--quiet"]
+
+  notification-service:
+    <<: *service-common
+    build:
+      context: .
+      dockerfile: notification-service/Dockerfile
+      target: local-runtime
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      OTEL_SERVICE_NAME: notification-service
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://tempo:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+    ports:
+      - "8083:8083"
+    depends_on:
+      notification-postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      tempo:
+        condition: service_healthy
+    entrypoint:
+      - wait-for-it
+      - kafka:9092
+      - --timeout=60
+      - --strict
+      - --
+      - java
+      - -jar
+      - /app/notification-service.jar
+    healthcheck:
+      <<: *spring-healthcheck
+      test: ["CMD", "wait-for-it", "localhost:8083", "--timeout=3", "--quiet"]
+
+  gateway:
+    <<: *service-common
+    build:
+      context: .
+      dockerfile: gateway/Dockerfile
+      target: local-runtime
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      OTEL_SERVICE_NAME: gateway
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://tempo:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+    ports:
+      - "8080:8080"
+    depends_on:
+      order-service:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      tempo:
+        condition: service_healthy
+    entrypoint:
+      - wait-for-it
+      - order-service:8081
+      - --timeout=60
+      - --strict
+      - --
+      - wait-for-it
+      - redis:6379
+      - --timeout=60
+      - --strict
+      - --
+      - java
+      - -jar
+      - /app/gateway.jar
+    healthcheck:
+      <<: *spring-healthcheck
+      test: ["CMD", "wait-for-it", "localhost:8080", "--timeout=3", "--quiet"]
+
+  prometheus:
+    <<: *service-common
+    image: prom/prometheus:v2.55.1
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.console.libraries=/usr/share/prometheus/console_libraries
+      - --web.console.templates=/usr/share/prometheus/consoles
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./deploy/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    depends_on:
+      gateway:
+        condition: service_healthy
+      order-service:
+        condition: service_healthy
+      inventory-service:
+        condition: service_healthy
+      notification-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:9090/-/healthy || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  grafana:
+    <<: *service-common
+    image: grafana/grafana:11.3.1
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./deploy/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./deploy/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      prometheus:
+        condition: service_healthy
+      tempo:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:3000/api/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+networks:
+  polaris-net:
+    name: polaris-net
+
+volumes:
+  order-postgres-data:
+  inventory-postgres-data:
+  notification-postgres-data:
+  kafka-data:
+  redis-data:
+  tempo-data:
+  prometheus-data:
+  grafana-data:

@@ -12,7 +12,15 @@ COPY gateway/src gateway/src
 
 RUN mvn -pl gateway -am -DskipTests package
 
-FROM gcr.io/distroless/java25-debian13:nonroot
+FROM eclipse-temurin:25-jre AS local-runtime
+WORKDIR /app
+COPY deploy/scripts/wait-for-it.sh /usr/local/bin/wait-for-it
+RUN chmod +x /usr/local/bin/wait-for-it
+COPY --from=build /workspace/gateway/target/gateway.jar /app/gateway.jar
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "/app/gateway.jar"]
+
+FROM gcr.io/distroless/java25-debian13:nonroot AS production
 WORKDIR /app
 COPY --from=build /workspace/gateway/target/gateway.jar /app/gateway.jar
 EXPOSE 8080

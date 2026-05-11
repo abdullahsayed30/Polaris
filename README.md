@@ -40,7 +40,7 @@ flowchart LR
 | Auth              | Spring Security + JWT OAuth2 resource server |
 | Testing           | JUnit 5, Mockito, Testcontainers             |
 | Metrics           | Micrometer, Prometheus, Grafana              |
-| Tracing           | OpenTelemetry, Jaeger                        |
+| Tracing           | OpenTelemetry, Grafana Tempo                 |
 | Logs              | SLF4J + Logback, ELK-ready structured output |
 | Container runtime | Docker, Docker Compose                       |
 | Orchestration     | Kubernetes manifests and Helm chart          |
@@ -90,10 +90,10 @@ Expected local endpoints once the service skeleton and compose stack are in plac
 | Gateway                       | `http://localhost:8080`                 |
 | Order Service actuator        | `http://localhost:8081/actuator/health` |
 | Inventory Service actuator    | `http://localhost:8082/actuator/health` |
-| Notification Service          | Kafka consumer only, no HTTP listener   |
+| Notification Service actuator | `http://localhost:8083/actuator/health` |
 | Prometheus                    | `http://localhost:9090`                 |
 | Grafana                       | `http://localhost:3000`                 |
-| Jaeger                        | `http://localhost:16686`                |
+| Tempo API                     | `http://localhost:3200`                 |
 
 Build and verify all modules:
 
@@ -140,7 +140,7 @@ Before `v1.0.0`, Polaris is intended to move from a clean blueprint skeleton to 
 - `v0.3.0`: `proto-contracts` Maven module and inventory service with gRPC server, SQL Liquibase, Kafka consumer/producer, and Testcontainers.
 - `v0.4.0`: notification service with Kafka listeners, retry, dead-letter topic, and tests.
 - `v0.5.0`: gateway routes, JWT resource server, CORS, request logging, and rate limiting.
-- `v0.6.0`: Docker Compose local stack for Postgres, Kafka, services, Prometheus, Grafana, and Jaeger.
+- `v0.6.0`: Docker Compose local stack for Postgres, Kafka, services, Prometheus, Grafana, and Tempo.
 - `v0.7.0`: GitHub Actions CI, CodeQL, Spotless, Checkstyle, Lefthook, integration test automation, and README badges.
 - `v0.8.0`: migrate manual gRPC server wiring to a Spring gRPC starter, then add gRPC interceptors, health/reflection support, dashboards, tracing conventions, and structured logging.
 - `v0.9.0`: Helm chart, Kubernetes manifests, deployment docs, ADR set, and final README polish.

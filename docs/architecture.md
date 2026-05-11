@@ -54,7 +54,7 @@ Each service owns its PostgreSQL database and applies Liquibase migrations as pa
 - Kafka demonstrates event-driven choreography and eventual consistency.
 - gRPC demonstrates internal synchronous contracts without leaking them to the edge.
 - Testcontainers makes integration tests realistic and portable in CI.
-- Prometheus, Grafana, OpenTelemetry, Jaeger, and ELK-ready logs show production observability expectations.
+- Prometheus, Grafana, OpenTelemetry, Tempo, and ELK-ready logs show production observability expectations.
 - Kubernetes manifests and Helm chart make deployment intent clear without requiring a permanent paid environment.
 
 ## ADR Index

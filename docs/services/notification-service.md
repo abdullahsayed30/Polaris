@@ -12,7 +12,9 @@
 
 ## Runtime Model
 
-The service runs with `spring.main.web-application-type=none`. It does not expose an HTTP API and does not own a database in the current blueprint stage. Actuator exposure is configured through JMX.
+The service runs with `spring.main.web-application-type=none` by default and does not expose a business HTTP API. The `docker` profile switches on an actuator-only HTTP listener on port `8083` so Docker Compose can healthcheck the consumer and Prometheus can scrape metrics.
+
+The service does not own a database in the current blueprint stage. The local Compose stack still provisions a dedicated notification PostgreSQL container to preserve the database-per-service runtime boundary for later notification persistence.
 
 The current notification handler logs confirmation and inventory adjustment messages. This keeps the workflow testable while leaving real email, SMS, webhook, or provider integrations behind the `NotificationHandler` port.
 
