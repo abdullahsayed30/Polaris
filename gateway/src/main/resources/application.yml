@@ -1,0 +1,101 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: gateway
+  cloud:
+    gateway:
+      routes:
+        - id: order-create
+          uri: ${polaris.gateway.routes.order-service-uri:http://localhost:8081}
+          predicates:
+            - Path=/api/v1/orders
+            - Method=POST
+        - id: order-read
+          uri: ${polaris.gateway.routes.order-service-uri:http://localhost:8081}
+          predicates:
+            - Path=/api/v1/orders/{orderId}
+            - Method=GET
+        - id: order-public-api
+          uri: ${polaris.gateway.routes.order-service-uri:http://localhost:8081}
+          predicates:
+            - Path=/api/v1/orders/**
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8089/realms/polaris
+          jwk-set-uri: http://localhost:8089/realms/polaris/protocol/openid-connect/certs
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+polaris:
+  gateway:
+    cors:
+      allowed-origins:
+        - http://localhost:3000
+      allowed-methods:
+        - GET
+        - POST
+        - PUT
+        - PATCH
+        - DELETE
+        - OPTIONS
+      allowed-headers:
+        - Authorization
+        - Content-Type
+        - X-Request-Id
+      exposed-headers:
+        - X-Request-Id
+      allow-credentials: true
+      max-age: 1h
+    rate-limit:
+      enabled: true
+      backend: in-memory
+      requests-per-window: 120
+      window: 1m
+      key-header: X-Forwarded-For
+
+---
+spring:
+  config:
+    activate:
+      on-profile: docker
+  cloud:
+    gateway:
+      routes:
+        - id: order-create
+          uri: http://order-service:8081
+          predicates:
+            - Path=/api/v1/orders
+            - Method=POST
+        - id: order-read
+          uri: http://order-service:8081
+          predicates:
+            - Path=/api/v1/orders/{orderId}
+            - Method=GET
+        - id: order-public-api
+          uri: http://order-service:8081
+          predicates:
+            - Path=/api/v1/orders/**
+  data:
+    redis:
+      host: redis
+
+polaris:
+  gateway:
+    rate-limit:
+      backend: redis
