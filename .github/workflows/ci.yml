@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      run-integration-tests:
+        description: Run Testcontainers-backed integration tests.
+        required: false
+        default: true
+        type: boolean
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+permissions:
+  actions: read
+  contents: read
+  security-events: write
+
+jobs:
+  ci:
+    uses: ./.github/workflows/reusable-ci.yml
+    with:
+      artifact-name: polaris
+      java-version: '25'
+      run-integration-tests: ${{ github.event_name != 'workflow_dispatch' || inputs.run-integration-tests }}

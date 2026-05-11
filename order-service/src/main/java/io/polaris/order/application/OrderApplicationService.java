@@ -1,15 +1,16 @@
 package io.polaris.order.application;
 
-import io.polaris.order.domain.Order;
-import io.polaris.order.domain.OrderItem;
-import io.polaris.order.inventory.InventoryClient;
-import io.polaris.order.persistence.OrderRepository;
+import java.util.List;
+import java.util.UUID;
+
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.UUID;
+import io.polaris.order.domain.Order;
+import io.polaris.order.domain.OrderItem;
+import io.polaris.order.inventory.InventoryClient;
+import io.polaris.order.persistence.OrderRepository;
 
 @Service
 public class OrderApplicationService {
@@ -20,8 +21,7 @@ public class OrderApplicationService {
     public OrderApplicationService(
             OrderRepository orderRepository,
             InventoryClient inventoryClient,
-            ApplicationEventPublisher events
-    ) {
+            ApplicationEventPublisher events) {
         this.orderRepository = orderRepository;
         this.inventoryClient = inventoryClient;
         this.events = events;

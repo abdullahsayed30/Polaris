@@ -1,11 +1,11 @@
 package io.polaris.order.api;
 
-import io.polaris.order.domain.Order;
-import io.polaris.order.domain.OrderStatus;
-
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
+
+import io.polaris.order.domain.Order;
+import io.polaris.order.domain.OrderStatus;
 
 public record OrderResponse(
         UUID id,
@@ -13,8 +13,7 @@ public record OrderResponse(
         OrderStatus status,
         List<OrderItemResponse> items,
         Instant createdAt,
-        Instant updatedAt
-) {
+        Instant updatedAt) {
     static OrderResponse from(Order order) {
         return new OrderResponse(
                 order.getId(),
@@ -24,7 +23,6 @@ public record OrderResponse(
                         .map(OrderItemResponse::from)
                         .toList(),
                 order.getCreatedAt(),
-                order.getUpdatedAt()
-        );
+                order.getUpdatedAt());
     }
 }

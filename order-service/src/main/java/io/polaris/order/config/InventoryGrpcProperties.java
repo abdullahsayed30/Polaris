@@ -1,8 +1,8 @@
 package io.polaris.order.config;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
 import java.time.Duration;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "polaris.inventory.grpc")
 public record InventoryGrpcProperties(String host, int port, Duration deadline) {

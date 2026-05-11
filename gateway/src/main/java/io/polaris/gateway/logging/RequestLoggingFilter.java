@@ -1,5 +1,9 @@
 package io.polaris.gateway.logging;
 
+import java.net.InetSocketAddress;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
@@ -9,11 +13,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
-import reactor.core.publisher.Mono;
 
-import java.net.InetSocketAddress;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
+import reactor.core.publisher.Mono;
 
 @Component
 class RequestLoggingFilter implements WebFilter, Ordered {
@@ -54,8 +55,7 @@ class RequestLoggingFilter implements WebFilter, Ordered {
             long started,
             String requestId,
             AtomicBoolean logged,
-            Throwable error
-    ) {
+            Throwable error) {
         if (!logged.compareAndSet(false, true)) {
             return;
         }
@@ -73,8 +73,7 @@ class RequestLoggingFilter implements WebFilter, Ordered {
                 durationMs,
                 requestId,
                 remoteAddress,
-                error == null ? "none" : error.getClass().getName()
-        );
+                error == null ? "none" : error.getClass().getName());
     }
 
     private String remoteAddress(ServerWebExchange exchange) {

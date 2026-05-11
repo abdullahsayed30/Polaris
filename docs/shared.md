@@ -47,6 +47,7 @@ Reservation adjustments use negative `quantityChanged` values because stock is l
 - `shared` must not contain service application logic, persistence entities, repositories, HTTP clients, gRPC clients, Kafka listeners, or Spring configuration.
 - `shared` must not replace `proto-contracts`; protobuf and gRPC contracts belong in `proto-contracts`.
 - Event payload changes must be treated as contract changes because multiple services compile against and serialize these records.
+- Build quality gates enforce this boundary: services may depend on `shared` and generated `proto-contracts` types, but must not depend on another service module.
 
 ## Versioning
 

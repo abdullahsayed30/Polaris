@@ -1,6 +1,11 @@
 package io.polaris.order.inventory;
 
+import java.util.concurrent.TimeUnit;
+
+import org.springframework.stereotype.Component;
+
 import io.grpc.StatusRuntimeException;
+
 import io.polaris.inventory.grpc.InventoryServiceGrpc;
 import io.polaris.inventory.grpc.ReserveRequest;
 import io.polaris.inventory.grpc.ReserveResponse;
@@ -10,9 +15,6 @@ import io.polaris.inventory.grpc.StockResponse;
 import io.polaris.order.config.InventoryGrpcProperties;
 import io.polaris.order.domain.Order;
 import io.polaris.order.domain.OrderItem;
-import org.springframework.stereotype.Component;
-
-import java.util.concurrent.TimeUnit;
 
 @Component
 public class GrpcInventoryClient implements InventoryClient {
@@ -21,8 +23,7 @@ public class GrpcInventoryClient implements InventoryClient {
 
     public GrpcInventoryClient(
             InventoryServiceGrpc.InventoryServiceBlockingStub inventoryService,
-            InventoryGrpcProperties properties
-    ) {
+            InventoryGrpcProperties properties) {
         this.inventoryService = inventoryService;
         this.properties = properties;
     }

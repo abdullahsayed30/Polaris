@@ -4,6 +4,5 @@ public record StockAvailability(
         String sku,
         int requestedQuantity,
         int availableQuantity,
-        boolean available
-) {
+        boolean available) {
 }

@@ -63,3 +63,5 @@ Every service should follow this package shape unless there is a clear reason to
 - Outbound integrations should be hidden behind small ports/interfaces when the service logic depends on them.
 - Kafka publication that represents a committed state change should run after transaction commit.
 - Liquibase changes should be small, ordered, SQL-based, and separated by table or schema concern.
+- Service modules may depend on `shared` and `proto-contracts`, but must not depend on another runtime service module.
+- Reusable Java contracts and helpers belong under `shared/src/main/java/io/polaris/shared`.

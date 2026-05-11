@@ -10,19 +10,15 @@ public record OrderCreatedEvent(
         UUID customerId,
         OrderStatus status,
         List<Item> items,
-        Instant createdAt
-) {
+        Instant createdAt) {
     public enum OrderStatus {
-        PENDING,
-        CONFIRMED,
-        CANCELLED
+        PENDING, CONFIRMED, CANCELLED
     }
 
     public record Item(
             UUID itemId,
             String sku,
             int quantity,
-            BigDecimal unitPrice
-    ) {
+            BigDecimal unitPrice) {
     }
 }

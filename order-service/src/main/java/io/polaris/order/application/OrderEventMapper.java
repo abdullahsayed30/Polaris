@@ -16,8 +16,7 @@ public final class OrderEventMapper {
                 order.getItems().stream()
                         .map(OrderEventMapper::toItem)
                         .toList(),
-                order.getCreatedAt()
-        );
+                order.getCreatedAt());
     }
 
     private static OrderCreatedEvent.Item toItem(OrderItem item) {
@@ -25,7 +24,6 @@ public final class OrderEventMapper {
                 item.getId(),
                 item.getSku(),
                 item.getQuantity(),
-                item.getUnitPrice()
-        );
+                item.getUnitPrice());
     }
 }

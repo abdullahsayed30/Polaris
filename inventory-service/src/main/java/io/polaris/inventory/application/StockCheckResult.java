@@ -5,6 +5,5 @@ import java.util.List;
 public record StockCheckResult(
         boolean available,
         InventoryDecisionReason reason,
-        List<StockAvailability> items
-) {
+        List<StockAvailability> items) {
 }

@@ -1,21 +1,18 @@
 package io.polaris.order;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.grpc.Server;
-import io.grpc.stub.StreamObserver;
-import io.polaris.inventory.grpc.InventoryDecision;
-import io.polaris.inventory.grpc.InventoryServiceGrpc;
-import io.polaris.inventory.grpc.ReserveRequest;
-import io.polaris.inventory.grpc.ReserveResponse;
-import io.polaris.inventory.grpc.StockItemAvailability;
-import io.polaris.inventory.grpc.StockItemReservation;
-import io.polaris.inventory.grpc.StockRequest;
-import io.polaris.inventory.grpc.StockResponse;
-import io.polaris.order.api.OrderItemRequest;
-import io.polaris.order.api.OrderResponse;
-import io.polaris.order.api.PlaceOrderRequest;
-import io.polaris.order.domain.OrderStatus;
-import io.polaris.shared.events.OrderCreatedEvent;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
+
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -38,18 +35,24 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.kafka.ConfluentKafkaContainer;
 import org.testcontainers.utility.DockerImageName;
 
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.time.Duration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
+import io.grpc.Server;
+import io.grpc.stub.StreamObserver;
+
+import io.polaris.inventory.grpc.InventoryDecision;
+import io.polaris.inventory.grpc.InventoryServiceGrpc;
+import io.polaris.inventory.grpc.ReserveRequest;
+import io.polaris.inventory.grpc.ReserveResponse;
+import io.polaris.inventory.grpc.StockItemAvailability;
+import io.polaris.inventory.grpc.StockItemReservation;
+import io.polaris.inventory.grpc.StockRequest;
+import io.polaris.inventory.grpc.StockResponse;
+import io.polaris.order.api.OrderItemRequest;
+import io.polaris.order.api.OrderResponse;
+import io.polaris.order.api.PlaceOrderRequest;
+import io.polaris.order.domain.OrderStatus;
+import io.polaris.shared.events.OrderCreatedEvent;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
@@ -61,16 +64,14 @@ class OrderServiceIntegrationTest {
 
     @Container
     static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(
-            DockerImageName.parse("postgres:18").asCompatibleSubstituteFor("postgres")
-    )
+            DockerImageName.parse("postgres:18").asCompatibleSubstituteFor("postgres"))
             .withDatabaseName("polaris_orders")
             .withUsername("polaris_order")
             .withPassword("polaris_order");
 
     @Container
     static final ConfluentKafkaContainer kafka = new ConfluentKafkaContainer(
-            DockerImageName.parse("confluentinc/cp-kafka:7.7.1")
-    );
+            DockerImageName.parse("confluentinc/cp-kafka:7.7.1"));
 
     static {
         try {
@@ -122,8 +123,7 @@ class OrderServiceIntegrationTest {
         ResponseEntity<OrderResponse> response = restTemplate.postForEntity(
                 "/api/v1/orders",
                 placeOrderRequest(),
-                OrderResponse.class
-        );
+                OrderResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         OrderResponse order = response.getBody();
@@ -134,8 +134,7 @@ class OrderServiceIntegrationTest {
         ResponseEntity<OrderResponse> lookup = restTemplate.getForEntity(
                 "/api/v1/orders/{id}",
                 OrderResponse.class,
-                order.id()
-        );
+                order.id());
         assertThat(lookup.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(lookup.getBody()).isNotNull();
         assertThat(lookup.getBody().id()).isEqualTo(order.id());
@@ -155,8 +154,7 @@ class OrderServiceIntegrationTest {
         ResponseEntity<OrderResponse> response = restTemplate.postForEntity(
                 "/api/v1/orders",
                 placeOrderRequest(),
-                OrderResponse.class
-        );
+                OrderResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         OrderResponse order = response.getBody();
@@ -177,8 +175,7 @@ class OrderServiceIntegrationTest {
         ResponseEntity<OrderResponse> response = restTemplate.postForEntity(
                 "/api/v1/orders",
                 placeOrderRequest(),
-                OrderResponse.class
-        );
+                OrderResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         OrderResponse order = response.getBody();
@@ -196,8 +193,7 @@ class OrderServiceIntegrationTest {
         ResponseEntity<String> response = restTemplate.getForEntity(
                 "/api/v1/orders/{id}",
                 String.class,
-                UUID.randomUUID()
-        );
+                UUID.randomUUID());
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(response.getBody()).contains("Order not found");
@@ -207,14 +203,12 @@ class OrderServiceIntegrationTest {
     void placeOrderWithInvalidPayloadReturnsBadRequest() {
         Map<String, Object> invalidRequest = Map.of(
                 "customerId", UUID.randomUUID(),
-                "items", List.of()
-        );
+                "items", List.of());
 
         ResponseEntity<String> response = restTemplate.postForEntity(
                 "/api/v1/orders",
                 invalidRequest,
-                String.class
-        );
+                String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
@@ -224,9 +218,7 @@ class OrderServiceIntegrationTest {
                 UUID.randomUUID(),
                 List.of(
                         new OrderItemRequest("SKU-COFFEE-001", 2, new BigDecimal("19.99")),
-                        new OrderItemRequest("SKU-MUG-002", 1, new BigDecimal("8.50"))
-                )
-        );
+                        new OrderItemRequest("SKU-MUG-002", 1, new BigDecimal("8.50"))));
     }
 
     private OrderCreatedEvent awaitOrderCreatedEvent(UUID orderId) throws Exception {

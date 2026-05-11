@@ -1,12 +1,5 @@
 package io.polaris.inventory.application;
 
-import io.polaris.inventory.domain.InventoryItem;
-import io.polaris.inventory.persistence.InventoryItemRepository;
-import io.polaris.shared.events.InventoryAdjustedEvent;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -14,6 +7,14 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import io.polaris.inventory.domain.InventoryItem;
+import io.polaris.inventory.persistence.InventoryItemRepository;
+import io.polaris.shared.events.InventoryAdjustedEvent;
 
 @Service
 public class InventoryApplicationService {
@@ -39,8 +40,7 @@ public class InventoryApplicationService {
         return new StockCheckResult(
                 available,
                 available ? InventoryDecisionReason.AVAILABLE : InventoryDecisionReason.INSUFFICIENT_STOCK,
-                results
-        );
+                results);
     }
 
     @Transactional
@@ -60,8 +60,7 @@ public class InventoryApplicationService {
                             result.requestedQuantity(),
                             0,
                             result.remainingQuantity(),
-                            false
-                    ))
+                            false))
                     .toList();
             return new StockReservationResult(false, InventoryDecisionReason.INSUFFICIENT_STOCK, results);
         }
@@ -75,8 +74,7 @@ public class InventoryApplicationService {
                             entry.getValue(),
                             entry.getValue(),
                             item.getAvailableQuantity(),
-                            true
-                    );
+                            true);
                 })
                 .toList();
 
@@ -111,8 +109,7 @@ public class InventoryApplicationService {
                 .map(reservation -> new InventoryAdjustedEvent.Item(
                         reservation.sku(),
                         -reservation.reservedQuantity(),
-                        reservation.remainingQuantity()
-                ))
+                        reservation.remainingQuantity()))
                 .toList();
         return new InventoryAdjustedEvent(orderId, items, Instant.now());
     }

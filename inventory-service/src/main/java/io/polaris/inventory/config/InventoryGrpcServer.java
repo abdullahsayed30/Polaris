@@ -1,13 +1,15 @@
 package io.polaris.inventory.config;
 
-import io.grpc.Server;
-import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder;
-import io.polaris.inventory.api.InventoryGrpcController;
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+
 import org.springframework.context.SmartLifecycle;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-import java.util.concurrent.TimeUnit;
+import io.grpc.Server;
+import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder;
+
+import io.polaris.inventory.api.InventoryGrpcController;
 
 @Component
 public class InventoryGrpcServer implements SmartLifecycle {

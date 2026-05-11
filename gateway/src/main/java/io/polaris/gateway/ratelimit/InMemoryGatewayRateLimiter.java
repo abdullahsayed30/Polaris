@@ -1,12 +1,13 @@
 package io.polaris.gateway.ratelimit;
 
-import org.springframework.web.server.ServerWebExchange;
-import reactor.core.publisher.Mono;
-
 import java.time.Clock;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import org.springframework.web.server.ServerWebExchange;
+
+import reactor.core.publisher.Mono;
 
 class InMemoryGatewayRateLimiter implements GatewayRateLimiter {
     private final GatewayRateLimitProperties properties;
@@ -17,8 +18,7 @@ class InMemoryGatewayRateLimiter implements GatewayRateLimiter {
     InMemoryGatewayRateLimiter(
             GatewayRateLimitProperties properties,
             GatewayRateLimitKeyResolver keyResolver,
-            Clock clock
-    ) {
+            Clock clock) {
         this.properties = properties;
         this.keyResolver = keyResolver;
         this.clock = clock;

@@ -1,11 +1,12 @@
 package io.polaris.notification.config;
 
-import io.github.resilience4j.core.IntervalFunction;
-import io.github.resilience4j.retry.Retry;
-import io.github.resilience4j.retry.RetryConfig;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import io.github.resilience4j.core.IntervalFunction;
+import io.github.resilience4j.retry.Retry;
+import io.github.resilience4j.retry.RetryConfig;
 
 @Configuration
 @EnableConfigurationProperties(NotificationRetryProperties.class)
@@ -16,8 +17,7 @@ public class NotificationRetryConfiguration {
                 .maxAttempts(properties.maxAttempts())
                 .intervalFunction(IntervalFunction.ofExponentialBackoff(
                         properties.initialInterval().toMillis(),
-                        properties.multiplier()
-                ))
+                        properties.multiplier()))
                 .retryExceptions(RuntimeException.class)
                 .build();
 

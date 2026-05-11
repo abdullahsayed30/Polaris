@@ -1,0 +1,117 @@
+name: Reusable CI
+
+on:
+  workflow_call:
+    inputs:
+      artifact-name:
+        description: Name prefix for uploaded CI artifacts.
+        required: false
+        type: string
+        default: polaris
+      java-version:
+        description: Exact Java version used for the build.
+        required: false
+        type: string
+        default: '25'
+      maven-args:
+        description: Additional Maven arguments appended to Maven commands.
+        required: false
+        type: string
+        default: ''
+      run-integration-tests:
+        description: Run Testcontainers-backed integration tests with Maven verify.
+        required: false
+        type: boolean
+        default: true
+
+permissions:
+  actions: read
+  contents: read
+  security-events: write
+
+jobs:
+  quality-gates:
+    name: Quality gates
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: ${{ inputs.java-version }}
+          cache: maven
+          cache-dependency-path: |
+            pom.xml
+            **/pom.xml
+
+      - name: Confirm toolchain
+        run: |
+          java -version
+          ./mvnw --version
+
+      - name: Run Spotless
+        run: ./mvnw -B -ntp spotless:check ${{ inputs.maven-args }}
+
+      - name: Run Checkstyle
+        run: ./mvnw -B -ntp checkstyle:check ${{ inputs.maven-args }}
+
+      - name: Run unit tests
+        run: ./mvnw -B -ntp test ${{ inputs.maven-args }}
+
+      - name: Run integration tests
+        if: ${{ inputs.run-integration-tests }}
+        run: ./mvnw -B -ntp verify ${{ inputs.maven-args }}
+
+      - name: Verify without integration tests
+        if: ${{ !inputs.run-integration-tests }}
+        run: ./mvnw -B -ntp -DskipITs verify ${{ inputs.maven-args }}
+
+      - name: Run Trivy repository scan
+        id: trivy
+        uses: aquasecurity/trivy-action@v0.36.0
+        continue-on-error: true
+        with:
+          version: v0.70.0
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln,secret,misconfig
+          severity: HIGH,CRITICAL
+          format: sarif
+          output: trivy-results.sarif
+          exit-code: '1'
+
+      - name: Upload Trivy SARIF
+        if: ${{ always() && hashFiles('trivy-results.sarif') != '' }}
+        uses: github/codeql-action/upload-sarif@v4
+        continue-on-error: true
+        with:
+          sarif_file: trivy-results.sarif
+          category: trivy
+
+      - name: Upload Trivy report
+        if: ${{ always() && hashFiles('trivy-results.sarif') != '' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ inputs.artifact-name }}-trivy-sarif
+          path: trivy-results.sarif
+          retention-days: 14
+
+      - name: Upload test reports
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ inputs.artifact-name }}-test-reports
+          path: |
+            **/target/surefire-reports/**
+            **/target/failsafe-reports/**
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Fail on Trivy findings
+        if: ${{ steps.trivy.outcome == 'failure' }}
+        run: exit 1

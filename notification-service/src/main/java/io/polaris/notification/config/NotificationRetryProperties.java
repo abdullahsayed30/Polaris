@@ -1,15 +1,14 @@
 package io.polaris.notification.config;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
 import java.time.Duration;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "polaris.notifications.retry")
 public record NotificationRetryProperties(
         int maxAttempts,
         Duration initialInterval,
-        double multiplier
-) {
+        double multiplier) {
     public NotificationRetryProperties {
         if (maxAttempts < 1) {
             throw new IllegalArgumentException("maxAttempts must be at least 1");

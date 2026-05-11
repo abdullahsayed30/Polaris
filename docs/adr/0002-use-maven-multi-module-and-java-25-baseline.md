@@ -14,7 +14,7 @@ Polaris needs to show multiple independently deployable services while remaining
 
 We will use a Maven multi-module build with the root project `io.polaris:polaris` as a parent POM. The parent manages dependency versions, plugin versions, Java compilation, and Maven Enforcer rules. Runtime service modules, `shared`, and `proto-contracts` all participate in the same reactor build.
 
-Java 25 is the project baseline. The compiler release is set to `25`, and the Maven Enforcer plugin requires Java `[25,26)` and Maven `3.9.6` or newer.
+Java 25 is the exact project baseline. The compiler release is set to `25`, and the Maven Enforcer plugin requires `java.specification.version` to be `25`. The Maven Wrapper is pinned to Maven `3.9.15`.
 
 ## Consequences
 

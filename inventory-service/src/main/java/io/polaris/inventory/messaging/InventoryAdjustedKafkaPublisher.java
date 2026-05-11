@@ -1,12 +1,13 @@
 package io.polaris.inventory.messaging;
 
-import io.polaris.inventory.application.InventoryAdjustedApplicationEvent;
-import io.polaris.shared.events.InventoryAdjustedEvent;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
+
+import io.polaris.inventory.application.InventoryAdjustedApplicationEvent;
+import io.polaris.shared.events.InventoryAdjustedEvent;
 
 @Component
 public class InventoryAdjustedKafkaPublisher {
@@ -15,8 +16,7 @@ public class InventoryAdjustedKafkaPublisher {
 
     public InventoryAdjustedKafkaPublisher(
             KafkaTemplate<String, InventoryAdjustedEvent> kafkaTemplate,
-            @Value("${polaris.kafka.topics.inventory-adjusted}") String topic
-    ) {
+            @Value("${polaris.kafka.topics.inventory-adjusted}") String topic) {
         this.kafkaTemplate = kafkaTemplate;
         this.topic = topic;
     }

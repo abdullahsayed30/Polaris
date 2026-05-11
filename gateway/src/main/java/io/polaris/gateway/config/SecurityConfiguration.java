@@ -22,8 +22,8 @@ class SecurityConfiguration {
                                 "/actuator/health",
                                 "/actuator/health/**",
                                 "/actuator/info",
-                                "/actuator/prometheus"
-                        ).permitAll()
+                                "/actuator/prometheus")
+                        .permitAll()
                         .pathMatchers("/api/v1/orders", "/api/v1/orders/**").authenticated()
                         .anyExchange().denyAll())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))

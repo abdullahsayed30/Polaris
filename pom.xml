@@ -6,7 +6,7 @@
 
     <groupId>io.polaris</groupId>
     <artifactId>polaris</artifactId>
-    <version>0.6.0-SNAPSHOT</version>
+    <version>0.7.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Polaris</name>
@@ -54,10 +54,13 @@
         <testcontainers.version>1.20.6</testcontainers.version>
         <javax-annotation-api.version>1.3.2</javax-annotation-api.version>
 
-        <maven-compiler-plugin.version>3.14.1</maven-compiler-plugin.version>
+        <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
         <maven-enforcer-plugin.version>3.6.1</maven-enforcer-plugin.version>
-        <maven-failsafe-plugin.version>3.5.4</maven-failsafe-plugin.version>
-        <maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>
+        <maven-failsafe-plugin.version>3.5.5</maven-failsafe-plugin.version>
+        <maven-surefire-plugin.version>3.5.5</maven-surefire-plugin.version>
+        <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
+        <checkstyle.version>13.4.2</checkstyle.version>
+        <spotless-maven-plugin.version>3.4.0</spotless-maven-plugin.version>
         <os-maven-plugin.version>1.7.1</os-maven-plugin.version>
         <protobuf-maven-plugin.version>0.6.1</protobuf-maven-plugin.version>
     </properties>
@@ -183,6 +186,9 @@
                     <version>${maven-surefire-plugin.version}</version>
                     <configuration>
                         <useModulePath>false</useModulePath>
+                        <excludes>
+                            <exclude>**/*IntegrationTest.java</exclude>
+                        </excludes>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -191,6 +197,9 @@
                     <version>${maven-failsafe-plugin.version}</version>
                     <configuration>
                         <useModulePath>false</useModulePath>
+                        <includes>
+                            <include>**/*IntegrationTest.java</include>
+                        </includes>
                     </configuration>
                     <executions>
                         <execution>
@@ -211,6 +220,81 @@
                         </layers>
                     </configuration>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-checkstyle-plugin</artifactId>
+                    <version>${maven-checkstyle-plugin.version}</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>com.puppycrawl.tools</groupId>
+                            <artifactId>checkstyle</artifactId>
+                            <version>${checkstyle.version}</version>
+                        </dependency>
+                    </dependencies>
+                    <configuration>
+                        <configLocation>${maven.multiModuleProjectDirectory}/config/checkstyle/checkstyle.xml</configLocation>
+                        <consoleOutput>true</consoleOutput>
+                        <failsOnError>true</failsOnError>
+                        <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                        <sourceDirectories>
+                            <sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
+                        </sourceDirectories>
+                        <testSourceDirectories>
+                            <testSourceDirectory>${project.build.testSourceDirectory}</testSourceDirectory>
+                        </testSourceDirectories>
+                        <propertyExpansion>checkstyle.config.dir=${maven.multiModuleProjectDirectory}/config/checkstyle</propertyExpansion>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>com.diffplug.spotless</groupId>
+                    <artifactId>spotless-maven-plugin</artifactId>
+                    <version>${spotless-maven-plugin.version}</version>
+                    <configuration>
+                        <lineEndings>UNIX</lineEndings>
+                        <java>
+                            <eclipse>
+                                <version>4.35</version>
+                                <file>${maven.multiModuleProjectDirectory}/config/spotless/eclipse-java-formatter.xml</file>
+                            </eclipse>
+                            <importOrder>
+                                <order>java,javax,jakarta,org,com,io,io.polaris,</order>
+                            </importOrder>
+                            <removeUnusedImports/>
+                            <forbidWildcardImports/>
+                            <formatAnnotations/>
+                        </java>
+                        <formats>
+                            <format>
+                                <includes>
+                                    <include>pom.xml</include>
+                                    <include>src/main/resources/**/*.xml</include>
+                                    <include>src/test/resources/**/*.xml</include>
+                                    <include>*.yml</include>
+                                    <include>*.yaml</include>
+                                    <include>.github/**/*.yml</include>
+                                    <include>.github/**/*.yaml</include>
+                                    <include>deploy/**/*.yml</include>
+                                    <include>deploy/**/*.yaml</include>
+                                    <include>src/main/resources/**/*.yml</include>
+                                    <include>src/main/resources/**/*.yaml</include>
+                                    <include>src/test/resources/**/*.yml</include>
+                                    <include>src/test/resources/**/*.yaml</include>
+                                    <include>*.md</include>
+                                    <include>docs/**/*.md</include>
+                                    <include>src/main/proto/**/*.proto</include>
+                                    <include>src/main/resources/**/*.sql</include>
+                                    <include>src/test/resources/**/*.sql</include>
+                                </includes>
+                                <excludes>
+                                    <exclude>target/**</exclude>
+                                    <exclude>**/target/**</exclude>
+                                </excludes>
+                                <trimTrailingWhitespace/>
+                                <endWithNewline/>
+                            </format>
+                        </formats>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -227,16 +311,60 @@
                         <configuration>
                             <rules>
                                 <requireJavaVersion>
-                                    <version>[25,26)</version>
+                                    <version>25</version>
                                 </requireJavaVersion>
+                                <requireProperty>
+                                    <property>java.specification.version</property>
+                                    <regex>^25$</regex>
+                                    <regexMessage>Polaris must be built with Java 25 exactly.</regexMessage>
+                                </requireProperty>
                                 <requireMavenVersion>
-                                    <version>[3.9.6,)</version>
+                                    <version>[3.9.15,)</version>
                                 </requireMavenVersion>
                                 <requireReleaseDeps>
                                     <onlyWhenRelease>true</onlyWhenRelease>
                                 </requireReleaseDeps>
+                                <bannedDependencies>
+                                    <searchTransitive>true</searchTransitive>
+                                    <excludes>
+                                        <exclude>io.polaris:gateway</exclude>
+                                        <exclude>io.polaris:order-service</exclude>
+                                        <exclude>io.polaris:inventory-service</exclude>
+                                        <exclude>io.polaris:notification-service</exclude>
+                                    </excludes>
+                                </bannedDependencies>
                             </rules>
                         </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>check-format</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>check-style</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>

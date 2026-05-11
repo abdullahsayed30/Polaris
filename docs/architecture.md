@@ -54,6 +54,7 @@ Each service owns its PostgreSQL database and applies Liquibase migrations as pa
 - Kafka demonstrates event-driven choreography and eventual consistency.
 - gRPC demonstrates internal synchronous contracts without leaking them to the edge.
 - Testcontainers makes integration tests realistic and portable in CI.
+- GitHub Actions, CodeQL, Trivy, Spotless, Checkstyle, and repository-managed Git hooks keep build, security, and style gates repeatable.
 - Prometheus, Grafana, OpenTelemetry, Tempo, and ELK-ready logs show production observability expectations.
 - Kubernetes manifests and Helm chart make deployment intent clear without requiring a permanent paid environment.
 
@@ -75,6 +76,8 @@ Each service owns its PostgreSQL database and applies Liquibase migrations as pa
 - [0013 - Use JWT OAuth2 Resource Server at the Gateway](adr/0013-use-jwt-oauth2-resource-server-at-the-gateway.md)
 - [0014 - Use Notification Retry and Dead-Letter Topic](adr/0014-use-notification-retry-and-dead-letter-topic.md)
 - [0015 - Use Records for Configuration Properties](adr/0015-use-records-for-configuration-properties.md)
+- [0016 - Use Tempo for Distributed Tracing](adr/0016-use-tempo-for-distributed-tracing.md)
+- [0017 - Use GitHub Actions Quality and Security Gates](adr/0017-use-github-actions-quality-and-security-gates.md)
 
 ## Service Documentation
 

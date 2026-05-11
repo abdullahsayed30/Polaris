@@ -7,12 +7,10 @@ import java.util.UUID;
 public record InventoryAdjustedEvent(
         UUID orderId,
         List<Item> items,
-        Instant adjustedAt
-) {
+        Instant adjustedAt) {
     public record Item(
             String sku,
             int quantityChanged,
-            int availableQuantity
-    ) {
+            int availableQuantity) {
     }
 }

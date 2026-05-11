@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<!DOCTYPE import-control PUBLIC
+        "-//Checkstyle//DTD ImportControl Configuration 1.4//EN"
+        "https://checkstyle.org/dtds/import_control_1_4.dtd">
+<import-control pkg="io.polaris">
+    <allow pkg="com"/>
+    <allow pkg="io.github.resilience4j"/>
+    <allow pkg="io.grpc"/>
+    <allow pkg="io.micrometer"/>
+    <allow pkg="io.polaris.inventory.grpc"/>
+    <allow pkg="io.polaris.shared"/>
+    <allow pkg="jakarta"/>
+    <allow pkg="java"/>
+    <allow pkg="javax"/>
+    <allow pkg="org"/>
+    <allow pkg="reactor"/>
+
+    <subpackage name="gateway">
+        <allow pkg="io.polaris.gateway"/>
+        <disallow pkg="io.polaris.inventory"/>
+        <disallow pkg="io.polaris.notification"/>
+        <disallow pkg="io.polaris.order"/>
+    </subpackage>
+
+    <subpackage name="inventory">
+        <allow pkg="io.polaris.inventory"/>
+        <disallow pkg="io.polaris.gateway"/>
+        <disallow pkg="io.polaris.notification"/>
+        <disallow pkg="io.polaris.order"/>
+    </subpackage>
+
+    <subpackage name="notification">
+        <allow pkg="io.polaris.notification"/>
+        <disallow pkg="io.polaris.gateway"/>
+        <disallow pkg="io.polaris.inventory.api"/>
+        <disallow pkg="io.polaris.inventory.application"/>
+        <disallow pkg="io.polaris.inventory.config"/>
+        <disallow pkg="io.polaris.inventory.domain"/>
+        <disallow pkg="io.polaris.inventory.messaging"/>
+        <disallow pkg="io.polaris.inventory.persistence"/>
+        <disallow pkg="io.polaris.order"/>
+    </subpackage>
+
+    <subpackage name="order">
+        <allow pkg="io.polaris.order"/>
+        <disallow pkg="io.polaris.gateway"/>
+        <disallow pkg="io.polaris.inventory.api"/>
+        <disallow pkg="io.polaris.inventory.application"/>
+        <disallow pkg="io.polaris.inventory.config"/>
+        <disallow pkg="io.polaris.inventory.domain"/>
+        <disallow pkg="io.polaris.inventory.messaging"/>
+        <disallow pkg="io.polaris.inventory.persistence"/>
+        <disallow pkg="io.polaris.notification"/>
+    </subpackage>
+
+    <subpackage name="shared">
+        <allow pkg="io.polaris.shared"/>
+        <disallow pkg="io.polaris.gateway"/>
+        <disallow pkg="io.polaris.inventory"/>
+        <disallow pkg="io.polaris.notification"/>
+        <disallow pkg="io.polaris.order"/>
+    </subpackage>
+</import-control>

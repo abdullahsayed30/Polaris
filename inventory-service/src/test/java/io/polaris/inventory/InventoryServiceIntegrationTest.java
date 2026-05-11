@@ -1,19 +1,14 @@
 package io.polaris.inventory;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
-import io.polaris.inventory.config.InventoryGrpcServer;
-import io.polaris.inventory.domain.InventoryItem;
-import io.polaris.inventory.grpc.InventoryDecision;
-import io.polaris.inventory.grpc.InventoryServiceGrpc;
-import io.polaris.inventory.grpc.ReserveRequest;
-import io.polaris.inventory.grpc.ReserveResponse;
-import io.polaris.inventory.grpc.StockItem;
-import io.polaris.inventory.grpc.StockRequest;
-import io.polaris.inventory.grpc.StockResponse;
-import io.polaris.inventory.persistence.InventoryItemRepository;
-import io.polaris.shared.events.InventoryAdjustedEvent;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
+
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -32,14 +27,22 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.kafka.ConfluentKafkaContainer;
 import org.testcontainers.utility.DockerImageName;
 
-import java.time.Duration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
+
+import io.polaris.inventory.config.InventoryGrpcServer;
+import io.polaris.inventory.domain.InventoryItem;
+import io.polaris.inventory.grpc.InventoryDecision;
+import io.polaris.inventory.grpc.InventoryServiceGrpc;
+import io.polaris.inventory.grpc.ReserveRequest;
+import io.polaris.inventory.grpc.ReserveResponse;
+import io.polaris.inventory.grpc.StockItem;
+import io.polaris.inventory.grpc.StockRequest;
+import io.polaris.inventory.grpc.StockResponse;
+import io.polaris.inventory.persistence.InventoryItemRepository;
+import io.polaris.shared.events.InventoryAdjustedEvent;
 
 @SpringBootTest
 @Testcontainers
@@ -48,16 +51,14 @@ class InventoryServiceIntegrationTest {
 
     @Container
     static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(
-            DockerImageName.parse("postgres:18").asCompatibleSubstituteFor("postgres")
-    )
+            DockerImageName.parse("postgres:18").asCompatibleSubstituteFor("postgres"))
             .withDatabaseName("polaris_inventory")
             .withUsername("polaris_inventory")
             .withPassword("polaris_inventory");
 
     @Container
     static final ConfluentKafkaContainer kafka = new ConfluentKafkaContainer(
-            DockerImageName.parse("confluentinc/cp-kafka:7.7.1")
-    );
+            DockerImageName.parse("confluentinc/cp-kafka:7.7.1"));
 
     @Autowired
     InventoryItemRepository inventoryItems;
@@ -85,8 +86,7 @@ class InventoryServiceIntegrationTest {
         inventoryItems.deleteAll();
         inventoryItems.saveAll(List.of(
                 InventoryItem.create("SKU-COFFEE-001", 10),
-                InventoryItem.create("SKU-MUG-002", 5)
-        ));
+                InventoryItem.create("SKU-MUG-002", 5)));
 
         channel = ManagedChannelBuilder.forAddress("localhost", grpcServer.port())
                 .usePlaintext()

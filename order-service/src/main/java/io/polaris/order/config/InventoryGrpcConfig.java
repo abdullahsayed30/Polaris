@@ -1,10 +1,12 @@
 package io.polaris.order.config;
 
-import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
-import io.polaris.inventory.grpc.InventoryServiceGrpc;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
+
+import io.polaris.inventory.grpc.InventoryServiceGrpc;
 
 @Configuration
 public class InventoryGrpcConfig {

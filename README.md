@@ -1,6 +1,7 @@
 # Polaris
 
-[![Build](https://img.shields.io/badge/build-GitHub_Actions_placeholder-lightgrey)](#)
+[![CI](https://github.com/abdullahsayed30/Polaris/actions/workflows/ci.yml/badge.svg)](https://github.com/abdullahsayed30/Polaris/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/abdullahsayed30/Polaris/actions/workflows/codeql.yml/badge.svg)](https://github.com/abdullahsayed30/Polaris/actions/workflows/codeql.yml)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.x-6DB33F)](#)
 [![Java](https://img.shields.io/badge/Java-25-007396)](#)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](#)
@@ -44,7 +45,7 @@ flowchart LR
 | Logs              | SLF4J + Logback, ELK-ready structured output |
 | Container runtime | Docker, Docker Compose                       |
 | Orchestration     | Kubernetes manifests and Helm chart          |
-| CI                | GitHub Actions and CodeQL                    |
+| CI                | GitHub Actions, CodeQL, Trivy                |
 
 ## Modules
 
@@ -74,7 +75,7 @@ See [Gateway](docs/services/gateway.md) for configuration details.
 Prerequisites:
 
 - Java 25
-- Maven 3.9.6 or newer
+- Maven Wrapper, pinned to Maven 3.9.15
 - Docker with Docker Compose
 
 Run the full local stack from the repository root:
@@ -101,11 +102,20 @@ Build and verify all modules:
 ./mvnw clean verify
 ```
 
-If the Maven wrapper has not been generated yet:
+Run the fast local gate without Testcontainers-backed integration tests:
 
 ```bash
-mvn clean verify
+./mvnw spotless:check checkstyle:check test
 ```
+
+Configure the required local Git hooks once per clone:
+
+```bash
+git config core.hooksPath .githooks
+git config --get core.hooksPath
+```
+
+The pre-commit hook runs the fast local gate: Spotless, Checkstyle, and unit tests. Run commits from a shell where `java -version` reports Java 25; Windows PowerShell, Git Bash, and WSL can each have separate Java configuration. CI runs Spotless, Checkstyle, unit tests, Testcontainers integration tests, CodeQL, and a Trivy repository scan for dependencies, secrets, Dockerfiles, Compose, and configuration files. Container image, Helm chart, and Kubernetes manifest scanning are deferred until those deployment artifacts are added. See [CI/CD](docs/ci-cd.md).
 
 ## Domain Flow
 
@@ -126,6 +136,7 @@ mvn clean verify
 - Kafka carries durable domain events and supports eventual consistency.
 - Services expose health, readiness, metrics, tracing, and structured logs.
 - Integration tests use Testcontainers, not shared developer infrastructure.
+- CI enforces Java 25, formatting, style, unit tests, integration tests, static analysis, and repository security scans.
 - Docker Compose is the default local runtime; Helm is the deployment contract.
 - ADRs in `docs/adr` document major architectural decisions.
 
@@ -141,7 +152,7 @@ Before `v1.0.0`, Polaris is intended to move from a clean blueprint skeleton to 
 - `v0.4.0`: notification service with Kafka listeners, retry, dead-letter topic, and tests.
 - `v0.5.0`: gateway routes, JWT resource server, CORS, request logging, and rate limiting.
 - `v0.6.0`: Docker Compose local stack for Postgres, Kafka, services, Prometheus, Grafana, and Tempo.
-- `v0.7.0`: GitHub Actions CI, CodeQL, Spotless, Checkstyle, Lefthook, integration test automation, and README badges.
+- `v0.6.0`: GitHub Actions CI, CodeQL, Trivy, Spotless, Checkstyle, required Git hooks, integration test automation, and README badges.
 - `v0.8.0`: migrate manual gRPC server wiring to a Spring gRPC starter, then add gRPC interceptors, health/reflection support, dashboards, tracing conventions, and structured logging.
 - `v0.9.0`: Helm chart, Kubernetes manifests, deployment docs, ADR set, and final README polish.
 - `v1.0.0`: stable portfolio-ready blueprint with local runtime, CI proof, and deployment artifacts.

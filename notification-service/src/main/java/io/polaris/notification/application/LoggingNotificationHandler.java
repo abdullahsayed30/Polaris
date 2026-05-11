@@ -1,10 +1,11 @@
 package io.polaris.notification.application;
 
-import io.polaris.shared.events.InventoryAdjustedEvent;
-import io.polaris.shared.events.OrderCreatedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
+import io.polaris.shared.events.InventoryAdjustedEvent;
+import io.polaris.shared.events.OrderCreatedEvent;
 
 @Component
 public class LoggingNotificationHandler implements NotificationHandler {
@@ -17,8 +18,7 @@ public class LoggingNotificationHandler implements NotificationHandler {
                 event.orderId(),
                 event.customerId(),
                 event.status(),
-                event.items().size()
-        );
+                event.items().size());
     }
 
     @Override
@@ -26,7 +26,6 @@ public class LoggingNotificationHandler implements NotificationHandler {
         log.info(
                 "inventory adjustment notification processed orderId={} itemCount={}",
                 event.orderId(),
-                event.items().size()
-        );
+                event.items().size());
     }
 }

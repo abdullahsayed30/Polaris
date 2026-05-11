@@ -1,0 +1,25 @@
+#!/usr/bin/env sh
+set -eu
+
+repo_root="$(git rev-parse --show-toplevel)"
+cd "$repo_root"
+
+java_version="$(java -XshowSettings:properties -version 2>&1 \
+  | awk -F= '/java.specification.version/ { gsub(/[[:space:]]/, "", $2); print $2; exit }')"
+
+if [ "$java_version" != "25" ]; then
+  printf '%s\n' "ERROR: Polaris requires Java 25 for local hooks, but this shell is using Java ${java_version:-unknown}."
+  exit 1
+fi
+
+case "$(uname -s)" in
+  MINGW* | MSYS* | CYGWIN*)
+    mvnw="./mvnw.cmd"
+    ;;
+  *)
+    mvnw="./mvnw"
+    ;;
+esac
+
+echo "Running required pre-commit quality gate"
+"$mvnw" -B -ntp spotless:check checkstyle:check test

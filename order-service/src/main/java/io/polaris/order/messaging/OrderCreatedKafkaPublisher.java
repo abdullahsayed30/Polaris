@@ -1,12 +1,13 @@
 package io.polaris.order.messaging;
 
-import io.polaris.order.application.OrderCreatedApplicationEvent;
-import io.polaris.shared.events.OrderCreatedEvent;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
+
+import io.polaris.order.application.OrderCreatedApplicationEvent;
+import io.polaris.shared.events.OrderCreatedEvent;
 
 @Component
 public class OrderCreatedKafkaPublisher {
@@ -15,8 +16,7 @@ public class OrderCreatedKafkaPublisher {
 
     public OrderCreatedKafkaPublisher(
             KafkaTemplate<String, OrderCreatedEvent> kafkaTemplate,
-            @Value("${polaris.kafka.topics.order-created}") String topic
-    ) {
+            @Value("${polaris.kafka.topics.order-created}") String topic) {
         this.kafkaTemplate = kafkaTemplate;
         this.topic = topic;
     }

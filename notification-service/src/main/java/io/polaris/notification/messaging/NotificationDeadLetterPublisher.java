@@ -11,8 +11,7 @@ public class NotificationDeadLetterPublisher {
 
     public NotificationDeadLetterPublisher(
             KafkaTemplate<String, NotificationDeadLetterEvent> kafkaTemplate,
-            @Value("${polaris.kafka.topics.notifications-dlq}") String topic
-    ) {
+            @Value("${polaris.kafka.topics.notifications-dlq}") String topic) {
         this.kafkaTemplate = kafkaTemplate;
         this.topic = topic;
     }

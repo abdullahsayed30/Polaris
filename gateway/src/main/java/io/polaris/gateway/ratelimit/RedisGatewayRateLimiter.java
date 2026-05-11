@@ -1,12 +1,13 @@
 package io.polaris.gateway.ratelimit;
 
+import java.time.Clock;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
 import org.springframework.web.server.ServerWebExchange;
-import reactor.core.publisher.Mono;
 
-import java.time.Clock;
+import reactor.core.publisher.Mono;
 
 class RedisGatewayRateLimiter implements GatewayRateLimiter {
     private static final Logger log = LoggerFactory.getLogger(RedisGatewayRateLimiter.class);
@@ -21,8 +22,7 @@ class RedisGatewayRateLimiter implements GatewayRateLimiter {
             GatewayRateLimitProperties properties,
             GatewayRateLimitKeyResolver keyResolver,
             ReactiveStringRedisTemplate redis,
-            Clock clock
-    ) {
+            Clock clock) {
         this.properties = properties;
         this.keyResolver = keyResolver;
         this.redis = redis;
@@ -41,8 +41,7 @@ class RedisGatewayRateLimiter implements GatewayRateLimiter {
                     log.warn(
                             "gateway rate limiter failed open backend=redis errorType={} message={}",
                             error.getClass().getName(),
-                            error.getMessage()
-                    );
+                            error.getMessage());
                     return Mono.just(true);
                 });
     }

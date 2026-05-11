@@ -1,18 +1,21 @@
 package io.polaris.notification.messaging;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.resilience4j.retry.Retry;
-import io.polaris.notification.application.NotificationHandler;
-import io.polaris.shared.events.InventoryAdjustedEvent;
-import io.polaris.shared.events.OrderCreatedEvent;
+import java.time.Instant;
+import java.util.function.Consumer;
+
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
-import java.util.function.Consumer;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.github.resilience4j.retry.Retry;
+
+import io.polaris.notification.application.NotificationHandler;
+import io.polaris.shared.events.InventoryAdjustedEvent;
+import io.polaris.shared.events.OrderCreatedEvent;
 
 @Component
 public class NotificationKafkaListener {
@@ -27,26 +30,19 @@ public class NotificationKafkaListener {
             ObjectMapper objectMapper,
             NotificationHandler notificationHandler,
             Retry notificationRetry,
-            NotificationDeadLetterPublisher deadLetterPublisher
-    ) {
+            NotificationDeadLetterPublisher deadLetterPublisher) {
         this.objectMapper = objectMapper;
         this.notificationHandler = notificationHandler;
         this.notificationRetry = notificationRetry;
         this.deadLetterPublisher = deadLetterPublisher;
     }
 
-    @KafkaListener(
-            topics = "${polaris.kafka.topics.orders-created}",
-            groupId = "${spring.kafka.consumer.group-id}"
-    )
+    @KafkaListener(topics = "${polaris.kafka.topics.orders-created}", groupId = "${spring.kafka.consumer.group-id}")
     public void onOrderCreated(ConsumerRecord<String, String> record) {
         handle(record, "OrderCreated", OrderCreatedEvent.class, notificationHandler::handle);
     }
 
-    @KafkaListener(
-            topics = "${polaris.kafka.topics.inventory-adjusted}",
-            groupId = "${spring.kafka.consumer.group-id}"
-    )
+    @KafkaListener(topics = "${polaris.kafka.topics.inventory-adjusted}", groupId = "${spring.kafka.consumer.group-id}")
     public void onInventoryAdjusted(ConsumerRecord<String, String> record) {
         handle(record, "InventoryAdjusted", InventoryAdjustedEvent.class, notificationHandler::handle);
     }
@@ -55,8 +51,7 @@ public class NotificationKafkaListener {
             ConsumerRecord<String, String> record,
             String eventType,
             Class<T> eventClass,
-            Consumer<T> handler
-    ) {
+            Consumer<T> handler) {
         try {
             T event = objectMapper.readValue(record.value(), eventClass);
             Retry.decorateRunnable(notificationRetry, () -> handler.accept(event)).run();
@@ -68,8 +63,7 @@ public class NotificationKafkaListener {
                     record.value(),
                     ex.getClass().getName(),
                     ex.getMessage(),
-                    Instant.now()
-            );
+                    Instant.now());
             deadLetterPublisher.publish(deadLetter);
             log.error(
                     "Notification handling failed eventType={} sourceTopic={} sourceKey={} dlqTopic={}",
@@ -77,8 +71,7 @@ public class NotificationKafkaListener {
                     record.topic(),
                     record.key(),
                     deadLetterPublisher.topic(),
-                    ex
-            );
+                    ex);
         }
     }
 }

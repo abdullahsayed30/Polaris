@@ -1,10 +1,21 @@
 package io.polaris.notification;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.polaris.notification.application.NotificationHandler;
-import io.polaris.notification.messaging.NotificationDeadLetterEvent;
-import io.polaris.shared.events.InventoryAdjustedEvent;
-import io.polaris.shared.events.OrderCreatedEvent;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
+
+import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BooleanSupplier;
+
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -26,21 +37,12 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.kafka.ConfluentKafkaContainer;
 import org.testcontainers.utility.DockerImageName;
 
-import java.math.BigDecimal;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.BooleanSupplier;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
+import io.polaris.notification.application.NotificationHandler;
+import io.polaris.notification.messaging.NotificationDeadLetterEvent;
+import io.polaris.shared.events.InventoryAdjustedEvent;
+import io.polaris.shared.events.OrderCreatedEvent;
 
 @SpringBootTest(properties = {
         "spring.kafka.consumer.group-id=notification-service-it",
@@ -55,8 +57,7 @@ class NotificationServiceIntegrationTest {
 
     @Container
     static final ConfluentKafkaContainer kafka = new ConfluentKafkaContainer(
-            DockerImageName.parse("confluentinc/cp-kafka:7.7.1")
-    );
+            DockerImageName.parse("confluentinc/cp-kafka:7.7.1"));
 
     @Autowired
     KafkaTemplate<String, Object> kafkaTemplate;
@@ -147,18 +148,15 @@ class NotificationServiceIntegrationTest {
                         UUID.randomUUID(),
                         "SKU-COFFEE-001",
                         2,
-                        new BigDecimal("19.99")
-                )),
-                Instant.now()
-        );
+                        new BigDecimal("19.99"))),
+                Instant.now());
     }
 
     private InventoryAdjustedEvent inventoryAdjustedEvent(UUID orderId) {
         return new InventoryAdjustedEvent(
                 orderId,
                 List.of(new InventoryAdjustedEvent.Item("SKU-COFFEE-001", -2, 8)),
-                Instant.now()
-        );
+                Instant.now());
     }
 
     @TestConfiguration

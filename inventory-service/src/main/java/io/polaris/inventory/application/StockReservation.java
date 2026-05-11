@@ -5,6 +5,5 @@ public record StockReservation(
         int requestedQuantity,
         int reservedQuantity,
         int remainingQuantity,
-        boolean reserved
-) {
+        boolean reserved) {
 }

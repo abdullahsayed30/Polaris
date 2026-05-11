@@ -5,6 +5,5 @@ import java.util.List;
 public record StockReservationResult(
         boolean reserved,
         InventoryDecisionReason reason,
-        List<StockReservation> items
-) {
+        List<StockReservation> items) {
 }

@@ -9,6 +9,5 @@ public record NotificationDeadLetterEvent(
         String payload,
         String errorType,
         String errorMessage,
-        Instant failedAt
-) {
+        Instant failedAt) {
 }
