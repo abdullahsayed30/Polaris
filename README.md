@@ -13,8 +13,7 @@ Polaris is a production-grade microservices blueprint for a small e-commerce ord
 flowchart LR
     Client[Clients] --> Gateway[API Gateway]
 
-    Gateway -->|REST /api/v1/orders| Order[Order Service]
-    Gateway -->|REST internal admin| Inventory[Inventory Service]
+    Gateway -->|REST /api/v1/orders/** + JWT| Order[Order Service]
 
     Order <-->|gRPC CheckStock / ReserveStock| Inventory
 
@@ -51,12 +50,24 @@ flowchart LR
 
 | Module                 | Responsibility                                                                    |
 |------------------------|-----------------------------------------------------------------------------------|
-| `proto-contracts`      | Versioned protobuf contracts and generated gRPC Java stubs                        |
-| `shared`               | Shared Java events, error models, and cross-service support code                  |
+| [`proto-contracts`](docs/proto-contracts.md) | Versioned protobuf contracts and generated gRPC Java stubs                        |
+| [`shared`](docs/shared.md) | Shared Java event payloads used by Kafka producers and consumers                  |
 | `gateway`              | Spring Cloud Gateway routes, JWT validation, CORS, rate limiting, request logging |
 | `order-service`        | Order REST API, order lifecycle, Postgres persistence, Kafka event publishing     |
 | `inventory-service`    | gRPC inventory API, stock reservations, inventory persistence, Kafka consumers    |
 | `notification-service` | Kafka-driven notification workflow with retry and dead-letter handling            |
+
+## Gateway Edge Contract
+
+The gateway is the external HTTP entry point. It exposes the public order API at `/api/v1/orders/**`, validates bearer JWTs as an OAuth2 resource server, handles CORS preflight requests, logs each request with an `X-Request-Id`, and applies a global rate limit. The default rate limiter is in-memory for local development; the `docker` profile switches the backend to Redis.
+
+| Route ID | Method | Public path | Upstream |
+| --- | --- | --- | --- |
+| `order-create` | `POST` | `/api/v1/orders` | `order-service:8081` |
+| `order-read` | `GET` | `/api/v1/orders/{orderId}` | `order-service:8081` |
+| `order-public-api` | Any | `/api/v1/orders/**` | `order-service:8081` |
+
+See [Gateway](docs/services/gateway.md) for configuration details.
 
 ## Quick Start
 
@@ -110,12 +121,15 @@ mvn clean verify
 
 - Each service owns its database and schema migrations.
 - REST is used for external traffic through the gateway.
+- Gateway API routes require JWT authentication; health and CORS preflight traffic stay unauthenticated.
 - gRPC is used for synchronous internal service contracts.
 - Kafka carries durable domain events and supports eventual consistency.
 - Services expose health, readiness, metrics, tracing, and structured logs.
 - Integration tests use Testcontainers, not shared developer infrastructure.
 - Docker Compose is the default local runtime; Helm is the deployment contract.
 - ADRs in `docs/adr` document major architectural decisions.
+
+Detailed service documentation lives in [`docs/services`](docs/services/README.md), and the ADR index lives in [`docs/adr`](docs/adr/README.md).
 
 ## Roadmap
 

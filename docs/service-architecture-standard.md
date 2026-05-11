@@ -39,6 +39,15 @@ Every service should follow this package shape unless there is a clear reason to
 - `messaging`: observes order events and publishes `InventoryAdjustedEvent` after reservation commit.
 - `config`: starts the gRPC server and owns typed gRPC properties.
 
+## Gateway Shape
+
+`gateway` is an edge service rather than a domain service, so it keeps infrastructure concerns explicit:
+
+- `config`: owns WebFlux security and CORS configuration.
+- `logging`: owns request logging and request ID response propagation.
+- `ratelimit`: owns global rate limiting, key resolution, and Redis/in-memory limiter implementations.
+- `application.yml`: owns Spring Cloud Gateway route definitions for the public order API.
+
 ## Why This Architecture
 
 - It keeps Spring framework code at the edges instead of spreading infrastructure concerns through domain logic.
