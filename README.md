@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/abdullahsayed30/Polaris/actions/workflows/ci.yml/badge.svg)](https://github.com/abdullahsayed30/Polaris/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/abdullahsayed30/Polaris/actions/workflows/codeql.yml/badge.svg)](https://github.com/abdullahsayed30/Polaris/actions/workflows/codeql.yml)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.x-6DB33F)](#)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.x-6DB33F)](#)
 [![Java](https://img.shields.io/badge/Java-25-007396)](#)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](#)
 
@@ -32,8 +32,8 @@ flowchart LR
 |-------------------|----------------------------------------------|
 | Build             | Maven multi-module                           |
 | Java              | 25                                           |
-| Spring Boot       | 3.4.x                                        |
-| Spring Cloud      | 2024.0.x                                     |
+| Spring Boot       | 3.5.x                                        |
+| Spring Cloud      | 2025.0.x                                     |
 | Database          | PostgreSQL 18, one database per service      |
 | Schema migrations | Liquibase                                    |
 | Async messaging   | Apache Kafka 3.7                             |

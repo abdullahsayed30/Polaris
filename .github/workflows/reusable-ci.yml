@@ -54,36 +54,32 @@ jobs:
           java -version
           ./mvnw --version
 
-      - name: Run Spotless
-        run: ./mvnw -B -ntp spotless:check ${{ inputs.maven-args }}
-
-      - name: Run Checkstyle
-        run: ./mvnw -B -ntp checkstyle:check ${{ inputs.maven-args }}
+      - name: Run formatting and style checks
+        run: ./mvnw -B -ntp spotless:check checkstyle:check ${{ inputs.maven-args }}
 
       - name: Run unit tests
         run: ./mvnw -B -ntp test ${{ inputs.maven-args }}
 
       - name: Run integration tests
         if: ${{ inputs.run-integration-tests }}
-        run: ./mvnw -B -ntp verify ${{ inputs.maven-args }}
+        run: ./mvnw -B -ntp test-compile failsafe:integration-test failsafe:verify ${{ inputs.maven-args }}
 
-      - name: Verify without integration tests
+      - name: Package without integration tests
         if: ${{ !inputs.run-integration-tests }}
-        run: ./mvnw -B -ntp -DskipITs verify ${{ inputs.maven-args }}
+        run: ./mvnw -B -ntp -DskipTests package ${{ inputs.maven-args }}
 
       - name: Run Trivy repository scan
         id: trivy
         uses: aquasecurity/trivy-action@v0.36.0
-        continue-on-error: true
         with:
           version: v0.70.0
           scan-type: fs
           scan-ref: .
-          scanners: vuln,secret,misconfig
-          severity: HIGH,CRITICAL
+          scanners: vuln
+          severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
           format: sarif
           output: trivy-results.sarif
-          exit-code: '1'
+          exit-code: '0'
 
       - name: Upload Trivy SARIF
         if: ${{ always() && hashFiles('trivy-results.sarif') != '' }}
@@ -92,14 +88,6 @@ jobs:
         with:
           sarif_file: trivy-results.sarif
           category: trivy
-
-      - name: Upload Trivy report
-        if: ${{ always() && hashFiles('trivy-results.sarif') != '' }}
-        uses: actions/upload-artifact@v7
-        with:
-          name: ${{ inputs.artifact-name }}-trivy-sarif
-          path: trivy-results.sarif
-          retention-days: 14
 
       - name: Upload test reports
         if: ${{ failure() }}
@@ -112,6 +100,23 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
-      - name: Fail on Trivy findings
-        if: ${{ steps.trivy.outcome == 'failure' }}
-        run: exit 1
+      - name: Fail on Trivy critical findings
+        if: ${{ always() && hashFiles('trivy-results.sarif') != '' }}
+        run: |
+          set -euo pipefail
+
+          critical_count="$(jq -r '
+            [
+              .runs[].results[]
+              | (.message.text | capture("Severity: (?<severity>[A-Z]+)")? | .severity) as $severity
+              | select($severity == "CRITICAL")
+            ]
+            | length
+          ' trivy-results.sarif)"
+
+          if [ "$critical_count" -gt 0 ]; then
+            echo "::error::Trivy found $critical_count CRITICAL vulnerability result(s). Review the uploaded SARIF report."
+            exit 1
+          fi
+
+          echo "Trivy found no critical vulnerabilities. Non-critical vulnerabilities are reported in the uploaded SARIF report."

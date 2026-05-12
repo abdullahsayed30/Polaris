@@ -16,12 +16,16 @@ RUN mvn -pl notification-service -am -DskipTests package
 FROM eclipse-temurin:25-jre AS local-runtime
 WORKDIR /app
 COPY deploy/scripts/wait-for-it.sh /usr/local/bin/wait-for-it
-RUN chmod +x /usr/local/bin/wait-for-it
+RUN chmod +x /usr/local/bin/wait-for-it \
+    && groupadd --system --gid 10001 polaris \
+    && useradd --system --uid 10001 --gid polaris --home-dir /app --shell /usr/sbin/nologin polaris
 COPY --from=build /workspace/notification-service/target/notification-service.jar /app/notification-service.jar
 EXPOSE 8083
+USER 10001:10001
 ENTRYPOINT ["java", "-jar", "/app/notification-service.jar"]
 
 FROM gcr.io/distroless/java25-debian13:nonroot AS production
 WORKDIR /app
 COPY --from=build /workspace/notification-service/target/notification-service.jar /app/notification-service.jar
+USER 65532:65532
 ENTRYPOINT ["java", "-jar", "/app/notification-service.jar"]
