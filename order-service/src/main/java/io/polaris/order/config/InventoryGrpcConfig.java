@@ -1,13 +1,16 @@
 package io.polaris.order.config;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import io.polaris.inventory.grpc.InventoryServiceGrpc.InventoryServiceBlockingStub;
+import io.polaris.inventory.grpc.InventoryServiceGrpc;
 
-import net.devh.boot.grpc.client.inject.GrpcClient;
-import net.devh.boot.grpc.client.inject.GrpcClientBean;
+import net.devh.boot.grpc.client.channelfactory.GrpcChannelFactory;
 
 @Configuration
-@GrpcClientBean(clazz = InventoryServiceBlockingStub.class, beanName = "inventoryGrpc", client = @GrpcClient("inventory-service"))
 public class InventoryGrpcConfig {
+    @Bean
+    InventoryServiceGrpc.InventoryServiceBlockingStub inventoryServiceBlockingStub(GrpcChannelFactory channelFactory) {
+        return InventoryServiceGrpc.newBlockingStub(channelFactory.createChannel("inventory-service"));
+    }
 }
