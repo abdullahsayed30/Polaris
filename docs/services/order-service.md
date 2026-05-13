@@ -60,6 +60,10 @@ JPA validates the schema at startup with `hibernate.ddl-auto=validate`. The serv
 
 The inventory gRPC target is configured with `polaris.inventory.grpc.host`, `polaris.inventory.grpc.port`, and `polaris.inventory.grpc.deadline`. The default deadline is `2s`.
 
+The generated inventory blocking stub is created by the Spring Boot-compatible gRPC client starter. `GrpcInventoryClient` still applies the configured per-call deadline before invoking `CheckStock` and `ReserveStock`.
+
+`order-service` accepts or creates `X-Request-Id` for direct HTTP calls, stores it in MDC as `request.id`, and propagates it to inventory as gRPC `x-request-id` metadata.
+
 ## Package Shape
 
 | Package | Purpose |
@@ -70,8 +74,9 @@ The inventory gRPC target is configured with `polaris.inventory.grpc.host`, `pol
 | `inventory` | Inventory client port and gRPC adapter |
 | `messaging` | Kafka topic wiring and after-commit event publisher |
 | `persistence` | Spring Data order repository |
-| `config` | Kafka and gRPC configuration |
+| `config` | Kafka, gRPC client, and gRPC observability configuration |
+| `logging` | Request ID MDC and response propagation |
 
 ## Tests
 
-The integration test starts PostgreSQL and Kafka with Testcontainers and uses a fake gRPC inventory server. It verifies confirmed orders, cancelled orders, failed reservations, order lookup, validation, and Kafka publication.
+The integration test starts PostgreSQL and Kafka with Testcontainers and uses a fake gRPC inventory server. It verifies confirmed orders, cancelled orders, failed reservations, order lookup, validation, and Kafka publication. Focused unit tests cover gRPC request ID metadata propagation and MDC cleanup.

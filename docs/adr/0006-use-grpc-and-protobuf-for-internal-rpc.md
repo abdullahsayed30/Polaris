@@ -16,6 +16,8 @@ Polaris will use gRPC with Protobuf for synchronous internal service-to-service 
 
 These APIs are internal only. External clients use REST through the gateway.
 
+As of `v0.8.0`, gRPC server lifecycle and client stub creation are managed by a Spring Boot-compatible gRPC starter. See [0018 - Use Spring Boot-Compatible gRPC and Observability Conventions](0018-use-spring-boot-compatible-grpc-and-observability-conventions.md).
+
 ## Consequences
 
 Internal RPC contracts are strongly typed, explicit, and efficient. The tradeoff is extra build tooling for generated code and the need to manage protobuf compatibility over time.

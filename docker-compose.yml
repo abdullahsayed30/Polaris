@@ -134,9 +134,10 @@ services:
       target: local-runtime
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      OTEL_SERVICE_NAME: inventory-service
-      OTEL_EXPORTER_OTLP_ENDPOINT: http://tempo:4318
-      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      POLARIS_DEPLOYMENT_ENVIRONMENT: docker
+      POLARIS_TRACING_EXPORT_ENABLED: "true"
+      POLARIS_TRACING_SAMPLING_PROBABILITY: "1.0"
+      MANAGEMENT_OTLP_TRACING_ENDPOINT: http://tempo:4318/v1/traces
     ports:
       - "8082:8082"
       - "19090:9090"
@@ -173,9 +174,10 @@ services:
       target: local-runtime
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      OTEL_SERVICE_NAME: order-service
-      OTEL_EXPORTER_OTLP_ENDPOINT: http://tempo:4318
-      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      POLARIS_DEPLOYMENT_ENVIRONMENT: docker
+      POLARIS_TRACING_EXPORT_ENABLED: "true"
+      POLARIS_TRACING_SAMPLING_PROBABILITY: "1.0"
+      MANAGEMENT_OTLP_TRACING_ENDPOINT: http://tempo:4318/v1/traces
     ports:
       - "8081:8081"
     depends_on:
@@ -218,9 +220,10 @@ services:
       target: local-runtime
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      OTEL_SERVICE_NAME: notification-service
-      OTEL_EXPORTER_OTLP_ENDPOINT: http://tempo:4318
-      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      POLARIS_DEPLOYMENT_ENVIRONMENT: docker
+      POLARIS_TRACING_EXPORT_ENABLED: "true"
+      POLARIS_TRACING_SAMPLING_PROBABILITY: "1.0"
+      MANAGEMENT_OTLP_TRACING_ENDPOINT: http://tempo:4318/v1/traces
     ports:
       - "8083:8083"
     depends_on:
@@ -251,9 +254,10 @@ services:
       target: local-runtime
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      OTEL_SERVICE_NAME: gateway
-      OTEL_EXPORTER_OTLP_ENDPOINT: http://tempo:4318
-      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      POLARIS_DEPLOYMENT_ENVIRONMENT: docker
+      POLARIS_TRACING_EXPORT_ENABLED: "true"
+      POLARIS_TRACING_SAMPLING_PROBABILITY: "1.0"
+      MANAGEMENT_OTLP_TRACING_ENDPOINT: http://tempo:4318/v1/traces
     ports:
       - "8080:8080"
     depends_on:

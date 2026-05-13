@@ -11,6 +11,7 @@ This folder documents the architecture, service boundaries, and significant deci
 | [Service Architecture Standard](service-architecture-standard.md) | Package structure and coding rules for service modules |
 | [Proto Contracts](proto-contracts.md) | Protobuf ownership, generated stubs, and contract versioning strategy |
 | [Shared Module](shared.md) | Shared Java event payloads and module boundary rules |
+| [Observability](observability.md) | Metrics, tracing, logs, request correlation, and dashboards |
 | [CI/CD](ci-cd.md) | GitHub Actions, quality gates, security scanning, and deferred deployment automation |
 | [Architecture Decision Records](adr/README.md) | Accepted architecture decisions and tradeoffs |
 
@@ -29,6 +30,7 @@ docs/
 |   `-- notification-service.md
 |-- architecture.md
 |-- gateway.md
+|-- observability.md
 |-- proto-contracts.md
 |-- shared.md
 |-- ci-cd.md

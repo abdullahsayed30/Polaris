@@ -3,8 +3,6 @@ package io.polaris.inventory.api;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.stereotype.Component;
-
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 
@@ -24,7 +22,9 @@ import io.polaris.inventory.grpc.StockItemReservation;
 import io.polaris.inventory.grpc.StockRequest;
 import io.polaris.inventory.grpc.StockResponse;
 
-@Component
+import net.devh.boot.grpc.server.service.GrpcService;
+
+@GrpcService
 public class InventoryGrpcController extends InventoryServiceGrpc.InventoryServiceImplBase {
     private final InventoryApplicationService inventory;
 

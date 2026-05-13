@@ -23,3 +23,4 @@ Polaris records significant architecture choices as lightweight ADRs. Each recor
 | [0015](0015-use-records-for-configuration-properties.md) | Accepted | Use records for configuration properties |
 | [0016](0016-use-tempo-for-distributed-tracing.md) | Accepted | Use Tempo for distributed tracing |
 | [0017](0017-use-github-actions-quality-and-security-gates.md) | Accepted | Use GitHub Actions quality and security gates |
+| [0018](0018-use-spring-boot-compatible-grpc-and-observability-conventions.md) | Accepted | Use Spring Boot-compatible gRPC and observability conventions |

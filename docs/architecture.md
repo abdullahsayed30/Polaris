@@ -33,7 +33,15 @@ External clients enter through Spring Cloud Gateway over REST. The gateway owns 
 
 Synchronous internal calls use gRPC where a request needs an immediate answer, such as checking stock before confirming an order. gRPC keeps internal contracts explicit, strongly typed, and efficient without exposing those APIs to external clients.
 
+Spring Boot-compatible gRPC starters own server lifecycle and client channel creation. Services add global gRPC interceptors for request ID propagation, access logs, Micrometer Observation, and Prometheus metrics. Inventory exposes gRPC health and enables reflection only in local and Docker runtime profiles.
+
 Kafka carries domain events that do not require an immediate response. Order creation, inventory adjustments, and notification outcomes are modeled as durable events so services can evolve independently and recover from transient failures.
+
+## Observability
+
+Services expose actuator health and Prometheus metrics. Docker Compose enables OTLP trace export to Tempo, while direct local JVM runs keep trace export disabled unless explicitly enabled. Console logs use ECS JSON and include trace identifiers plus `request.id` when request context exists.
+
+Grafana provisions Prometheus and Tempo datasources, the Polaris overview dashboard, and a dedicated Polaris gRPC dashboard. See [Observability](observability.md) for runtime conventions.
 
 ## Gateway Edge Policy
 
@@ -78,6 +86,7 @@ Each service owns its PostgreSQL database and applies Liquibase migrations as pa
 - [0015 - Use Records for Configuration Properties](adr/0015-use-records-for-configuration-properties.md)
 - [0016 - Use Tempo for Distributed Tracing](adr/0016-use-tempo-for-distributed-tracing.md)
 - [0017 - Use GitHub Actions Quality and Security Gates](adr/0017-use-github-actions-quality-and-security-gates.md)
+- [0018 - Use Spring Boot-Compatible gRPC and Observability Conventions](adr/0018-use-spring-boot-compatible-grpc-and-observability-conventions.md)
 
 ## Service Documentation
 

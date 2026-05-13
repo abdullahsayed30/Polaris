@@ -18,6 +18,8 @@ Polaris will use Grafana Tempo as the distributed tracing backend.
 
 Services should export traces through OTLP. The Docker Compose stack exposes Tempo OTLP gRPC on `4317`, OTLP HTTP on `4318`, and the Tempo HTTP API on `3200`. Grafana provisions Tempo as a datasource alongside Prometheus.
 
+As of `v0.8.0`, runtime services use Micrometer Tracing with the OpenTelemetry bridge. Trace export is disabled by default for direct local JVM runs and enabled by Docker Compose through OTLP HTTP at `/v1/traces`.
+
 ## Consequences
 
 Local trace exploration happens through Grafana instead of a dedicated tracing UI.

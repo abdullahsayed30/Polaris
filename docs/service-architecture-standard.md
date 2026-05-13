@@ -37,7 +37,7 @@ Every service should follow this package shape unless there is a clear reason to
 - `domain`: owns `InventoryItem`.
 - `persistence`: owns `InventoryItemRepository`.
 - `messaging`: observes order events and publishes `InventoryAdjustedEvent` after reservation commit.
-- `config`: starts the gRPC server and owns typed gRPC properties.
+- `config`: owns gRPC interceptors, starter configuration, and topic configuration.
 
 ## Gateway Shape
 

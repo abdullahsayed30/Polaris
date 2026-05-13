@@ -14,12 +14,16 @@
 
 The service implements `polaris.inventory.v1.InventoryService`.
 
+The server is managed by the Spring Boot-compatible gRPC starter. The `InventoryGrpcController` is registered with `@GrpcService`; application code does not start Netty directly.
+
 | RPC | Request | Response | Behavior |
 | --- | --- | --- | --- |
 | `CheckStock` | `StockRequest` | `StockResponse` | Reports availability per SKU without mutating stock |
 | `ReserveStock` | `ReserveRequest` | `ReserveResponse` | Reserves stock if every requested SKU has enough available quantity |
 
 Invalid request data returns gRPC `INVALID_ARGUMENT`. Reservation precondition failures can return `FAILED_PRECONDITION`.
+
+The service exposes gRPC health checks. Reflection is disabled by default and enabled for `local` and `docker` profiles.
 
 ## Reservation Behavior
 
@@ -48,10 +52,14 @@ The current order-event listener logs observed order events. It leaves room for 
 | --- | --- | --- |
 | `server.port` | `8082` | HTTP actuator port |
 | `polaris.inventory.grpc.port` | `9090` | gRPC server port |
+| `grpc.server.health-service-enabled` | `true` | Enables the starter-managed gRPC health service |
+| `grpc.server.reflection-service-enabled` | `false` | Enables gRPC reflection; local and Docker profiles override it to `true` |
+| `POLARIS_TRACING_EXPORT_ENABLED` | `false` | Enables OTLP trace export |
+| `MANAGEMENT_OTLP_TRACING_ENDPOINT` | `http://localhost:4318/v1/traces` | OTLP HTTP trace endpoint |
 | `spring.datasource.url` | `jdbc:postgresql://localhost:5433/polaris_inventory` | Inventory database |
 | `spring.kafka.bootstrap-servers` | `localhost:9092` | Kafka broker |
 
-The `docker` profile switches PostgreSQL and Kafka addresses to Docker service names.
+The `docker` profile switches PostgreSQL and Kafka addresses to Docker service names, enables gRPC reflection, and Docker Compose enables trace export to Tempo.
 
 ## Package Shape
 
@@ -62,8 +70,8 @@ The `docker` profile switches PostgreSQL and Kafka addresses to Docker service n
 | `domain` | `InventoryItem` domain model |
 | `messaging` | Kafka listener, topic wiring, after-commit publisher |
 | `persistence` | Spring Data inventory repository |
-| `config` | Manual gRPC server and typed gRPC properties |
+| `config` | gRPC interceptors, observability wiring, and topic configuration |
 
 ## Tests
 
-The integration test starts PostgreSQL and Kafka with Testcontainers, calls the real gRPC server, verifies stock checks, successful reservations, insufficient-stock behavior, database mutations, and Kafka publication.
+The integration test starts PostgreSQL and Kafka with Testcontainers, calls the starter-managed gRPC server, verifies stock checks, successful reservations, insufficient-stock behavior, gRPC health/reflection, database mutations, and Kafka publication.

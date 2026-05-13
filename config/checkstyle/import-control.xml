@@ -12,6 +12,7 @@
     <allow pkg="jakarta"/>
     <allow pkg="java"/>
     <allow pkg="javax"/>
+    <allow pkg="net.devh"/>
     <allow pkg="org"/>
     <allow pkg="reactor"/>
 

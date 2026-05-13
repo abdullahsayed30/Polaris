@@ -38,7 +38,7 @@ The default CORS policy allows `http://localhost:3000`, common API methods, `Aut
 
 ## Request Logging
 
-Every request is logged through a WebFlux filter. If the caller does not send `X-Request-Id`, the gateway uses the WebFlux request ID and returns it in the response.
+Every request is logged through a WebFlux filter. If the caller does not send `X-Request-Id`, the gateway uses the WebFlux request ID. The filter returns the request ID in the response, forwards it to upstream services, and places it in MDC as `request.id` while writing the access log.
 
 ## Rate Limiting
 

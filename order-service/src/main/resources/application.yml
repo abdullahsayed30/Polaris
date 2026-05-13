@@ -28,6 +28,8 @@ spring:
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:
         spring.json.add.type.headers: false
+    template:
+      observation-enabled: true
 
 management:
   endpoints:
@@ -38,6 +40,29 @@ management:
     health:
       probes:
         enabled: true
+  tracing:
+    sampling:
+      probability: ${POLARIS_TRACING_SAMPLING_PROBABILITY:1.0}
+  otlp:
+    tracing:
+      endpoint: ${MANAGEMENT_OTLP_TRACING_ENDPOINT:http://localhost:4318/v1/traces}
+      export:
+        enabled: ${POLARIS_TRACING_EXPORT_ENABLED:false}
+  opentelemetry:
+    resource-attributes:
+      service.namespace: polaris
+      deployment.environment: ${POLARIS_DEPLOYMENT_ENVIRONMENT:local}
+
+logging:
+  structured:
+    format:
+      console: ecs
+
+grpc:
+  client:
+    inventory-service:
+      address: static://${polaris.inventory.grpc.host:localhost}:${polaris.inventory.grpc.port:9090}
+      negotiation-type: plaintext
 
 polaris:
   kafka:

@@ -55,7 +55,7 @@ flowchart LR
 | [`shared`](docs/shared.md) | Shared Java event payloads used by Kafka producers and consumers                  |
 | `gateway`              | Spring Cloud Gateway routes, JWT validation, CORS, rate limiting, request logging |
 | `order-service`        | Order REST API, order lifecycle, Postgres persistence, Kafka event publishing     |
-| `inventory-service`    | gRPC inventory API, stock reservations, inventory persistence, Kafka consumers    |
+| `inventory-service`    | Starter-managed gRPC inventory API, stock reservations, inventory persistence, Kafka consumers |
 | `notification-service` | Kafka-driven notification workflow with retry and dead-letter handling            |
 
 ## Gateway Edge Contract
@@ -91,6 +91,7 @@ Expected local endpoints once the service skeleton and compose stack are in plac
 | Gateway                       | `http://localhost:8080`                 |
 | Order Service actuator        | `http://localhost:8081/actuator/health` |
 | Inventory Service actuator    | `http://localhost:8082/actuator/health` |
+| Inventory Service gRPC        | `localhost:19090`                       |
 | Notification Service actuator | `http://localhost:8083/actuator/health` |
 | Prometheus                    | `http://localhost:9090`                 |
 | Grafana                       | `http://localhost:3000`                 |
@@ -133,14 +134,15 @@ The pre-commit hook runs the fast local gate: Spotless, Checkstyle, and unit tes
 - REST is used for external traffic through the gateway.
 - Gateway API routes require JWT authentication; health and CORS preflight traffic stay unauthenticated.
 - gRPC is used for synchronous internal service contracts.
+- gRPC server lifecycle, client stubs, health checks, local reflection, interceptors, metrics, and tracing are managed through the Spring Boot-compatible gRPC starter.
 - Kafka carries durable domain events and supports eventual consistency.
-- Services expose health, readiness, metrics, tracing, and structured logs.
+- Services expose health, readiness, metrics, OTLP tracing, ECS JSON logs, and request correlation.
 - Integration tests use Testcontainers, not shared developer infrastructure.
 - CI enforces Java 25, formatting, style, unit tests, integration tests, static analysis, and repository security scans.
 - Docker Compose is the default local runtime; Helm is the deployment contract.
 - ADRs in `docs/adr` document major architectural decisions.
 
-Detailed service documentation lives in [`docs/services`](docs/services/README.md), and the ADR index lives in [`docs/adr`](docs/adr/README.md).
+Detailed service documentation lives in [`docs/services`](docs/services/README.md), observability conventions live in [`docs/observability.md`](docs/observability.md), and the ADR index lives in [`docs/adr`](docs/adr/README.md).
 
 ## Roadmap
 
@@ -153,7 +155,7 @@ Before `v1.0.0`, Polaris is intended to move from a clean blueprint skeleton to 
 - `v0.5.0`: gateway routes, JWT resource server, CORS, request logging, and rate limiting.
 - `v0.6.0`: Docker Compose local stack for Postgres, Kafka, services, Prometheus, Grafana, and Tempo.
 - `v0.6.0`: GitHub Actions CI, CodeQL, Trivy, Spotless, Checkstyle, required Git hooks, integration test automation, and README badges.
-- `v0.8.0`: migrate manual gRPC server wiring to a Spring gRPC starter, then add gRPC interceptors, health/reflection support, dashboards, tracing conventions, and structured logging.
+- `v0.8.0`: Spring Boot-compatible gRPC starter, gRPC interceptors, health/reflection support, dashboards, tracing conventions, and structured logging.
 - `v0.9.0`: Helm chart, Kubernetes manifests, deployment docs, ADR set, and final README polish.
 - `v1.0.0`: stable portfolio-ready blueprint with local runtime, CI proof, and deployment artifacts.
 
