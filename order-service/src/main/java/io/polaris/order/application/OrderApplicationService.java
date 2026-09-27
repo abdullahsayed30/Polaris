@@ -3,54 +3,38 @@ package io.polaris.order.application;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import io.polaris.order.domain.Order;
-import io.polaris.order.domain.OrderItem;
-import io.polaris.order.inventory.InventoryClient;
 import io.polaris.order.persistence.OrderRepository;
 
 @Service
 public class OrderApplicationService {
     private final OrderRepository orderRepository;
-    private final InventoryClient inventoryClient;
-    private final ApplicationEventPublisher events;
+    private final OrderPlacementTransactions placement;
 
-    public OrderApplicationService(
-            OrderRepository orderRepository,
-            InventoryClient inventoryClient,
-            ApplicationEventPublisher events) {
+    public OrderApplicationService(OrderRepository orderRepository, OrderPlacementTransactions placement) {
         this.orderRepository = orderRepository;
-        this.inventoryClient = inventoryClient;
-        this.events = events;
+        this.placement = placement;
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public Order placeOrder(UUID customerId, List<PlaceOrderLine> lines) {
-        List<OrderItem> items = lines.stream()
-                .map(line -> OrderItem.create(line.sku(), line.quantity(), line.unitPrice()))
-                .toList();
+        return placeOrder(null, customerId, lines).order();
+    }
 
-        Order order = Order.place(customerId, items);
-        orderRepository.save(order);
-
-        if (!inventoryClient.checkStock(order).available()) {
-            order.cancel();
-        } else if (inventoryClient.reserveStock(order).reserved()) {
-            order.confirm();
-        } else {
-            order.cancel();
-        }
-
-        events.publishEvent(new OrderCreatedApplicationEvent(OrderEventMapper.toOrderCreatedEvent(order)));
-        return order;
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public PlaceOrderResult placeOrder(String idempotencyKey, UUID customerId, List<PlaceOrderLine> lines) {
+        // The intent must commit before inventory can change stock, even for headerless requests.
+        PlaceOrderResult intent = placement.prepare(idempotencyKey, customerId, lines);
+        return new PlaceOrderResult(placement.resolve(intent.order().getId()), intent.replayed());
     }
 
     @Transactional(readOnly = true)
-    public Order getOrder(UUID orderId) {
-        return orderRepository.findWithItemsById(orderId)
+    public Order getOrder(UUID orderId, UUID customerId) {
+        return orderRepository.findWithItemsByIdAndCustomerId(orderId, customerId)
                 .orElseThrow(() -> new OrderNotFoundException(orderId));
     }
 }

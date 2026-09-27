@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://polaris.example/contracts/events/v1/inventory-adjusted.schema.json",
+  "title": "InventoryAdjusted",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["metadata", "orderId", "items", "adjustedAt"],
+  "properties": {
+    "metadata": {"$ref": "#/$defs/metadata"},
+    "orderId": {"type": "string", "format": "uuid"},
+    "items": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/item"}
+    },
+    "adjustedAt": {"type": "string", "format": "date-time"}
+  },
+  "$defs": {
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["eventId", "version", "occurredAt", "correlationId", "causationId"],
+      "properties": {
+        "eventId": {"type": "string", "format": "uuid"},
+        "version": {"const": 1},
+        "occurredAt": {"type": "string", "format": "date-time"},
+        "correlationId": {"type": ["string", "null"]},
+        "causationId": {"type": ["string", "null"], "format": "uuid"}
+      }
+    },
+    "item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sku", "quantityChanged", "availableQuantity"],
+      "properties": {
+        "sku": {"type": "string", "minLength": 1, "maxLength": 128},
+        "quantityChanged": {"type": "integer", "not": {"const": 0}},
+        "availableQuantity": {"type": "integer", "minimum": 0}
+      }
+    }
+  }
+}

@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
@@ -34,7 +35,8 @@ class GatewayRateLimitingTest {
     @Test
     void rejectsRequestsAfterLimitIsExceeded() {
         WebTestClient authenticatedClient = webTestClient.mutateWith(mockJwt()
-                .jwt(jwt -> jwt.subject("customer-123")));
+                .jwt(jwt -> jwt.subject("customer-123"))
+                .authorities(new SimpleGrantedAuthority("SCOPE_orders:read")));
 
         authenticatedClient.get()
                 .uri("/api/v1/orders/{id}", UUID.randomUUID())

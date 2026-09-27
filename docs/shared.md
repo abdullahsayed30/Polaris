@@ -22,10 +22,11 @@
 | Field | Meaning |
 | --- | --- |
 | `orderId` | Order identifier from `order-service` |
-| `customerId` | Customer identifier supplied by the client |
-| `status` | Final order status at publication time: `PENDING`, `CONFIRMED`, or `CANCELLED` |
+| `customerId` | Customer identifier derived from the authenticated JWT subject |
+| `status` | Final placement outcome at publication time: `CONFIRMED` or `CANCELLED` |
 | `items` | Ordered items with item ID, SKU, quantity, and unit price |
 | `createdAt` | Order creation timestamp |
+| `metadata` | Immutable event identity, version, occurrence time, and correlation/causation |
 
 The event name is about the order aggregate being created. Consumers must inspect `status`; a created order can be confirmed or cancelled.
 
@@ -38,8 +39,15 @@ The event name is about the order aggregate being created. Consumers must inspec
 | `orderId` | Order that caused the adjustment |
 | `items` | Adjusted SKUs with quantity change and remaining available quantity |
 | `adjustedAt` | Adjustment timestamp |
+| `metadata` | Immutable event identity, version, occurrence time, and correlation/causation |
 
-Reservation adjustments use negative `quantityChanged` values because stock is leaving availability.
+Reservation adjustments use negative `quantityChanged` values because stock is leaving availability. Release adjustments use positive values.
+
+## Metadata and Legacy Records
+
+Current producers emit `EventMetadata`: UUID `eventId`, integer `version`, `occurredAt`, `correlationId`, and optional `causationId`. Outbox retries preserve the entire serialized payload and identity. Notification uses the identity to suppress duplicate delivery with its service-owned inbox.
+
+Kafka may retain records produced before metadata existed. Notification accepts those only when the metadata member is absent, deriving an identity from topic/partition/offset and occurrence time from `createdAt` or `adjustedAt`. Explicit null or malformed metadata is a poison event, not a legacy event. Republish to a different offset creates a different legacy identity; use explicit event IDs when migrating/replaying outside the original source coordinates. See [contracts](../contracts/README.md) for rollout rules.
 
 ## Boundary Rules
 

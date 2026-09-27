@@ -1,0 +1,41 @@
+{{- range $serviceName, $service := .Values.services }}
+{{- if $service.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "polaris.serviceName" (dict "root" $ "service" $serviceName) }}
+  labels:
+    {{- include "polaris.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: {{ $serviceName }}
+data:
+  POLARIS_DEPLOYMENT_ENVIRONMENT: {{ $.Values.global.deploymentEnvironment | quote }}
+  POLARIS_TRACING_EXPORT_ENABLED: {{ $.Values.infrastructure.tracing.enabled | quote }}
+  POLARIS_TRACING_SAMPLING_PROBABILITY: {{ $.Values.infrastructure.tracing.samplingProbability | quote }}
+  MANAGEMENT_OTLP_TRACING_ENDPOINT: {{ $.Values.infrastructure.tracing.endpoint | quote }}
+  {{- if eq $serviceName "gateway" }}
+  POLARIS_GATEWAY_ROUTES_ORDER_SERVICE_URI: {{ printf "http://%s:%v" (include "polaris.serviceName" (dict "root" $ "service" "order-service")) ((index $.Values.services "order-service").httpPort | int) | quote }}
+  SPRING_DATA_REDIS_HOST: {{ $.Values.infrastructure.redis.host | quote }}
+  SPRING_DATA_REDIS_PORT: {{ $.Values.infrastructure.redis.port | quote }}
+  POLARIS_OAUTH_ISSUER_URI: {{ $.Values.infrastructure.oidc.issuerUri | quote }}
+  POLARIS_OAUTH_JWK_SET_URI: {{ $.Values.infrastructure.oidc.jwkSetUri | quote }}
+  {{- else if eq $serviceName "order-service" }}
+  SPRING_DATASOURCE_URL: {{ $.Values.infrastructure.databases.order.url | quote }}
+  SPRING_KAFKA_BOOTSTRAP_SERVERS: {{ $.Values.infrastructure.kafka.bootstrapServers | quote }}
+  POLARIS_OAUTH_ISSUER_URI: {{ $.Values.infrastructure.oidc.issuerUri | quote }}
+  POLARIS_OAUTH_JWK_SET_URI: {{ $.Values.infrastructure.oidc.jwkSetUri | quote }}
+  POLARIS_INVENTORY_GRPC_HOST: {{ include "polaris.serviceName" (dict "root" $ "service" "inventory-service") | quote }}
+  POLARIS_INVENTORY_GRPC_PORT: {{ (index $.Values.services "inventory-service").grpcPort | quote }}
+  {{- else if eq $serviceName "inventory-service" }}
+  SPRING_DATASOURCE_URL: {{ $.Values.infrastructure.databases.inventory.url | quote }}
+  SPRING_KAFKA_BOOTSTRAP_SERVERS: {{ $.Values.infrastructure.kafka.bootstrapServers | quote }}
+  {{- else if eq $serviceName "notification-service" }}
+  SPRING_MAIN_WEB_APPLICATION_TYPE: servlet
+  SPRING_DATASOURCE_URL: {{ $.Values.infrastructure.databases.notification.url | quote }}
+  SPRING_KAFKA_BOOTSTRAP_SERVERS: {{ $.Values.infrastructure.kafka.bootstrapServers | quote }}
+  {{- end }}
+  {{- range $key, $value := $service.extraEnv }}
+  {{ $key }}: {{ tpl ($value | toString) $ | quote }}
+  {{- end }}
+---
+{{- end }}
+{{- end }}

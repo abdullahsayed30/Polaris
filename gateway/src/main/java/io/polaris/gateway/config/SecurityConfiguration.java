@@ -24,7 +24,9 @@ class SecurityConfiguration {
                                 "/actuator/info",
                                 "/actuator/prometheus")
                         .permitAll()
-                        .pathMatchers("/api/v1/orders", "/api/v1/orders/**").authenticated()
+                        .pathMatchers(HttpMethod.POST, "/api/v1/orders").hasAuthority("SCOPE_orders:write")
+                        .pathMatchers(HttpMethod.GET, "/api/v1/orders/*").hasAuthority("SCOPE_orders:read")
+                        .pathMatchers("/api/v1/orders", "/api/v1/orders/**").denyAll()
                         .anyExchange().denyAll())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
                 .build();

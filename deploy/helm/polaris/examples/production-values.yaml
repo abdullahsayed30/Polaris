@@ -1,0 +1,72 @@
+# Example only: replace every example.invalid endpoint and image repository.
+global:
+  deploymentEnvironment: production
+
+infrastructure:
+  databases:
+    order:
+      url: jdbc:postgresql://orders-db.example.invalid:5432/polaris_orders
+      existingSecret: polaris-order-database
+      usernameKey: username
+      passwordKey: password
+    inventory:
+      url: jdbc:postgresql://inventory-db.example.invalid:5432/polaris_inventory
+      existingSecret: polaris-inventory-database
+      usernameKey: username
+      passwordKey: password
+    notification:
+      url: jdbc:postgresql://notification-db.example.invalid:5432/polaris_notifications
+      existingSecret: polaris-notification-database
+      usernameKey: username
+      passwordKey: password
+  kafka:
+    bootstrapServers: kafka-1.example.invalid:9093,kafka-2.example.invalid:9093
+  redis:
+    host: redis.example.invalid
+    port: 6379
+  oidc:
+    issuerUri: https://identity.example.invalid/realms/polaris
+    jwkSetUri: https://identity.example.invalid/realms/polaris/protocol/openid-connect/certs
+  tracing:
+    enabled: true
+    endpoint: https://otel.example.invalid/v1/traces
+    samplingProbability: "0.10"
+
+services:
+  gateway:
+    image:
+      repository: registry.example.invalid/polaris/gateway
+      tag: "0.8.0"
+    autoscaling:
+      enabled: true
+  order-service:
+    image:
+      repository: registry.example.invalid/polaris/order-service
+      tag: "0.8.0"
+    autoscaling:
+      enabled: true
+  inventory-service:
+    image:
+      repository: registry.example.invalid/polaris/inventory-service
+      tag: "0.8.0"
+    autoscaling:
+      enabled: true
+  notification-service:
+    image:
+      repository: registry.example.invalid/polaris/notification-service
+      tag: "0.8.0"
+    autoscaling:
+      enabled: true
+
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - host: api.example.invalid
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: polaris-api-tls
+      hosts:
+        - api.example.invalid

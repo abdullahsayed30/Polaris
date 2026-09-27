@@ -12,7 +12,9 @@ Polaris is a microservices blueprint, so service ownership needs to be visible i
 
 ## Decision
 
-Each stateful service owns its own PostgreSQL database and schema. `order-service` owns `polaris_orders` and the order tables. `inventory-service` owns `polaris_inventory` and the inventory tables. `gateway` does not own domain data, and `notification-service` is currently a consumer-only workflow without a database.
+Each stateful service owns its own PostgreSQL database and schema. `order-service` owns `polaris_orders` and the order tables. `inventory-service` owns `polaris_inventory` and the inventory tables. `gateway` does not own domain data.
+
+Originally, notification was a database-free consumer. [ADR 0019](0019-use-transactional-outbox-and-consumer-inbox.md) extends this decision: `notification-service` now owns `polaris_notifications` and its durable inbox, with its own Liquibase migrations. It never accesses another service's tables.
 
 Services must not read or write another service's database. Cross-service reads and state changes happen through public service contracts: REST at the edge, gRPC for synchronous internal calls, and Kafka for asynchronous domain events.
 

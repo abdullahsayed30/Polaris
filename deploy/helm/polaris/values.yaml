@@ -1,0 +1,305 @@
+# The default registry is deliberately non-routable. Supply repositories for images you built.
+nameOverride: ""
+fullnameOverride: ""
+
+global:
+  deploymentEnvironment: kubernetes
+
+imagePullSecrets: []
+revisionHistoryLimit: 3
+terminationGracePeriodSeconds: 30
+tmpVolumeSizeLimit: 128Mi
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 65532
+  runAsGroup: 65532
+  fsGroup: 65532
+  fsGroupChangePolicy: OnRootMismatch
+  seccompProfile:
+    type: RuntimeDefault
+
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+topologySpreadConstraints: []
+
+infrastructure:
+  # These are connection contracts only. This chart does not run PostgreSQL, Kafka,
+  # Redis, an identity provider, or an OpenTelemetry backend.
+  databases:
+    order:
+      url: jdbc:postgresql://postgresql.example.invalid:5432/polaris_orders
+      existingSecret: polaris-order-database
+      usernameKey: username
+      passwordKey: password
+    inventory:
+      url: jdbc:postgresql://postgresql.example.invalid:5432/polaris_inventory
+      existingSecret: polaris-inventory-database
+      usernameKey: username
+      passwordKey: password
+    notification:
+      url: jdbc:postgresql://postgresql.example.invalid:5432/polaris_notifications
+      existingSecret: polaris-notification-database
+      usernameKey: username
+      passwordKey: password
+  kafka:
+    bootstrapServers: kafka.example.invalid:9092
+  redis:
+    host: redis.example.invalid
+    port: 6379
+  oidc:
+    issuerUri: https://identity.example.invalid/realms/polaris
+    jwkSetUri: https://identity.example.invalid/realms/polaris/protocol/openid-connect/certs
+  tracing:
+    enabled: false
+    endpoint: http://otel-collector.observability.svc.cluster.local:4318/v1/traces
+    samplingProbability: "0.10"
+
+services:
+  gateway:
+    enabled: true
+    replicaCount: 2
+    image:
+      repository: registry.example.invalid/polaris/gateway
+      tag: ""
+      pullPolicy: IfNotPresent
+    httpPort: 8080
+    ports:
+      - name: http
+        containerPort: 8080
+        servicePort: 8080
+        protocol: TCP
+        appProtocol: http
+    service:
+      type: ClusterIP
+      annotations: {}
+    extraEnv: {}
+    secretEnv: []
+    podAnnotations: {}
+    probes:
+      timeoutSeconds: 2
+      startup:
+        failureThreshold: 30
+        periodSeconds: 5
+      readiness:
+        failureThreshold: 3
+        periodSeconds: 5
+      liveness:
+        failureThreshold: 3
+        periodSeconds: 10
+    resources:
+      requests:
+        cpu: 200m
+        memory: 256Mi
+      limits:
+        cpu: "1"
+        memory: 512Mi
+    podDisruptionBudget:
+      enabled: true
+      minAvailable: 1
+    autoscaling:
+      enabled: false
+      minReplicas: 2
+      maxReplicas: 6
+      targetCPUUtilizationPercentage: 70
+      targetMemoryUtilizationPercentage: 80
+      behavior: {}
+
+  order-service:
+    enabled: true
+    replicaCount: 2
+    image:
+      repository: registry.example.invalid/polaris/order-service
+      tag: ""
+      pullPolicy: IfNotPresent
+    httpPort: 8081
+    ports:
+      - name: http
+        containerPort: 8081
+        servicePort: 8081
+        protocol: TCP
+        appProtocol: http
+    service:
+      type: ClusterIP
+      annotations: {}
+    extraEnv: {}
+    secretEnv: []
+    podAnnotations: {}
+    probes:
+      timeoutSeconds: 2
+      startup:
+        failureThreshold: 60
+        periodSeconds: 5
+      readiness:
+        failureThreshold: 3
+        periodSeconds: 5
+      liveness:
+        failureThreshold: 3
+        periodSeconds: 10
+    resources:
+      requests:
+        cpu: 250m
+        memory: 384Mi
+      limits:
+        cpu: "1"
+        memory: 768Mi
+    podDisruptionBudget:
+      enabled: true
+      minAvailable: 1
+    autoscaling:
+      enabled: false
+      minReplicas: 2
+      maxReplicas: 8
+      targetCPUUtilizationPercentage: 70
+      targetMemoryUtilizationPercentage: 80
+      behavior: {}
+
+  inventory-service:
+    enabled: true
+    replicaCount: 2
+    image:
+      repository: registry.example.invalid/polaris/inventory-service
+      tag: ""
+      pullPolicy: IfNotPresent
+    httpPort: 8082
+    grpcPort: 9090
+    ports:
+      - name: http
+        containerPort: 8082
+        servicePort: 8082
+        protocol: TCP
+        appProtocol: http
+      - name: grpc
+        containerPort: 9090
+        servicePort: 9090
+        protocol: TCP
+        appProtocol: grpc
+    service:
+      type: ClusterIP
+      annotations: {}
+    extraEnv: {}
+    secretEnv: []
+    podAnnotations: {}
+    probes:
+      timeoutSeconds: 2
+      startup:
+        failureThreshold: 60
+        periodSeconds: 5
+      readiness:
+        failureThreshold: 3
+        periodSeconds: 5
+      liveness:
+        failureThreshold: 3
+        periodSeconds: 10
+    resources:
+      requests:
+        cpu: 250m
+        memory: 384Mi
+      limits:
+        cpu: "1"
+        memory: 768Mi
+    podDisruptionBudget:
+      enabled: true
+      minAvailable: 1
+    autoscaling:
+      enabled: false
+      minReplicas: 2
+      maxReplicas: 8
+      targetCPUUtilizationPercentage: 70
+      targetMemoryUtilizationPercentage: 80
+      behavior: {}
+
+  notification-service:
+    enabled: true
+    replicaCount: 2
+    image:
+      repository: registry.example.invalid/polaris/notification-service
+      tag: ""
+      pullPolicy: IfNotPresent
+    httpPort: 8083
+    ports:
+      - name: http
+        containerPort: 8083
+        servicePort: 8083
+        protocol: TCP
+        appProtocol: http
+    service:
+      type: ClusterIP
+      annotations: {}
+    extraEnv: {}
+    secretEnv: []
+    podAnnotations: {}
+    probes:
+      timeoutSeconds: 2
+      startup:
+        failureThreshold: 30
+        periodSeconds: 5
+      readiness:
+        failureThreshold: 3
+        periodSeconds: 5
+      liveness:
+        failureThreshold: 3
+        periodSeconds: 10
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+    podDisruptionBudget:
+      enabled: true
+      minAvailable: 1
+    autoscaling:
+      enabled: false
+      minReplicas: 2
+      maxReplicas: 6
+      targetCPUUtilizationPercentage: 70
+      targetMemoryUtilizationPercentage: 80
+      behavior: {}
+
+networkPolicy:
+  enabled: true
+  # The gateway is the cluster edge. Restrict this list to the ingress-controller
+  # namespace/pods in a real environment.
+  gatewayIngressFrom:
+    - namespaceSelector: {}
+  monitoringIngressFrom:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: monitoring
+  egress:
+    # Open by default because the supplied infrastructure endpoints may be managed
+    # services outside the cluster. Set false and enumerate stable CIDRs below when possible.
+    allowAll: true
+    dnsPodSelector:
+      key: k8s-app
+      value: kube-dns
+    additionalRules: []
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: polaris.example.invalid
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []

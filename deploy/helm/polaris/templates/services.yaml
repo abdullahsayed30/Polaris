@@ -1,0 +1,28 @@
+{{- range $serviceName, $service := .Values.services }}
+{{- if $service.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "polaris.serviceName" (dict "root" $ "service" $serviceName) }}
+  labels:
+    {{- include "polaris.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: {{ $serviceName }}
+  {{- with $service.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ $service.service.type }}
+  selector:
+    {{- include "polaris.selectorLabels" (dict "root" $ "service" $serviceName) | nindent 4 }}
+  ports:
+    {{- range $port := $service.ports }}
+    - name: {{ $port.name }}
+      port: {{ $port.servicePort }}
+      targetPort: {{ $port.name }}
+      protocol: {{ default "TCP" $port.protocol }}
+      appProtocol: {{ $port.appProtocol }}
+    {{- end }}
+---
+{{- end }}
+{{- end }}

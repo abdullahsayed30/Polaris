@@ -1,14 +1,14 @@
 # Order Service
 
-`order-service` owns the public order API and the order lifecycle. It persists orders in its own PostgreSQL database, calls the inventory service over gRPC, and publishes order events to Kafka after the local transaction commits.
+`order-service` owns the public order API and the order lifecycle. It persists orders in its own PostgreSQL database, calls the inventory service over gRPC, and delivers order events through a transactional outbox.
 
 ## Responsibilities
 
 - Expose the order REST API.
 - Persist orders and order items in `polaris_orders`.
 - Validate order input and return Problem Details for known API errors.
-- Call inventory `CheckStock` and `ReserveStock` over gRPC.
-- Confirm or cancel orders based on inventory availability and reservation outcome.
+- Call inventory `ReserveStock` over gRPC as the atomic stock decision.
+- Confirm or cancel orders based on the reservation outcome.
 - Publish `OrderCreatedEvent` to `polaris.orders.created`.
 
 ## HTTP API
@@ -20,7 +20,9 @@ The service exposes these endpoints under `/api/v1/orders`. Public traffic shoul
 | `POST` | `/api/v1/orders` | Places an order and returns `201 Created` with the order representation |
 | `GET` | `/api/v1/orders/{id}` | Returns an existing order |
 
-`POST /api/v1/orders` accepts a `customerId` and at least one item. Each item requires a non-blank SKU, a positive quantity, and a unit price of at least `0.01`.
+`POST /api/v1/orders` accepts at least one item. Each item requires a non-blank SKU, a positive quantity, and a unit price of at least `0.01`. The authenticated JWT subject supplies the customer ID.
+
+Clients may send an `Idempotency-Key` of at most 128 characters. Keys are scoped to the authenticated customer. Repeating the same key and payload returns the original order with `Idempotency-Replayed: true`; reusing the key for a different payload returns `409 Conflict`.
 
 Known API errors:
 
@@ -28,23 +30,26 @@ Known API errors:
 | --- | --- | --- |
 | Unknown order ID | `404 Not Found` | Spring Problem Details with title `Order not found` |
 | Inventory gRPC failure | `503 Service Unavailable` | Spring Problem Details with title `Inventory unavailable` |
+| Idempotency key reused with different payload | `409 Conflict` | Problem Details with title `Idempotency conflict` |
 | Invalid request payload | `400 Bad Request` | Spring validation error response |
 
 ## Order Flow
 
-1. The service creates an order in `PENDING` status.
-2. The order and items are persisted in the order database.
-3. The service calls inventory `CheckStock`.
-4. If stock is unavailable, the order is cancelled.
-5. If stock is available, the service calls inventory `ReserveStock`.
-6. A successful reservation confirms the order; a failed reservation cancels it.
-7. `OrderCreatedEvent` is published to Kafka after the database transaction commits.
+1. Commit the `PENDING` order, original items, and optional idempotency binding before any remote stock mutation.
+2. In a separate local transaction, lock the order and call inventory `ReserveStock` using its persisted ID and items. A successful reservation confirms the order; a rejected reservation cancels it.
+3. Commit the final status, completed request binding, and `OrderCreatedEvent` outbox row together. Failures leave the durable intent pending.
+4. A scheduled recovery use case retries due pending orders, including headerless requests, without needing a client retry. Failed attempts defer their next retry so other orders can progress.
+5. The outbox publisher retries until Kafka acknowledges the stored payload or the configured attempt limit makes the row visibly `FAILED`.
+
+Skipping a preliminary stock check avoids a time-of-check/time-of-use race. If inventory committed but its response was lost, both HTTP retries with the same key and background recovery receive the stored reservation decision instead of decrementing stock again. A failed first attempt still binds the key to its original payload. Headerless HTTP retries are new orders: background recovery does not replace client idempotency.
+
+The resolver holds a local order row lock across the bounded RPC to serialize finalization and prevent duplicate outbox rows. This is a compact, low-throughput tradeoff; a higher-throughput design would need an explicitly designed claim/lease protocol. Recovery defaults to a batch of 50, a 30-second retry delay, a 5-second poll interval, and a 30-second initial delay under `polaris.reservation.recovery`. See [ADR 0020](../adr/0020-recover-pending-orders-durably.md).
 
 The event name is intentionally `OrderCreatedEvent` even when the status is `CANCELLED`; consumers must read the event status.
 
 ## Data Ownership
 
-`order-service` owns the `orders` and `order_items` tables. Migrations are SQL-based Liquibase changes under `order-service/src/main/resources/db/changelog`.
+`order-service` owns the `orders`, `order_items`, `order_requests`, and `outbox_events` tables. `order_requests` serializes concurrent uses of a customer-scoped key and binds the key to its original request hash and pending/completed order. `outbox_events` records delivery status, attempts, retry time, publication time, and the last error. Migrations are SQL-based Liquibase changes under `order-service/src/main/resources/db/changelog`.
 
 JPA validates the schema at startup with `hibernate.ddl-auto=validate`. The service does not read or write inventory tables.
 
@@ -53,7 +58,7 @@ JPA validates the schema at startup with `hibernate.ddl-auto=validate`. The serv
 | Dependency | Use |
 | --- | --- |
 | PostgreSQL | Order persistence |
-| Inventory gRPC | Stock check and reservation |
+| Inventory gRPC | Atomic reservation |
 | Kafka | Publish order lifecycle events |
 | `shared` | `OrderCreatedEvent` payload |
 | `proto-contracts` | Generated inventory gRPC stubs |
@@ -69,14 +74,14 @@ The generated inventory blocking stub is created by the Spring Boot-compatible g
 | Package | Purpose |
 | --- | --- |
 | `api` | REST controller, request/response records, API exception handling |
-| `application` | Place-order use case, event mapping, transaction boundary |
-| `domain` | `Order`, `OrderItem`, and `OrderStatus` |
+| `application` | Placement and recovery use cases, event mapping/recording port, transaction boundaries |
+| `domain` | Orders, items, statuses, and idempotency request identity |
 | `inventory` | Inventory client port and gRPC adapter |
-| `messaging` | Kafka topic wiring and after-commit event publisher |
-| `persistence` | Spring Data order repository |
-| `config` | Kafka, gRPC client, and gRPC observability configuration |
+| `messaging` | Event-recording adapter, outbox publisher, and delivery scheduler |
+| `persistence` | Order/request repositories, outbox entities and repository |
+| `config` | Kafka/gRPC wiring, observability, typed properties, recovery scheduler |
 | `logging` | Request ID MDC and response propagation |
 
 ## Tests
 
-The integration test starts PostgreSQL and Kafka with Testcontainers and uses a fake gRPC inventory server. It verifies confirmed orders, cancelled orders, failed reservations, order lookup, validation, and Kafka publication. Focused unit tests cover gRPC request ID metadata propagation and MDC cleanup.
+The integration test starts PostgreSQL and Kafka with Testcontainers and uses a fake gRPC inventory server. It verifies confirmed and cancelled orders, duplicate and concurrent idempotent requests, payload conflicts, recovery after a lost reservation response, order lookup, validation, and Kafka publication. Focused unit tests cover gRPC request ID metadata propagation and MDC cleanup.

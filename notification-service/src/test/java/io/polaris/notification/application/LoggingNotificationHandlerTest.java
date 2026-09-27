@@ -12,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 
+import io.polaris.shared.events.EventMetadata;
 import io.polaris.shared.events.OrderCreatedEvent;
 
 @ExtendWith(OutputCaptureExtension.class)
@@ -19,10 +20,12 @@ class LoggingNotificationHandlerTest {
     private final LoggingNotificationHandler handler = new LoggingNotificationHandler();
 
     @Test
-    void logsConfirmationEmailSentForOrderCreatedEvent(CapturedOutput output) {
+    void logsSimulatedConfirmationForOrderCreatedEvent(CapturedOutput output) {
         UUID orderId = UUID.randomUUID();
+        Instant now = Instant.now();
 
         handler.handle(new OrderCreatedEvent(
+                EventMetadata.initial(OrderCreatedEvent.EVENT_VERSION, now, "test"),
                 orderId,
                 UUID.randomUUID(),
                 OrderCreatedEvent.OrderStatus.CONFIRMED,
@@ -31,10 +34,11 @@ class LoggingNotificationHandlerTest {
                         "SKU-COFFEE-001",
                         2,
                         new BigDecimal("19.99"))),
-                Instant.now()));
+                now));
 
         assertThat(output.getAll())
-                .contains("confirmation email sent")
+                .contains("simulated confirmation notification")
+                .doesNotContain("email sent")
                 .contains(orderId.toString());
     }
 }

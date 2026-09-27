@@ -63,6 +63,13 @@ public class InventoryItem {
         availableQuantity -= quantity;
     }
 
+    public void release(int quantity) {
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("quantity must be positive");
+        }
+        availableQuantity = Math.addExact(availableQuantity, quantity);
+    }
+
     @PrePersist
     void prePersist() {
         Instant now = Instant.now();

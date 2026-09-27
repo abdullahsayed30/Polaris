@@ -1,0 +1,45 @@
+version: 2
+updates:
+  - package-ecosystem: maven
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "04:00"
+      timezone: Africa/Cairo
+    groups:
+      maven-dependencies:
+        patterns:
+          - "*"
+    open-pull-requests-limit: 10
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "04:15"
+      timezone: Africa/Cairo
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: docker
+    directories:
+      - /
+      - /gateway
+      - /inventory-service
+      - /notification-service
+      - /order-service
+    schedule:
+      interval: weekly
+      day: monday
+      time: "04:30"
+      timezone: Africa/Cairo
+    groups:
+      container-images:
+        patterns:
+          - "*"
+    open-pull-requests-limit: 10

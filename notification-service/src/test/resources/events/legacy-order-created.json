@@ -1,0 +1,14 @@
+{
+  "orderId": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+  "customerId": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+  "status": "CONFIRMED",
+  "items": [
+    {
+      "itemId": "cccccccc-cccc-cccc-cccc-cccccccccccc",
+      "sku": "SKU-COFFEE-001",
+      "quantity": 2,
+      "unitPrice": 19.99
+    }
+  ],
+  "createdAt": "2026-05-11T12:00:00Z"
+}

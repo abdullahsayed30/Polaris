@@ -1,6 +1,6 @@
 # Inventory Service
 
-`inventory-service` owns stock state. It exposes the internal inventory gRPC API, persists inventory items in its own PostgreSQL database, observes order events, and publishes inventory adjustment events after successful reservations.
+`inventory-service` owns stock state. It exposes the internal inventory gRPC API, persists inventory items in its own PostgreSQL database, observes order events, and delivers inventory adjustment events through a transactional outbox.
 
 ## Responsibilities
 
@@ -19,7 +19,8 @@ The server is managed by the Spring Boot-compatible gRPC starter. The `Inventory
 | RPC | Request | Response | Behavior |
 | --- | --- | --- | --- |
 | `CheckStock` | `StockRequest` | `StockResponse` | Reports availability per SKU without mutating stock |
-| `ReserveStock` | `ReserveRequest` | `ReserveResponse` | Reserves stock if every requested SKU has enough available quantity |
+| `ReserveStock` | `ReserveRequest` | `ReserveResponse` | Atomically records one reservation decision per order ID |
+| `ReleaseStock` | `ReleaseRequest` | `ReleaseResponse` | Idempotently releases a successful reservation |
 
 Invalid request data returns gRPC `INVALID_ARGUMENT`. Reservation precondition failures can return `FAILED_PRECONDITION`.
 
@@ -27,13 +28,15 @@ The service exposes gRPC health checks. Reflection is disabled by default and en
 
 ## Reservation Behavior
 
-`ReserveStock` loads requested inventory rows with a pessimistic write lock. The service first builds a reservation preview. If any item is missing or insufficient, no inventory row is mutated and the response reports `INSUFFICIENT_STOCK`.
+`ReserveStock` first inserts or locks the reservation record keyed by `order_id`. The unique primary key serializes concurrent duplicate requests. The first request locks inventory rows in SKU order and records either `RESERVED` or `REJECTED`; both decisions are durable. An exact retry returns the stored line-level result. The same order ID with a different normalized SKU/quantity set returns `FAILED_PRECONDITION`, and a released reservation cannot be reserved again.
 
-When every item can be reserved, the service decrements available quantities and publishes an `InventoryAdjustedEvent` after the transaction commits. Event item quantities are negative because they represent stock leaving availability.
+If any item is missing or insufficient, no inventory row is mutated and the durable response reports `INSUFFICIENT_STOCK`. When every item can be reserved, available quantities are decremented in the same transaction as the reservation decision and inventory outbox record. Event item quantities are negative because they represent stock leaving availability.
+
+`ReleaseStock` transitions `RESERVED` to terminal `RELEASED`, restores all reserved quantities, and records the returned availability snapshot. Repeating the release returns that stored result without restoring stock twice. Releasing a missing or rejected reservation is an invalid transition. Release adjustments are positive.
 
 ## Data Ownership
 
-`inventory-service` owns the `inventory_items` table in `polaris_inventory`. The table stores SKU, available quantity, timestamps, and an optimistic version column. Liquibase SQL migrations live under `inventory-service/src/main/resources/db/changelog`.
+`inventory-service` owns `inventory_items`, `inventory_reservations`, `inventory_reservation_lines`, and `outbox_events` in `polaris_inventory`. Database checks enforce valid states and non-negative quantities, while unique constraints enforce one reservation per order and one line per order/SKU. The outbox row is committed atomically with a successful reservation or release and exposes delivery status, attempts, retry time, and the last error. Liquibase SQL migrations live under `inventory-service/src/main/resources/db/changelog`.
 
 No other service reads or writes this database.
 
@@ -66,12 +69,12 @@ The `docker` profile switches PostgreSQL and Kafka addresses to Docker service n
 | Package | Purpose |
 | --- | --- |
 | `api` | gRPC adapter |
-| `application` | Stock check, reservation, transaction boundary, application events |
-| `domain` | `InventoryItem` domain model |
-| `messaging` | Kafka listener, topic wiring, after-commit publisher |
-| `persistence` | Spring Data inventory repository |
+| `application` | Stock check, reservation/release, and transaction boundaries |
+| `domain` | Inventory items, reservations, reservation lines and statuses |
+| `messaging` | Kafka listener, topic wiring, transactional outbox, and retry publisher |
+| `persistence` | Inventory/reservation repositories, outbox entities and repository |
 | `config` | gRPC interceptors, observability wiring, and topic configuration |
 
 ## Tests
 
-The integration test starts PostgreSQL and Kafka with Testcontainers, calls the starter-managed gRPC server, verifies stock checks, successful reservations, insufficient-stock behavior, gRPC health/reflection, database mutations, and Kafka publication.
+The integration test starts PostgreSQL and Kafka with Testcontainers and covers successful and rejected decisions, exact retries after a lost response, concurrent duplicates, conflicting payloads, idempotent release, invalid transitions, database mutations, Kafka publication, and gRPC health/reflection.

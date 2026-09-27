@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://polaris.example/contracts/events/v1/notification-dead-letter.schema.json",
+  "title": "NotificationDeadLetter",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["metadata", "sourceTopic", "sourcePartition", "sourceOffset", "sourceKey", "sourceEventId", "sourceEventVersion", "eventType", "payload", "errorType", "errorMessage", "failedAt"],
+  "properties": {
+    "metadata": {"$ref": "#/$defs/metadata"},
+    "sourceTopic": {"type": "string", "minLength": 1},
+    "sourcePartition": {"type": "integer", "minimum": 0},
+    "sourceOffset": {"type": "integer", "minimum": 0},
+    "sourceKey": {"type": ["string", "null"]},
+    "sourceEventId": {"type": ["string", "null"], "format": "uuid"},
+    "sourceEventVersion": {"type": ["integer", "null"], "minimum": 1},
+    "eventType": {"type": "string", "enum": ["OrderCreated", "InventoryAdjusted"]},
+    "payload": {"type": "string", "minLength": 1},
+    "errorType": {"type": "string", "minLength": 1},
+    "errorMessage": {"type": ["string", "null"]},
+    "failedAt": {"type": "string", "format": "date-time"}
+  },
+  "$defs": {
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["eventId", "version", "occurredAt", "correlationId", "causationId"],
+      "properties": {
+        "eventId": {"type": "string", "format": "uuid"},
+        "version": {"const": 1},
+        "occurredAt": {"type": "string", "format": "date-time"},
+        "correlationId": {"type": ["string", "null"]},
+        "causationId": {"type": ["string", "null"], "format": "uuid"}
+      }
+    }
+  }
+}

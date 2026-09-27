@@ -6,6 +6,8 @@ import java.security.Principal;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 
+import io.polaris.gateway.config.GatewayRateLimitProperties;
+
 import reactor.core.publisher.Mono;
 
 class GatewayRateLimitKeyResolver {

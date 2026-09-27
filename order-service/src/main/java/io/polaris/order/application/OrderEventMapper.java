@@ -1,7 +1,11 @@
 package io.polaris.order.application;
 
+import java.time.Instant;
+
+import io.polaris.order.config.ObservabilityConstants;
 import io.polaris.order.domain.Order;
 import io.polaris.order.domain.OrderItem;
+import io.polaris.shared.events.EventMetadata;
 import io.polaris.shared.events.OrderCreatedEvent;
 
 public final class OrderEventMapper {
@@ -9,7 +13,12 @@ public final class OrderEventMapper {
     }
 
     public static OrderCreatedEvent toOrderCreatedEvent(Order order) {
+        Instant occurredAt = Instant.now();
         return new OrderCreatedEvent(
+                EventMetadata.initial(
+                        OrderCreatedEvent.EVENT_VERSION,
+                        occurredAt,
+                        ObservabilityConstants.currentRequestId()),
                 order.getId(),
                 order.getCustomerId(),
                 OrderCreatedEvent.OrderStatus.valueOf(order.getStatus().name()),

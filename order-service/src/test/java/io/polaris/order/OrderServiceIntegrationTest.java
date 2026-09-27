@@ -2,6 +2,8 @@ package io.polaris.order;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -9,7 +11,14 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -23,12 +32,22 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -38,6 +57,7 @@ import org.testcontainers.utility.DockerImageName;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.grpc.Server;
+import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 
 import io.polaris.inventory.grpc.InventoryDecision;
@@ -51,13 +71,18 @@ import io.polaris.inventory.grpc.StockResponse;
 import io.polaris.order.api.OrderItemRequest;
 import io.polaris.order.api.OrderResponse;
 import io.polaris.order.api.PlaceOrderRequest;
+import io.polaris.order.application.OrderEventRecorder;
+import io.polaris.order.application.ReservationRecovery;
 import io.polaris.order.domain.OrderStatus;
 import io.polaris.shared.events.OrderCreatedEvent;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
+@Import(OrderServiceIntegrationTest.TestSecurityConfiguration.class)
 class OrderServiceIntegrationTest {
     private static final String ORDER_CREATED_TOPIC = "polaris.orders.created";
+    private static final UUID CUSTOMER_ID = UUID.fromString("11111111-1111-4111-8111-111111111111");
+    private static final UUID OTHER_CUSTOMER_ID = UUID.fromString("22222222-2222-4222-8222-222222222222");
     private static final FakeInventoryService fakeInventoryService = new FakeInventoryService();
     private static final Server inventoryServer;
     private static final int inventoryPort;
@@ -94,6 +119,15 @@ class OrderServiceIntegrationTest {
     @Autowired
     ObjectMapper objectMapper;
 
+    @Autowired
+    JdbcTemplate jdbc;
+
+    @Autowired
+    ReservationRecovery recovery;
+
+    @MockitoSpyBean
+    OrderEventRecorder eventRecorder;
+
     @DynamicPropertySource
     static void registerProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.url", postgres::getJdbcUrl);
@@ -102,6 +136,7 @@ class OrderServiceIntegrationTest {
         registry.add("spring.kafka.bootstrap-servers", kafka::getBootstrapServers);
         registry.add("polaris.inventory.grpc.host", () -> "localhost");
         registry.add("polaris.inventory.grpc.port", () -> inventoryPort);
+        registry.add("polaris.reservation.recovery.initial-delay", () -> "1h");
     }
 
     @BeforeEach
@@ -120,21 +155,16 @@ class OrderServiceIntegrationTest {
     void placeOrderWithAvailableStockConfirmsOrderAndPublishesEvent() throws Exception {
         fakeInventoryService.setAvailable(true);
 
-        ResponseEntity<OrderResponse> response = restTemplate.postForEntity(
-                "/api/v1/orders",
-                placeOrderRequest(),
-                OrderResponse.class);
+        ResponseEntity<OrderResponse> response = placeOrder(placeOrderRequest(), CUSTOMER_ID);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         OrderResponse order = response.getBody();
         assertThat(order).isNotNull();
+        assertThat(order.customerId()).isEqualTo(CUSTOMER_ID);
         assertThat(order.status()).isEqualTo(OrderStatus.CONFIRMED);
         assertThat(order.items()).hasSize(2);
 
-        ResponseEntity<OrderResponse> lookup = restTemplate.getForEntity(
-                "/api/v1/orders/{id}",
-                OrderResponse.class,
-                order.id());
+        ResponseEntity<OrderResponse> lookup = getOrder(order.id(), CUSTOMER_ID, OrderResponse.class);
         assertThat(lookup.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(lookup.getBody()).isNotNull();
         assertThat(lookup.getBody().id()).isEqualTo(order.id());
@@ -143,28 +173,26 @@ class OrderServiceIntegrationTest {
         assertThat(event.customerId()).isEqualTo(order.customerId());
         assertThat(event.status()).isEqualTo(OrderCreatedEvent.OrderStatus.CONFIRMED);
         assertThat(event.items()).hasSize(2);
-        assertThat(fakeInventoryService.checkStockCalls()).isEqualTo(1);
+        assertThat(fakeInventoryService.checkStockCalls()).isZero();
         assertThat(fakeInventoryService.reserveStockCalls()).isEqualTo(1);
     }
 
     @Test
-    void placeOrderWithUnavailableStockCancelsOrderAndPublishesEvent() throws Exception {
+    void atomicReservationIsAuthoritativeWhenEarlierStockCheckWouldBeStale() throws Exception {
         fakeInventoryService.setAvailable(false);
+        fakeInventoryService.setReserved(true);
 
-        ResponseEntity<OrderResponse> response = restTemplate.postForEntity(
-                "/api/v1/orders",
-                placeOrderRequest(),
-                OrderResponse.class);
+        ResponseEntity<OrderResponse> response = placeOrder(placeOrderRequest(), CUSTOMER_ID);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         OrderResponse order = response.getBody();
         assertThat(order).isNotNull();
-        assertThat(order.status()).isEqualTo(OrderStatus.CANCELLED);
+        assertThat(order.status()).isEqualTo(OrderStatus.CONFIRMED);
 
         OrderCreatedEvent event = awaitOrderCreatedEvent(order.id());
-        assertThat(event.status()).isEqualTo(OrderCreatedEvent.OrderStatus.CANCELLED);
-        assertThat(fakeInventoryService.checkStockCalls()).isEqualTo(1);
-        assertThat(fakeInventoryService.reserveStockCalls()).isZero();
+        assertThat(event.status()).isEqualTo(OrderCreatedEvent.OrderStatus.CONFIRMED);
+        assertThat(fakeInventoryService.checkStockCalls()).isZero();
+        assertThat(fakeInventoryService.reserveStockCalls()).isEqualTo(1);
     }
 
     @Test
@@ -172,10 +200,7 @@ class OrderServiceIntegrationTest {
         fakeInventoryService.setAvailable(true);
         fakeInventoryService.setReserved(false);
 
-        ResponseEntity<OrderResponse> response = restTemplate.postForEntity(
-                "/api/v1/orders",
-                placeOrderRequest(),
-                OrderResponse.class);
+        ResponseEntity<OrderResponse> response = placeOrder(placeOrderRequest(), CUSTOMER_ID);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         OrderResponse order = response.getBody();
@@ -184,41 +209,261 @@ class OrderServiceIntegrationTest {
 
         OrderCreatedEvent event = awaitOrderCreatedEvent(order.id());
         assertThat(event.status()).isEqualTo(OrderCreatedEvent.OrderStatus.CANCELLED);
-        assertThat(fakeInventoryService.checkStockCalls()).isEqualTo(1);
+        assertThat(fakeInventoryService.checkStockCalls()).isZero();
         assertThat(fakeInventoryService.reserveStockCalls()).isEqualTo(1);
     }
 
     @Test
+    void duplicateIdempotencyKeyReplaysOrderWithoutCallingInventoryAgain() {
+        String idempotencyKey = "checkout-" + UUID.randomUUID();
+
+        ResponseEntity<OrderResponse> first = placeOrder(placeOrderRequest(), CUSTOMER_ID, idempotencyKey);
+        ResponseEntity<OrderResponse> replay = placeOrder(placeOrderRequest(), CUSTOMER_ID, idempotencyKey);
+
+        assertThat(first.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(replay.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(first.getBody()).isNotNull();
+        assertThat(replay.getBody()).isNotNull();
+        assertThat(replay.getBody().id()).isEqualTo(first.getBody().id());
+        assertThat(first.getHeaders().getFirst("Idempotency-Replayed")).isEqualTo("false");
+        assertThat(replay.getHeaders().getFirst("Idempotency-Replayed")).isEqualTo("true");
+        assertThat(fakeInventoryService.reserveStockCalls()).isEqualTo(1);
+    }
+
+    @Test
+    void idempotencyKeyCannotBeReusedForDifferentPayload() {
+        String idempotencyKey = "checkout-" + UUID.randomUUID();
+        placeOrder(placeOrderRequest(), CUSTOMER_ID, idempotencyKey);
+        PlaceOrderRequest differentRequest = new PlaceOrderRequest(
+                List.of(new OrderItemRequest("SKU-COFFEE-001", 3, new BigDecimal("19.99"))));
+
+        ResponseEntity<String> conflict = placeOrder(
+                differentRequest, CUSTOMER_ID, idempotencyKey, String.class);
+
+        assertThat(conflict.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(conflict.getBody()).contains("Idempotency conflict");
+        assertThat(fakeInventoryService.reserveStockCalls()).isEqualTo(1);
+    }
+
+    @Test
+    void concurrentDuplicateHttpRequestsCreateOneOrder() throws Exception {
+        String idempotencyKey = "checkout-" + UUID.randomUUID();
+        PlaceOrderRequest request = placeOrderRequest();
+        CountDownLatch start = new CountDownLatch(1);
+
+        try (ExecutorService executor = Executors.newFixedThreadPool(2)) {
+            Future<ResponseEntity<OrderResponse>> first = executor.submit(() -> {
+                start.await();
+                return placeOrder(request, CUSTOMER_ID, idempotencyKey);
+            });
+            Future<ResponseEntity<OrderResponse>> second = executor.submit(() -> {
+                start.await();
+                return placeOrder(request, CUSTOMER_ID, idempotencyKey);
+            });
+            start.countDown();
+
+            OrderResponse firstOrder = first.get(10, TimeUnit.SECONDS).getBody();
+            OrderResponse secondOrder = second.get(10, TimeUnit.SECONDS).getBody();
+            assertThat(firstOrder).isNotNull();
+            assertThat(secondOrder).isNotNull();
+            assertThat(secondOrder.id()).isEqualTo(firstOrder.id());
+        }
+
+        assertThat(fakeInventoryService.reserveStockCalls()).isEqualTo(1);
+    }
+
+    @Test
+    void retryAfterLostReservationResponseUsesSameOrderId() {
+        String idempotencyKey = "checkout-" + UUID.randomUUID();
+        fakeInventoryService.loseNextReservationResponse();
+
+        ResponseEntity<String> failed = placeOrder(
+                placeOrderRequest(), CUSTOMER_ID, idempotencyKey, String.class);
+        ResponseEntity<OrderResponse> retry = placeOrder(placeOrderRequest(), CUSTOMER_ID, idempotencyKey);
+
+        assertThat(failed.getStatusCode()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
+        assertThat(retry.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(retry.getBody()).isNotNull();
+        assertThat(retry.getBody().status()).isEqualTo(OrderStatus.CONFIRMED);
+        assertThat(fakeInventoryService.reserveStockCalls()).isEqualTo(2);
+        assertThat(fakeInventoryService.reservedOrderIds()).hasSize(1);
+    }
+
+    @Test
+    void recoveryCompletesHeaderlessOrderAfterLostResponseWithoutClientRetry() throws Exception {
+        fakeInventoryService.loseNextReservationResponse();
+        ResponseEntity<String> failed = placeOrder(placeOrderRequest(), CUSTOMER_ID, null, String.class);
+        assertThat(failed.getStatusCode()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
+        UUID orderId = UUID.fromString(fakeInventoryService.reservedOrderIds().iterator().next());
+        assertThat(getOrder(orderId, CUSTOMER_ID, OrderResponse.class).getBody().status())
+                .isEqualTo(OrderStatus.PENDING);
+
+        makeRecoveryDue(orderId);
+        recovery.recoverPending();
+        recovery.recoverPending();
+
+        assertThat(getOrder(orderId, CUSTOMER_ID, OrderResponse.class).getBody().status())
+                .isEqualTo(OrderStatus.CONFIRMED);
+        assertThat(fakeInventoryService.reservedOrderIds()).containsExactly(orderId.toString());
+        assertThat(fakeInventoryService.reserveStockCalls()).isEqualTo(2);
+        assertThat(awaitOrderCreatedEvent(orderId).status()).isEqualTo(OrderCreatedEvent.OrderStatus.CONFIRMED);
+        assertSingleOutboxEvent(orderId);
+    }
+
+    @Test
+    void recoveryCompletesOrderWhenFinalizationRollsBackAfterInventorySuccess() {
+        String key = "recovery-" + UUID.randomUUID();
+        doThrow(new IllegalStateException("simulated outbox persistence failure"))
+                .doCallRealMethod().when(eventRecorder).enqueue(any());
+        ResponseEntity<String> failed = placeOrder(placeOrderRequest(), CUSTOMER_ID, key, String.class);
+        assertThat(failed.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        UUID orderId = UUID.fromString(fakeInventoryService.reservedOrderIds().iterator().next());
+        assertThat(getOrder(orderId, CUSTOMER_ID, OrderResponse.class).getBody().status())
+                .isEqualTo(OrderStatus.PENDING);
+
+        PlaceOrderRequest changed = new PlaceOrderRequest(
+                List.of(new OrderItemRequest("SKU-COFFEE-001", 3, new BigDecimal("19.99"))));
+        assertThat(placeOrder(changed, CUSTOMER_ID, key, String.class).getStatusCode())
+                .isEqualTo(HttpStatus.CONFLICT);
+        makeRecoveryDue(orderId);
+        recovery.recoverPending();
+
+        assertThat(getOrder(orderId, CUSTOMER_ID, OrderResponse.class).getBody().status())
+                .isEqualTo(OrderStatus.CONFIRMED);
+        ResponseEntity<OrderResponse> replay = placeOrder(placeOrderRequest(), CUSTOMER_ID, key);
+        assertThat(replay.getHeaders().getFirst("Idempotency-Replayed")).isEqualTo("true");
+        assertThat(replay.getBody().id()).isEqualTo(orderId);
+        assertThat(fakeInventoryService.reserveStockCalls()).isEqualTo(2);
+        assertSingleOutboxEvent(orderId);
+    }
+
+    private void makeRecoveryDue(UUID orderId) {
+        jdbc.update("UPDATE orders SET reservation_retry_at = CURRENT_TIMESTAMP WHERE id = ?", orderId);
+    }
+
+    @Test
+    void concurrentRecoveryWorkersFinalizeOnlyOnce() throws Exception {
+        fakeInventoryService.loseNextReservationResponse();
+        placeOrder(placeOrderRequest(), CUSTOMER_ID, null, String.class);
+        UUID orderId = UUID.fromString(fakeInventoryService.reservedOrderIds().iterator().next());
+        makeRecoveryDue(orderId);
+        CountDownLatch start = new CountDownLatch(1);
+        try (ExecutorService executor = Executors.newFixedThreadPool(2)) {
+            Future<?> first = executor.submit(() -> {
+                start.await();
+                recovery.recoverPending();
+                return null;
+            });
+            Future<?> second = executor.submit(() -> {
+                start.await();
+                recovery.recoverPending();
+                return null;
+            });
+            start.countDown();
+            first.get(10, TimeUnit.SECONDS);
+            second.get(10, TimeUnit.SECONDS);
+        }
+        assertThat(getOrder(orderId, CUSTOMER_ID, OrderResponse.class).getBody().status())
+                .isEqualTo(OrderStatus.CONFIRMED);
+        assertThat(fakeInventoryService.reserveStockCalls()).isEqualTo(2);
+        assertSingleOutboxEvent(orderId);
+    }
+
+    private void assertSingleOutboxEvent(UUID orderId) {
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM outbox_events WHERE aggregate_id = ?",
+                Long.class, orderId.toString())).isEqualTo(1L);
+    }
+
+    @Test
     void getUnknownOrderReturnsNotFoundProblem() {
-        ResponseEntity<String> response = restTemplate.getForEntity(
-                "/api/v1/orders/{id}",
-                String.class,
-                UUID.randomUUID());
+        ResponseEntity<String> response = getOrder(UUID.randomUUID(), CUSTOMER_ID, String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(response.getBody()).contains("Order not found");
     }
 
     @Test
+    void customerCannotReadAnotherCustomersOrder() {
+        OrderResponse order = placeOrder(placeOrderRequest(), CUSTOMER_ID).getBody();
+        assertThat(order).isNotNull();
+
+        ResponseEntity<String> response = getOrder(order.id(), OTHER_CUSTOMER_ID, String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    void requestWithoutRequiredScopeIsForbidden() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth("no-scope");
+
+        ResponseEntity<String> response = restTemplate.exchange(
+                "/api/v1/orders/{id}",
+                HttpMethod.GET,
+                new HttpEntity<>(headers),
+                String.class,
+                UUID.randomUUID());
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
+    @Test
     void placeOrderWithInvalidPayloadReturnsBadRequest() {
         Map<String, Object> invalidRequest = Map.of(
-                "customerId", UUID.randomUUID(),
                 "items", List.of());
 
-        ResponseEntity<String> response = restTemplate.postForEntity(
-                "/api/v1/orders",
-                invalidRequest,
-                String.class);
+        HttpHeaders headers = bearerHeaders(CUSTOMER_ID);
+        ResponseEntity<String> response = restTemplate.exchange(
+                "/api/v1/orders", HttpMethod.POST, new HttpEntity<>(invalidRequest, headers), String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
     private PlaceOrderRequest placeOrderRequest() {
         return new PlaceOrderRequest(
-                UUID.randomUUID(),
                 List.of(
                         new OrderItemRequest("SKU-COFFEE-001", 2, new BigDecimal("19.99")),
                         new OrderItemRequest("SKU-MUG-002", 1, new BigDecimal("8.50"))));
+    }
+
+    private ResponseEntity<OrderResponse> placeOrder(PlaceOrderRequest request, UUID customerId) {
+        return placeOrder(request, customerId, null, OrderResponse.class);
+    }
+
+    private ResponseEntity<OrderResponse> placeOrder(
+            PlaceOrderRequest request, UUID customerId, String idempotencyKey) {
+        return placeOrder(request, customerId, idempotencyKey, OrderResponse.class);
+    }
+
+    private <T> ResponseEntity<T> placeOrder(
+            PlaceOrderRequest request,
+            UUID customerId,
+            String idempotencyKey,
+            Class<T> responseType) {
+        HttpHeaders headers = bearerHeaders(customerId);
+        if (idempotencyKey != null) {
+            headers.set("Idempotency-Key", idempotencyKey);
+        }
+        return restTemplate.exchange(
+                "/api/v1/orders",
+                HttpMethod.POST,
+                new HttpEntity<>(request, headers),
+                responseType);
+    }
+
+    private <T> ResponseEntity<T> getOrder(UUID orderId, UUID customerId, Class<T> responseType) {
+        return restTemplate.exchange(
+                "/api/v1/orders/{id}",
+                HttpMethod.GET,
+                new HttpEntity<>(bearerHeaders(customerId)),
+                responseType,
+                orderId);
+    }
+
+    private HttpHeaders bearerHeaders(UUID customerId) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(customerId.toString());
+        return headers;
     }
 
     private OrderCreatedEvent awaitOrderCreatedEvent(UUID orderId) throws Exception {
@@ -251,8 +496,10 @@ class OrderServiceIntegrationTest {
     private static final class FakeInventoryService extends InventoryServiceGrpc.InventoryServiceImplBase {
         private final AtomicBoolean available = new AtomicBoolean(true);
         private final AtomicBoolean reserved = new AtomicBoolean(true);
+        private final AtomicBoolean loseNextReservationResponse = new AtomicBoolean();
         private final AtomicInteger checkStockCalls = new AtomicInteger();
         private final AtomicInteger reserveStockCalls = new AtomicInteger();
+        private final Set<String> reservedOrderIds = ConcurrentHashMap.newKeySet();
 
         void setAvailable(boolean available) {
             this.available.set(available);
@@ -265,6 +512,12 @@ class OrderServiceIntegrationTest {
         void resetCalls() {
             checkStockCalls.set(0);
             reserveStockCalls.set(0);
+            loseNextReservationResponse.set(false);
+            reservedOrderIds.clear();
+        }
+
+        void loseNextReservationResponse() {
+            loseNextReservationResponse.set(true);
         }
 
         int checkStockCalls() {
@@ -273,6 +526,10 @@ class OrderServiceIntegrationTest {
 
         int reserveStockCalls() {
             return reserveStockCalls.get();
+        }
+
+        Set<String> reservedOrderIds() {
+            return Set.copyOf(reservedOrderIds);
         }
 
         @Override
@@ -299,6 +556,13 @@ class OrderServiceIntegrationTest {
         @Override
         public void reserveStock(ReserveRequest request, StreamObserver<ReserveResponse> responseObserver) {
             reserveStockCalls.incrementAndGet();
+            reservedOrderIds.add(request.getOrderId());
+            if (loseNextReservationResponse.getAndSet(false)) {
+                responseObserver.onError(Status.UNAVAILABLE
+                        .withDescription("simulated lost reservation response")
+                        .asRuntimeException());
+                return;
+            }
             boolean stockReserved = reserved.get();
             ReserveResponse.Builder response = ReserveResponse.newBuilder()
                     .setReserved(stockReserved)
@@ -316,6 +580,24 @@ class OrderServiceIntegrationTest {
 
             responseObserver.onNext(response.build());
             responseObserver.onCompleted();
+        }
+    }
+
+    @TestConfiguration
+    static class TestSecurityConfiguration {
+        @Bean
+        JwtDecoder jwtDecoder() {
+            return token -> {
+                boolean hasScopes = !"no-scope".equals(token);
+                String subject = hasScopes ? token : CUSTOMER_ID.toString();
+                Jwt.Builder jwt = Jwt.withTokenValue(token)
+                        .header("alg", "none")
+                        .subject(subject);
+                if (hasScopes) {
+                    jwt.claim("scope", "orders:read orders:write");
+                }
+                return jwt.build();
+            };
         }
     }
 }

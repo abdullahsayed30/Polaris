@@ -11,6 +11,7 @@ spring:
     open-in-view: false
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.xml
+    contexts: schema
   kafka:
     bootstrap-servers: localhost:9092
     consumer:
@@ -19,9 +20,11 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
     producer:
+      acks: all
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:
+        enable.idempotence: true
         spring.json.add.type.headers: false
     listener:
       observation-enabled: true
@@ -72,6 +75,15 @@ polaris:
     topics:
       orders-created: polaris.orders.created
       inventory-adjusted: polaris.inventory.adjusted
+  messaging:
+    outbox:
+      poll-interval: 500ms
+      initial-delay: 500ms
+      batch-size: 50
+      max-attempts: 10
+      initial-backoff: 1s
+      max-backoff: 1m
+      send-timeout: 10s
 
 ---
 spring:

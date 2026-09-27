@@ -9,6 +9,7 @@ option java_package = "io.polaris.inventory.grpc";
 service InventoryService {
   rpc CheckStock(StockRequest) returns (StockResponse);
   rpc ReserveStock(ReserveRequest) returns (ReserveResponse);
+  rpc ReleaseStock(ReleaseRequest) returns (ReleaseResponse);
 }
 
 enum InventoryDecision {
@@ -16,6 +17,14 @@ enum InventoryDecision {
   INVENTORY_DECISION_AVAILABLE = 1;
   INVENTORY_DECISION_RESERVED = 2;
   INVENTORY_DECISION_INSUFFICIENT_STOCK = 3;
+  INVENTORY_DECISION_RELEASED = 4;
+}
+
+enum ReservationState {
+  RESERVATION_STATE_UNSPECIFIED = 0;
+  RESERVATION_STATE_RESERVED = 1;
+  RESERVATION_STATE_REJECTED = 2;
+  RESERVATION_STATE_RELEASED = 3;
 }
 
 message StockRequest {
@@ -50,6 +59,7 @@ message ReserveResponse {
   bool reserved = 1;
   InventoryDecision reason = 2;
   repeated StockItemReservation items = 3;
+  ReservationState state = 4;
 }
 
 message StockItemReservation {
@@ -58,4 +68,21 @@ message StockItemReservation {
   int32 reserved_quantity = 3;
   int32 remaining_quantity = 4;
   bool reserved = 5;
+}
+
+message ReleaseRequest {
+  string order_id = 1;
+}
+
+message ReleaseResponse {
+  bool released = 1;
+  InventoryDecision reason = 2;
+  repeated StockItemRelease items = 3;
+  ReservationState state = 4;
+}
+
+message StockItemRelease {
+  string sku = 1;
+  int32 released_quantity = 2;
+  int32 available_quantity = 3;
 }

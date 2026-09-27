@@ -23,18 +23,20 @@ The upstream is controlled by `polaris.gateway.routes.order-service-uri` outside
 
 ## Security
 
-The gateway runs as an OAuth2 resource server and validates bearer JWTs. The default issuer and JWKS URLs are local placeholders:
+The gateway runs as an OAuth2 resource server and validates bearer JWTs. Creating an order requires `orders:write`; reading an order requires `orders:read`. The order service validates the bearer token again and uses its UUID-shaped `sub` claim as the customer ID. It never accepts an order owner from the request body, and ownership-aware lookup returns `404` when a different customer requests the order.
+
+The default issuer is the browser-reachable local Keycloak URL. The JWKS URL is independently configurable so containers can fetch keys over the Compose network while still validating the token's external issuer:
 
 ```yaml
-spring.security.oauth2.resourceserver.jwt.issuer-uri: http://localhost:8089/realms/polaris
-spring.security.oauth2.resourceserver.jwt.jwk-set-uri: http://localhost:8089/realms/polaris/protocol/openid-connect/certs
+POLARIS_OAUTH_ISSUER_URI: http://localhost:8089/realms/polaris
+POLARIS_OAUTH_JWK_SET_URI: http://keycloak:8080/realms/polaris/protocol/openid-connect/certs
 ```
 
-Health, info, and CORS preflight requests are unauthenticated. `/api/v1/orders` and `/api/v1/orders/**` require an authenticated JWT. Any other route is denied by default.
+Health, info, metrics, and CORS preflight requests are unauthenticated. Any route or method not explicitly granted is denied. See the [local authenticated demo](../../demo/README.md) for the reproducible realm, users, command, and production caveats.
 
 ## CORS
 
-The default CORS policy allows `http://localhost:3000`, common API methods, `Authorization`, `Content-Type`, and `X-Request-Id`. It exposes `X-Request-Id` so clients can correlate gateway logs with responses.
+The default CORS policy allows `http://localhost:3000`, common API methods, `Authorization`, `Content-Type`, `Idempotency-Key`, and `X-Request-Id`. It exposes `Idempotency-Replayed` and `X-Request-Id` so browser clients can detect safe order replays and correlate gateway logs with responses.
 
 ## Request Logging
 
@@ -52,6 +54,7 @@ Gateway tests verify:
 
 - Route definitions for the public order API.
 - Unauthenticated order requests are rejected.
+- Tokens without the method-specific order scope are rejected.
 - Authenticated order requests are forwarded.
 - CORS preflight traffic is permitted.
 - The in-memory rate limiter returns `429` with `{"error":"rate_limit_exceeded"}` after the configured limit.

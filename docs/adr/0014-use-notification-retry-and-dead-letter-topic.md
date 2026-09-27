@@ -14,6 +14,8 @@ Notification workflows are downstream side effects. They should tolerate transie
 
 `notification-service` consumes `polaris.orders.created` and `polaris.inventory.adjusted`. Handler execution is wrapped in a Resilience4j retry with configurable attempts, initial interval, and multiplier. If handling still fails after retry exhaustion, the service publishes a `NotificationDeadLetterEvent` to `polaris.notifications.dlq`.
 
+ADR 0019 strengthens this decision: the consumer waits for broker acknowledgement of the dead-letter event, retains the source record on publication failure, and uses a durable inbox for duplicate delivery.
+
 The current handler logs notification outcomes as a stand-in for real email, SMS, or webhook providers.
 
 ## Consequences

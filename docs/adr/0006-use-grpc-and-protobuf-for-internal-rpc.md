@@ -16,6 +16,8 @@ Polaris will use gRPC with Protobuf for synchronous internal service-to-service 
 
 These APIs are internal only. External clients use REST through the gateway.
 
+The contract now also exposes idempotent `ReleaseStock`. Order placement calls `ReserveStock` directly for an atomic decision; `CheckStock` is informational, not an authorization to reserve later. See [ADR 0010](0010-use-reservation-flow-instead-of-distributed-transactions.md).
+
 As of `v0.8.0`, gRPC server lifecycle and client stub creation are managed by a Spring Boot-compatible gRPC starter. See [0018 - Use Spring Boot-Compatible gRPC and Observability Conventions](0018-use-spring-boot-compatible-grpc-and-observability-conventions.md).
 
 ## Consequences

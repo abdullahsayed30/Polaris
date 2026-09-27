@@ -7,4 +7,8 @@
 
     <include file="db/changelog/changes/0001-create-orders.sql"/>
     <include file="db/changelog/changes/0002-create-order-items.sql"/>
+    <include file="db/changelog/changes/0003-create-outbox-events.sql"/>
+    <include file="db/changelog/changes/0004-create-order-requests.sql"/>
+    <include file="db/changelog/changes/0005-durable-reservation-recovery.sql"/>
+    <include file="db/changelog/changes/0006-bind-processing-order-requests.sql"/>
 </databaseChangeLog>

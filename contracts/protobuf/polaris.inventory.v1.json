@@ -1,0 +1,79 @@
+{
+  "package": "polaris.inventory.v1",
+  "services": {
+    "InventoryService": {
+      "methods": {
+        "CheckStock": {"input": "StockRequest", "output": "StockResponse", "clientStreaming": false, "serverStreaming": false},
+        "ReserveStock": {"input": "ReserveRequest", "output": "ReserveResponse", "clientStreaming": false, "serverStreaming": false},
+        "ReleaseStock": {"input": "ReleaseRequest", "output": "ReleaseResponse", "clientStreaming": false, "serverStreaming": false}
+      }
+    }
+  },
+  "enums": {
+    "InventoryDecision": {
+      "INVENTORY_DECISION_UNSPECIFIED": 0,
+      "INVENTORY_DECISION_AVAILABLE": 1,
+      "INVENTORY_DECISION_RESERVED": 2,
+      "INVENTORY_DECISION_INSUFFICIENT_STOCK": 3,
+      "INVENTORY_DECISION_RELEASED": 4
+    },
+    "ReservationState": {
+      "RESERVATION_STATE_UNSPECIFIED": 0,
+      "RESERVATION_STATE_RESERVED": 1,
+      "RESERVATION_STATE_REJECTED": 2,
+      "RESERVATION_STATE_RELEASED": 3
+    }
+  },
+  "messages": {
+    "StockRequest": {
+      "order_id": {"number": 1, "type": "STRING", "repeated": false},
+      "items": {"number": 2, "type": "MESSAGE", "typeName": "StockItem", "repeated": true}
+    },
+    "StockItem": {
+      "sku": {"number": 1, "type": "STRING", "repeated": false},
+      "quantity": {"number": 2, "type": "INT32", "repeated": false}
+    },
+    "StockResponse": {
+      "available": {"number": 1, "type": "BOOL", "repeated": false},
+      "reason": {"number": 2, "type": "ENUM", "typeName": "InventoryDecision", "repeated": false},
+      "items": {"number": 3, "type": "MESSAGE", "typeName": "StockItemAvailability", "repeated": true}
+    },
+    "StockItemAvailability": {
+      "sku": {"number": 1, "type": "STRING", "repeated": false},
+      "requested_quantity": {"number": 2, "type": "INT32", "repeated": false},
+      "available_quantity": {"number": 3, "type": "INT32", "repeated": false},
+      "available": {"number": 4, "type": "BOOL", "repeated": false}
+    },
+    "ReserveRequest": {
+      "order_id": {"number": 1, "type": "STRING", "repeated": false},
+      "items": {"number": 2, "type": "MESSAGE", "typeName": "StockItem", "repeated": true}
+    },
+    "ReserveResponse": {
+      "reserved": {"number": 1, "type": "BOOL", "repeated": false},
+      "reason": {"number": 2, "type": "ENUM", "typeName": "InventoryDecision", "repeated": false},
+      "items": {"number": 3, "type": "MESSAGE", "typeName": "StockItemReservation", "repeated": true},
+      "state": {"number": 4, "type": "ENUM", "typeName": "ReservationState", "repeated": false}
+    },
+    "StockItemReservation": {
+      "sku": {"number": 1, "type": "STRING", "repeated": false},
+      "requested_quantity": {"number": 2, "type": "INT32", "repeated": false},
+      "reserved_quantity": {"number": 3, "type": "INT32", "repeated": false},
+      "remaining_quantity": {"number": 4, "type": "INT32", "repeated": false},
+      "reserved": {"number": 5, "type": "BOOL", "repeated": false}
+    },
+    "ReleaseRequest": {
+      "order_id": {"number": 1, "type": "STRING", "repeated": false}
+    },
+    "ReleaseResponse": {
+      "released": {"number": 1, "type": "BOOL", "repeated": false},
+      "reason": {"number": 2, "type": "ENUM", "typeName": "InventoryDecision", "repeated": false},
+      "items": {"number": 3, "type": "MESSAGE", "typeName": "StockItemRelease", "repeated": true},
+      "state": {"number": 4, "type": "ENUM", "typeName": "ReservationState", "repeated": false}
+    },
+    "StockItemRelease": {
+      "sku": {"number": 1, "type": "STRING", "repeated": false},
+      "released_quantity": {"number": 2, "type": "INT32", "repeated": false},
+      "available_quantity": {"number": 3, "type": "INT32", "repeated": false}
+    }
+  }
+}

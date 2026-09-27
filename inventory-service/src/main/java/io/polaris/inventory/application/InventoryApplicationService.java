@@ -1,29 +1,39 @@
 package io.polaris.inventory.application;
 
 import java.time.Instant;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import io.polaris.inventory.config.ObservabilityConstants;
 import io.polaris.inventory.domain.InventoryItem;
+import io.polaris.inventory.domain.InventoryReservation;
+import io.polaris.inventory.domain.InventoryReservationLine;
+import io.polaris.inventory.domain.ReservationStatus;
 import io.polaris.inventory.persistence.InventoryItemRepository;
+import io.polaris.inventory.persistence.InventoryReservationRepository;
+import io.polaris.shared.events.EventMetadata;
 import io.polaris.shared.events.InventoryAdjustedEvent;
 
 @Service
 public class InventoryApplicationService {
     private final InventoryItemRepository inventoryItems;
-    private final ApplicationEventPublisher events;
+    private final InventoryReservationRepository reservations;
+    private final InventoryEventRecorder eventOutbox;
 
-    public InventoryApplicationService(InventoryItemRepository inventoryItems, ApplicationEventPublisher events) {
+    public InventoryApplicationService(
+            InventoryItemRepository inventoryItems,
+            InventoryReservationRepository reservations,
+            InventoryEventRecorder eventOutbox) {
         this.inventoryItems = inventoryItems;
-        this.events = events;
+        this.reservations = reservations;
+        this.eventOutbox = eventOutbox;
     }
 
     @Transactional(readOnly = true)
@@ -46,6 +56,14 @@ public class InventoryApplicationService {
     @Transactional
     public StockReservationResult reserveStock(UUID orderId, List<InventoryLine> lines) {
         Map<String, Integer> requested = requestedQuantities(lines);
+        int inserted = reservations.insertIfAbsent(orderId);
+        InventoryReservation reservation = reservations.findForUpdate(orderId)
+                .orElseThrow(() -> new IllegalStateException("Reservation row disappeared for order " + orderId));
+
+        if (inserted == 0) {
+            return replayReservation(reservation, requested);
+        }
+
         Map<String, InventoryItem> currentStock = inventoryItems.findBySkuInForUpdate(requested.keySet()).stream()
                 .collect(Collectors.toMap(InventoryItem::getSku, Function.identity()));
 
@@ -62,7 +80,12 @@ public class InventoryApplicationService {
                             result.remainingQuantity(),
                             false))
                     .toList();
-            return new StockReservationResult(false, InventoryDecisionReason.INSUFFICIENT_STOCK, results);
+            reservation.recordDecision(ReservationStatus.REJECTED, toReservationLines(results));
+            return new StockReservationResult(
+                    false,
+                    InventoryDecisionReason.INSUFFICIENT_STOCK,
+                    ReservationStatus.REJECTED,
+                    results);
         }
 
         List<StockReservation> results = requested.entrySet().stream()
@@ -78,8 +101,56 @@ public class InventoryApplicationService {
                 })
                 .toList();
 
-        events.publishEvent(new InventoryAdjustedApplicationEvent(toInventoryAdjustedEvent(orderId, results)));
-        return new StockReservationResult(true, InventoryDecisionReason.RESERVED, results);
+        reservation.recordDecision(ReservationStatus.RESERVED, toReservationLines(results));
+        eventOutbox.enqueue(toInventoryAdjustedEvent(orderId, results));
+        return new StockReservationResult(
+                true,
+                InventoryDecisionReason.RESERVED,
+                ReservationStatus.RESERVED,
+                results);
+    }
+
+    @Transactional
+    public StockReleaseResult releaseStock(UUID orderId) {
+        InventoryReservation reservation = reservations.findForUpdate(orderId)
+                .orElseThrow(() -> new IllegalStateException("No reservation exists for order " + orderId));
+
+        if (reservation.getStatus() == ReservationStatus.RELEASED) {
+            return storedRelease(reservation);
+        }
+        if (reservation.getStatus() != ReservationStatus.RESERVED) {
+            throw new IllegalStateException(
+                    "Reservation for order " + orderId + " is " + reservation.getStatus() + " and cannot be released");
+        }
+
+        Map<String, InventoryItem> currentStock = inventoryItems.findBySkuInForUpdate(reservation.getLines().stream()
+                .map(InventoryReservationLine::getSku)
+                .toList())
+                .stream()
+                .collect(Collectors.toMap(InventoryItem::getSku, Function.identity()));
+
+        List<StockRelease> results = reservation.getLines().stream()
+                .map(line -> {
+                    InventoryItem item = currentStock.get(line.getSku());
+                    if (item == null) {
+                        throw new IllegalStateException("Inventory item disappeared for reserved SKU " + line.getSku());
+                    }
+                    item.release(line.getReservedQuantity());
+                    line.recordRelease(item.getAvailableQuantity());
+                    return new StockRelease(
+                            line.getSku(),
+                            line.getReservedQuantity(),
+                            item.getAvailableQuantity());
+                })
+                .toList();
+
+        reservation.release();
+        eventOutbox.enqueue(toReleaseAdjustedEvent(orderId, results));
+        return new StockReleaseResult(
+                true,
+                InventoryDecisionReason.RELEASED,
+                ReservationStatus.RELEASED,
+                results);
     }
 
     private StockAvailability availability(String sku, int requestedQuantity, InventoryItem item) {
@@ -94,23 +165,124 @@ public class InventoryApplicationService {
     }
 
     private Map<String, Integer> requestedQuantities(List<InventoryLine> lines) {
-        Map<String, Integer> requested = new LinkedHashMap<>();
+        if (lines.isEmpty()) {
+            throw new IllegalArgumentException("at least one inventory line is required");
+        }
+        Map<String, Integer> requested = new TreeMap<>();
         for (InventoryLine line : lines) {
+            if (line.sku() == null || line.sku().isBlank()) {
+                throw new IllegalArgumentException("sku must not be blank");
+            }
             if (line.quantity() <= 0) {
                 throw new IllegalArgumentException("quantity must be positive for SKU " + line.sku());
             }
-            requested.merge(line.sku(), line.quantity(), Integer::sum);
+            try {
+                requested.merge(line.sku(), line.quantity(), Math::addExact);
+            } catch (ArithmeticException ex) {
+                throw new IllegalArgumentException("requested quantity is too large for SKU " + line.sku(), ex);
+            }
         }
         return requested;
     }
 
+    private StockReservationResult replayReservation(
+            InventoryReservation reservation,
+            Map<String, Integer> requested) {
+        Map<String, Integer> storedRequest = reservation.getLines().stream()
+                .collect(Collectors.toMap(
+                        InventoryReservationLine::getSku,
+                        InventoryReservationLine::getRequestedQuantity,
+                        (first, second) -> first,
+                        TreeMap::new));
+        if (!storedRequest.equals(requested)) {
+            throw new IllegalStateException(
+                    "Order " + reservation.getOrderId() + " already has a reservation with different items");
+        }
+
+        if (reservation.getStatus() == ReservationStatus.RELEASED) {
+            throw new IllegalStateException(
+                    "Reservation for order " + reservation.getOrderId() + " has already been released");
+        }
+        if (reservation.getStatus() == ReservationStatus.PROCESSING) {
+            throw new IllegalStateException(
+                    "Reservation for order " + reservation.getOrderId() + " has no completed decision");
+        }
+
+        List<StockReservation> results = reservation.getLines().stream()
+                .map(this::toStockReservation)
+                .toList();
+        boolean reserved = reservation.getStatus() == ReservationStatus.RESERVED;
+        return new StockReservationResult(
+                reserved,
+                reserved ? InventoryDecisionReason.RESERVED : InventoryDecisionReason.INSUFFICIENT_STOCK,
+                reservation.getStatus(),
+                results);
+    }
+
+    private List<InventoryReservationLine> toReservationLines(List<StockReservation> results) {
+        return results.stream()
+                .map(result -> InventoryReservationLine.create(
+                        result.sku(),
+                        result.requestedQuantity(),
+                        result.reservedQuantity(),
+                        result.remainingQuantity()))
+                .toList();
+    }
+
+    private StockReservation toStockReservation(InventoryReservationLine line) {
+        return new StockReservation(
+                line.getSku(),
+                line.getRequestedQuantity(),
+                line.getReservedQuantity(),
+                line.getRemainingQuantity(),
+                line.getReservedQuantity() == line.getRequestedQuantity());
+    }
+
+    private StockReleaseResult storedRelease(InventoryReservation reservation) {
+        List<StockRelease> results = reservation.getLines().stream()
+                .map(line -> {
+                    if (line.getReleasedAvailableQuantity() == null) {
+                        throw new IllegalStateException("Released reservation is missing its release result");
+                    }
+                    return new StockRelease(
+                            line.getSku(),
+                            line.getReservedQuantity(),
+                            line.getReleasedAvailableQuantity());
+                })
+                .toList();
+        return new StockReleaseResult(
+                true,
+                InventoryDecisionReason.RELEASED,
+                ReservationStatus.RELEASED,
+                results);
+    }
+
     private InventoryAdjustedEvent toInventoryAdjustedEvent(UUID orderId, List<StockReservation> reservations) {
+        Instant occurredAt = Instant.now();
         List<InventoryAdjustedEvent.Item> items = reservations.stream()
                 .map(reservation -> new InventoryAdjustedEvent.Item(
                         reservation.sku(),
                         -reservation.reservedQuantity(),
                         reservation.remainingQuantity()))
                 .toList();
-        return new InventoryAdjustedEvent(orderId, items, Instant.now());
+        return new InventoryAdjustedEvent(metadata(occurredAt), orderId, items, occurredAt);
+    }
+
+    private InventoryAdjustedEvent toReleaseAdjustedEvent(UUID orderId, List<StockRelease> releases) {
+        Instant occurredAt = Instant.now();
+        List<InventoryAdjustedEvent.Item> items = releases.stream()
+                .map(release -> new InventoryAdjustedEvent.Item(
+                        release.sku(),
+                        release.releasedQuantity(),
+                        release.availableQuantity()))
+                .toList();
+        return new InventoryAdjustedEvent(metadata(occurredAt), orderId, items, occurredAt);
+    }
+
+    private EventMetadata metadata(Instant occurredAt) {
+        return EventMetadata.initial(
+                InventoryAdjustedEvent.EVENT_VERSION,
+                occurredAt,
+                ObservabilityConstants.currentRequestId());
     }
 }

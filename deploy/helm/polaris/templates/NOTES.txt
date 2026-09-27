@@ -1,0 +1,16 @@
+Polaris application services were rendered for release {{ .Release.Name }}.
+
+Before expecting workloads to become Ready, verify that:
+  1. Every services.*.image.repository points to an image your cluster can pull.
+  2. The Secrets {{ .Values.infrastructure.databases.order.existingSecret }},
+     {{ .Values.infrastructure.databases.inventory.existingSecret }}, and
+     {{ .Values.infrastructure.databases.notification.existingSecret }} exist in namespace {{ .Release.Namespace }}.
+  3. PostgreSQL, Kafka, Redis, OIDC/JWKS, and optional OTLP endpoints in values are reachable.
+
+The chart does not install those stateful or security-sensitive dependencies.
+
+Gateway service:
+  kubectl --namespace {{ .Release.Namespace }} port-forward service/{{ include "polaris.serviceName" (dict "root" . "service" "gateway") }} 8080:8080
+
+Runbook: docs/operations.md
+Deployment guide: docs/deployment.md

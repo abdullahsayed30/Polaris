@@ -4,7 +4,7 @@ Date: 2026-05-11
 
 ## Status
 
-Accepted
+Superseded by [0019](0019-use-transactional-outbox-and-consumer-inbox.md)
 
 ## Context
 
@@ -12,8 +12,8 @@ Kafka events represent committed business facts. If a service publishes an event
 
 ## Decision
 
-Polaris publishes state-change events with Spring transaction event listeners using `TransactionPhase.AFTER_COMMIT`. `order-service` publishes `OrderCreatedEvent` only after the order transaction commits. `inventory-service` publishes `InventoryAdjustedEvent` only after the reservation transaction commits.
+Polaris originally published state-change events with Spring transaction event listeners using `TransactionPhase.AFTER_COMMIT`. ADR 0019 replaces this mechanism with a transactional outbox.
 
 ## Consequences
 
-Downstream consumers receive events that correspond to committed local state. The current implementation does not include a transactional outbox, so there is still a failure window between database commit and Kafka send. That gap is acceptable for the current blueprint stage and should be revisited before a stricter production release.
+This decision documented the original blueprint stage. The acknowledged database-commit/Kafka-send gap is now closed by the transactional outbox in ADR 0019.

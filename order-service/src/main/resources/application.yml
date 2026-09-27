@@ -24,12 +24,20 @@ spring:
   kafka:
     bootstrap-servers: localhost:9092
     producer:
+      acks: all
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:
+        enable.idempotence: true
         spring.json.add.type.headers: false
     template:
       observation-enabled: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${POLARIS_OAUTH_ISSUER_URI:http://localhost:8089/realms/polaris}
+          jwk-set-uri: ${POLARIS_OAUTH_JWK_SET_URI:http://localhost:8089/realms/polaris/protocol/openid-connect/certs}
 
 management:
   endpoints:
@@ -68,6 +76,15 @@ polaris:
   kafka:
     topics:
       order-created: polaris.orders.created
+  messaging:
+    outbox:
+      poll-interval: 500ms
+      initial-delay: 500ms
+      batch-size: 50
+      max-attempts: 10
+      initial-backoff: 1s
+      max-backoff: 1m
+      send-timeout: 10s
   inventory:
     grpc:
       host: localhost

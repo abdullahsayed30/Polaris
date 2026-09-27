@@ -64,33 +64,80 @@ jobs:
         if: ${{ inputs.run-integration-tests }}
         run: ./mvnw -B -ntp test-compile failsafe:integration-test failsafe:verify ${{ inputs.maven-args }}
 
-      - name: Package without integration tests
-        if: ${{ !inputs.run-integration-tests }}
+      - name: Package application
         run: ./mvnw -B -ntp -DskipTests package ${{ inputs.maven-args }}
 
-      - name: Run Trivy repository scan
-        id: trivy
+      - name: Generate aggregate SBOM
+        run: ./mvnw -B -ntp -DskipTests cyclonedx:makeAggregateBom ${{ inputs.maven-args }}
+
+      - name: Generate coverage reports
+        if: ${{ always() }}
+        continue-on-error: true
+        run: ./mvnw -B -ntp -DskipTests jacoco:report ${{ inputs.maven-args }}
+
+      - name: Publish test and coverage summary
+        if: ${{ always() }}
+        shell: python
+        run: |
+          import glob
+          import os
+          import xml.etree.ElementTree as ET
+
+          test_totals = {"tests": 0, "failures": 0, "errors": 0, "skipped": 0}
+          report_paths = set(glob.glob("**/target/surefire-reports/TEST-*.xml", recursive=True))
+          report_paths.update(glob.glob("**/target/failsafe-reports/TEST-*.xml", recursive=True))
+          for report_path in report_paths:
+              suite = ET.parse(report_path).getroot()
+              for name in test_totals:
+                  test_totals[name] += int(suite.attrib.get(name, 0))
+
+          covered_lines = 0
+          missed_lines = 0
+          for report_path in glob.glob("**/target/site/jacoco/jacoco.xml", recursive=True):
+              report = ET.parse(report_path).getroot()
+              line_counter = next(
+                  (counter for counter in report.findall("counter") if counter.attrib.get("type") == "LINE"),
+                  None,
+              )
+              if line_counter is not None:
+                  covered_lines += int(line_counter.attrib["covered"])
+                  missed_lines += int(line_counter.attrib["missed"])
+
+          measured_lines = covered_lines + missed_lines
+          coverage = f"{covered_lines / measured_lines:.1%}" if measured_lines else "n/a"
+          summary = (
+              "## Test and coverage summary\n\n"
+              "| Tests | Failures | Errors | Skipped | Line coverage |\n"
+              "| ---: | ---: | ---: | ---: | ---: |\n"
+              f"| {test_totals['tests']} | {test_totals['failures']} | {test_totals['errors']} "
+              f"| {test_totals['skipped']} | {coverage} |\n"
+          )
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as summary_file:
+              summary_file.write(summary)
+
+      - name: Run Trivy repository report scan
+        if: ${{ always() }}
         uses: aquasecurity/trivy-action@v0.36.0
         with:
-          version: v0.70.0
+          version: v0.74.0
           scan-type: fs
           scan-ref: .
-          scanners: vuln
+          scanners: vuln,secret,misconfig
           severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
           format: sarif
-          output: trivy-results.sarif
+          output: trivy-repository.sarif
           exit-code: '0'
 
-      - name: Upload Trivy SARIF
-        if: ${{ always() && hashFiles('trivy-results.sarif') != '' }}
+      - name: Upload Trivy repository SARIF
+        if: ${{ always() && hashFiles('trivy-repository.sarif') != '' }}
         uses: github/codeql-action/upload-sarif@v4
         continue-on-error: true
         with:
-          sarif_file: trivy-results.sarif
-          category: trivy
+          sarif_file: trivy-repository.sarif
+          category: trivy-repository
 
       - name: Upload test reports
-        if: ${{ failure() }}
+        if: ${{ always() }}
         uses: actions/upload-artifact@v7
         with:
           name: ${{ inputs.artifact-name }}-test-reports
@@ -100,23 +147,129 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
-      - name: Fail on Trivy critical findings
-        if: ${{ always() && hashFiles('trivy-results.sarif') != '' }}
+      - name: Upload coverage reports
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ inputs.artifact-name }}-coverage-reports
+          path: '**/target/site/jacoco/**'
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Upload aggregate SBOM
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ inputs.artifact-name }}-dependency-sbom
+          path: target/polaris-sbom.json
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Enforce Trivy repository severity gate
+        if: ${{ always() }}
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          version: v0.74.0
+          skip-setup-trivy: true
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln,secret,misconfig
+          severity: HIGH,CRITICAL
+          format: table
+          exit-code: '1'
+
+  container-images:
+    name: Container image (${{ matrix.service }})
+    needs: quality-gates
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - service: gateway
+            jar: /app/gateway.jar
+          - service: order-service
+            jar: /app/order-service.jar
+          - service: inventory-service
+            jar: /app/inventory-service.jar
+          - service: notification-service
+            jar: /app/notification-service.jar
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Build production image
+        env:
+          IMAGE_REF: polaris/${{ matrix.service }}:${{ github.sha }}
+        run: |
+          docker build \
+            --file "${{ matrix.service }}/Dockerfile" \
+            --target production \
+            --tag "$IMAGE_REF" \
+            .
+
+      - name: Smoke-test image runtime and application archive
+        env:
+          IMAGE_REF: polaris/${{ matrix.service }}:${{ github.sha }}
         run: |
           set -euo pipefail
+          docker run --rm --entrypoint java "$IMAGE_REF" -version
+          docker run --rm --entrypoint java "$IMAGE_REF" \
+            -Djarmode=tools -jar "${{ matrix.jar }}" list-layers \
+            | grep -Fx application
 
-          critical_count="$(jq -r '
-            [
-              .runs[].results[]
-              | (.message.text | capture("Severity: (?<severity>[A-Z]+)")? | .severity) as $severity
-              | select($severity == "CRITICAL")
-            ]
-            | length
-          ' trivy-results.sarif)"
+      - name: Run Trivy image report scan
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          version: v0.74.0
+          scan-type: image
+          image-ref: polaris/${{ matrix.service }}:${{ github.sha }}
+          scanners: vuln,secret,misconfig
+          severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
+          format: sarif
+          output: trivy-${{ matrix.service }}.sarif
+          exit-code: '0'
 
-          if [ "$critical_count" -gt 0 ]; then
-            echo "::error::Trivy found $critical_count CRITICAL vulnerability result(s). Review the uploaded SARIF report."
-            exit 1
-          fi
+      - name: Upload Trivy image SARIF
+        if: ${{ always() && hashFiles(format('trivy-{0}.sarif', matrix.service)) != '' }}
+        uses: github/codeql-action/upload-sarif@v4
+        continue-on-error: true
+        with:
+          sarif_file: trivy-${{ matrix.service }}.sarif
+          category: trivy-image-${{ matrix.service }}
 
-          echo "Trivy found no critical vulnerabilities. Non-critical vulnerabilities are reported in the uploaded SARIF report."
+      - name: Generate image SBOM
+        if: ${{ always() }}
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          version: v0.74.0
+          skip-setup-trivy: true
+          scan-type: image
+          image-ref: polaris/${{ matrix.service }}:${{ github.sha }}
+          format: cyclonedx
+          output: ${{ matrix.service }}.cdx.json
+          exit-code: '0'
+
+      - name: Upload image SBOM
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ inputs.artifact-name }}-${{ matrix.service }}-sbom
+          path: ${{ matrix.service }}.cdx.json
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Enforce Trivy image severity gate
+        if: ${{ always() }}
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          version: v0.74.0
+          skip-setup-trivy: true
+          scan-type: image
+          image-ref: polaris/${{ matrix.service }}:${{ github.sha }}
+          scanners: vuln,secret,misconfig
+          severity: HIGH,CRITICAL
+          format: table
+          exit-code: '1'

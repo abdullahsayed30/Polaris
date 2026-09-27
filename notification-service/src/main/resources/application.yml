@@ -3,19 +3,37 @@ spring:
     name: notification-service
   main:
     web-application-type: none
+  datasource:
+    url: jdbc:postgresql://localhost:5434/polaris_notifications
+    username: polaris_notification
+    password: polaris_notification
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.xml
   kafka:
     bootstrap-servers: localhost:9092
     consumer:
       group-id: notification-service
       auto-offset-reset: earliest
+      enable-auto-commit: false
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
     producer:
+      acks: all
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:
+        enable.idempotence: true
         spring.json.add.type.headers: false
     listener:
+      ack-mode: record
       observation-enabled: true
     template:
       observation-enabled: true
@@ -60,6 +78,9 @@ polaris:
       inventory-adjusted: polaris.inventory.adjusted
       notifications-dlq: polaris.notifications.dlq
   notifications:
+    dlq:
+      send-timeout: 10s
+      redelivery-backoff: 1s
     retry:
       max-attempts: 3
       initial-interval: 250ms
@@ -78,5 +99,7 @@ spring:
       on-profile: docker
   main:
     web-application-type: servlet
+  datasource:
+    url: jdbc:postgresql://notification-postgres:5432/polaris_notifications
   kafka:
     bootstrap-servers: kafka:9092

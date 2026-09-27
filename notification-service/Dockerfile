@@ -8,6 +8,7 @@ COPY gateway/pom.xml gateway/pom.xml
 COPY order-service/pom.xml order-service/pom.xml
 COPY inventory-service/pom.xml inventory-service/pom.xml
 COPY notification-service/pom.xml notification-service/pom.xml
+COPY contract-tests/pom.xml contract-tests/pom.xml
 COPY shared/src shared/src
 COPY notification-service/src notification-service/src
 
@@ -19,13 +20,13 @@ COPY deploy/scripts/wait-for-it.sh /usr/local/bin/wait-for-it
 RUN chmod +x /usr/local/bin/wait-for-it \
     && groupadd --system --gid 10001 polaris \
     && useradd --system --uid 10001 --gid polaris --home-dir /app --shell /usr/sbin/nologin polaris
-COPY --from=build /workspace/notification-service/target/notification-service.jar /app/notification-service.jar
+COPY --from=build /workspace/notification-service/target/notification-service-exec.jar /app/notification-service.jar
 EXPOSE 8083
 USER 10001:10001
 ENTRYPOINT ["java", "-jar", "/app/notification-service.jar"]
 
 FROM gcr.io/distroless/java25-debian13:nonroot AS production
 WORKDIR /app
-COPY --from=build /workspace/notification-service/target/notification-service.jar /app/notification-service.jar
+COPY --from=build /workspace/notification-service/target/notification-service-exec.jar /app/notification-service.jar
 USER 65532:65532
 ENTRYPOINT ["java", "-jar", "/app/notification-service.jar"]

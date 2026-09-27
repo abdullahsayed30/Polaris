@@ -6,7 +6,7 @@
 [![Java](https://img.shields.io/badge/Java-25-007396)](#)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](#)
 
-Polaris is a production-grade microservices blueprint for a small e-commerce order flow. It is designed as a portfolio anchor: one repository that demonstrates REST at the edge, gRPC between services, Kafka for event choreography, database-per-service persistence, Liquibase migrations, containerized local development, observability, CI, and deployable Kubernetes artifacts.
+Polaris is a production-oriented reference implementation of a small e-commerce order flow. It is designed as a portfolio anchor: the repository contains runnable services, an authenticated local demo, integration and contract tests, observability assets, container builds, and a Helm deployment contract. It demonstrates production patterns without claiming that a sample repository operates a production platform.
 
 ## Architecture
 
@@ -16,7 +16,7 @@ flowchart LR
 
     Gateway -->|REST /api/v1/orders/** + JWT| Order[Order Service]
 
-    Order <-->|gRPC CheckStock / ReserveStock| Inventory
+    Order <-->|gRPC ReserveStock| Inventory
 
     Order -->|polaris.orders.created| Kafka[(Kafka)]
     Inventory -->|polaris.inventory.adjusted| Kafka
@@ -34,18 +34,18 @@ flowchart LR
 | Java              | 25                                           |
 | Spring Boot       | 3.5.x                                        |
 | Spring Cloud      | 2025.0.x                                     |
-| Database          | PostgreSQL 18, one database per service      |
+| Database          | PostgreSQL 18, one database per stateful service |
 | Schema migrations | Liquibase                                    |
-| Async messaging   | Apache Kafka 3.7                             |
+| Async messaging   | Spring Kafka; Kafka 3.7.2 in local Compose   |
 | Internal RPC      | gRPC + Protobuf                              |
-| Auth              | Spring Security + JWT OAuth2 resource server |
+| Auth              | JWT resource servers; local Keycloak realm   |
 | Testing           | JUnit 5, Mockito, Testcontainers             |
 | Metrics           | Micrometer, Prometheus, Grafana              |
 | Tracing           | OpenTelemetry, Grafana Tempo                 |
 | Logs              | SLF4J + Logback, ELK-ready structured output |
 | Container runtime | Docker, Docker Compose                       |
-| Orchestration     | Kubernetes manifests and Helm chart          |
-| CI                | GitHub Actions, CodeQL, Trivy                |
+| Orchestration     | Helm-rendered Kubernetes resources           |
+| CI                | GitHub Actions, CodeQL, Trivy, JaCoCo, SBOMs |
 
 ## Modules
 
@@ -53,10 +53,11 @@ flowchart LR
 |------------------------|-----------------------------------------------------------------------------------|
 | [`proto-contracts`](docs/proto-contracts.md) | Versioned protobuf contracts and generated gRPC Java stubs                        |
 | [`shared`](docs/shared.md) | Shared Java event payloads used by Kafka producers and consumers                  |
+| `contract-tests`       | Cross-service HTTP, event, and protobuf compatibility checks                      |
 | `gateway`              | Spring Cloud Gateway routes, JWT validation, CORS, rate limiting, request logging |
 | `order-service`        | Order REST API, order lifecycle, Postgres persistence, Kafka event publishing     |
 | `inventory-service`    | Starter-managed gRPC inventory API, stock reservations, inventory persistence, Kafka consumers |
-| `notification-service` | Kafka-driven notification workflow with retry and dead-letter handling            |
+| `notification-service` | Idempotent Kafka notification workflow with a persistent inbox, retry, and dead-letter handling |
 
 ## Gateway Edge Contract
 
@@ -72,23 +73,29 @@ See [Gateway](docs/services/gateway.md) for configuration details.
 
 ## Quick Start
 
-Prerequisites:
+For the fastest reviewer path, install:
 
 - Java 25
 - Maven Wrapper, pinned to Maven 3.9.15
 - Docker with Docker Compose
+- `curl` and `jq` for the authenticated demo
 
-Run the full local stack from the repository root:
+Verify the codebase, start the local stack, and run the customer-isolation demo:
 
 ```bash
-docker-compose up --build
+./mvnw clean verify
+docker compose up --build --wait
+./demo/polaris-demo.sh
 ```
 
-Expected local endpoints once the service skeleton and compose stack are in place:
+The demo obtains local Keycloak tokens for two users, places and reads an order through the gateway, and verifies that one customer cannot read another customer's order. The realm, users, passwords, and password-grant flow are development fixtures only; see [Local authenticated demo](demo/README.md).
+
+Useful local endpoints:
 
 | Service                       | URL                                     |
 |-------------------------------|-----------------------------------------|
 | Gateway                       | `http://localhost:8080`                 |
+| Local Keycloak realm          | `http://localhost:8089/realms/polaris` |
 | Order Service actuator        | `http://localhost:8081/actuator/health` |
 | Inventory Service actuator    | `http://localhost:8082/actuator/health` |
 | Inventory Service gRPC        | `localhost:19090`                       |
@@ -96,12 +103,6 @@ Expected local endpoints once the service skeleton and compose stack are in plac
 | Prometheus                    | `http://localhost:9090`                 |
 | Grafana                       | `http://localhost:3000`                 |
 | Tempo API                     | `http://localhost:3200`                 |
-
-Build and verify all modules:
-
-```bash
-./mvnw clean verify
-```
 
 Run the fast local gate without Testcontainers-backed integration tests:
 
@@ -116,21 +117,29 @@ git config core.hooksPath .githooks
 git config --get core.hooksPath
 ```
 
-The pre-commit hook runs the fast local gate: Spotless, Checkstyle, and unit tests. Run commits from a shell where `java -version` reports Java 25; Windows PowerShell, Git Bash, and WSL can each have separate Java configuration. CI runs Spotless, Checkstyle, unit tests, Testcontainers integration tests, CodeQL, and a Trivy repository scan for dependencies, secrets, Dockerfiles, Compose, and configuration files. Container image, Helm chart, and Kubernetes manifest scanning are deferred until those deployment artifacts are added. See [CI/CD](docs/ci-cd.md).
+The pre-commit hook runs the fast local gate: Spotless, Checkstyle, and unit tests. CI also runs integration tests, coverage, CodeQL, repository and container scans, image smoke tests, and SBOM generation. It builds production images but does not publish them. See [CI/CD](docs/ci-cd.md).
+
+Review the Kubernetes output without needing a cluster:
+
+```bash
+./deploy/scripts/validate-helm.sh
+```
+
+The chart deploys application workloads only. PostgreSQL, Kafka, Redis, OIDC/JWKS, and telemetry endpoints are supplied by the target platform. See [Kubernetes deployment](docs/deployment.md) and [Operational readiness](docs/operations.md).
 
 ## Domain Flow
 
 1. A client places an order through the gateway.
-2. `order-service` persists the order as `PENDING`.
-3. `order-service` calls `inventory-service` over gRPC `CheckStock`.
-4. If stock is available, `order-service` calls `ReserveStock` over gRPC.
-5. `inventory-service` reserves stock in its own database and publishes `polaris.inventory.adjusted`.
-6. `order-service` confirms or cancels the order and publishes `polaris.orders.created`.
-7. `notification-service` consumes order and inventory events and emits notification logs.
+2. `order-service` commits a `PENDING` order and its stable reservation identity before calling inventory.
+3. It calls `ReserveStock` directly. Inventory commits its idempotent decision and any inventory adjustment outbox row atomically.
+4. Order commits the confirmed/cancelled outcome and its order event outbox row atomically. A recovery worker retries unfinished orders with the same identity after lost responses or crashes, without requiring a client retry.
+5. Outbox publishers deliver the stored events to Kafka. Notification deduplicates them with its own inbox and logs simulated notifications; no real email is sent.
+
+`CheckStock` remains an informational API, and `ReleaseStock` is an explicit compensation primitive. Neither is a preliminary step in order placement. See [reservation recovery](docs/adr/0020-recover-pending-orders-durably.md).
 
 ## Production Conventions
 
-- Each service owns its database and schema migrations.
+- Order, inventory, and notification each own a PostgreSQL database and Liquibase migrations; the gateway remains stateless.
 - REST is used for external traffic through the gateway.
 - Gateway API routes require JWT authentication; health and CORS preflight traffic stay unauthenticated.
 - gRPC is used for synchronous internal service contracts.
@@ -139,25 +148,30 @@ The pre-commit hook runs the fast local gate: Spotless, Checkstyle, and unit tes
 - Services expose health, readiness, metrics, OTLP tracing, ECS JSON logs, and request correlation.
 - Integration tests use Testcontainers, not shared developer infrastructure.
 - CI enforces Java 25, formatting, style, unit tests, integration tests, static analysis, and repository security scans.
-- Docker Compose is the default local runtime; Helm is the deployment contract.
+- Docker Compose is the local demo runtime; Helm is the application deployment contract and deliberately excludes production stateful infrastructure.
 - ADRs in `docs/adr` document major architectural decisions.
+
+Agent contributors must follow [`AGENTS.md`](AGENTS.md). Fast tests include package-boundary checks alongside Maven's runtime module dependency enforcement.
 
 Detailed service documentation lives in [`docs/services`](docs/services/README.md), observability conventions live in [`docs/observability.md`](docs/observability.md), and the ADR index lives in [`docs/adr`](docs/adr/README.md).
 
-## Roadmap
+## Delivery status and roadmap
 
-Before `v1.0.0`, Polaris is intended to move from a clean blueprint skeleton to a runnable, tested, deployable reference system. The project preserves real service boundaries throughout that path, including a dedicated versioned [`proto-contracts`](docs/proto-contracts.md) package so gRPC contracts can be consumed by services without copying `.proto` files.
+The Maven application version is `0.8.0`; the Helm chart is independently versioned from `0.1.0`. This is a capability roadmap, not a claim that matching Git tags or published artifacts exist.
 
-- `v0.1.0`: repository skeleton, architecture docs, parent build.
-- `v0.2.0`: order service with REST, JPA, SQL Liquibase, Kafka publishing, gRPC inventory client, and Testcontainers.
-- `v0.3.0`: `proto-contracts` Maven module and inventory service with gRPC server, SQL Liquibase, Kafka consumer/producer, and Testcontainers.
-- `v0.4.0`: notification service with Kafka listeners, retry, dead-letter topic, and tests.
-- `v0.5.0`: gateway routes, JWT resource server, CORS, request logging, and rate limiting.
-- `v0.6.0`: Docker Compose local stack for Postgres, Kafka, services, Prometheus, Grafana, and Tempo.
-- `v0.6.0`: GitHub Actions CI, CodeQL, Trivy, Spotless, Checkstyle, required Git hooks, integration test automation, and README badges.
-- `v0.8.0`: Spring Boot-compatible gRPC starter, gRPC interceptors, health/reflection support, dashboards, tracing conventions, and structured logging.
-- `v0.9.0`: Helm chart, Kubernetes manifests, deployment docs, ADR set, and final README polish.
-- `v1.0.0`: stable portfolio-ready blueprint with local runtime, CI proof, and deployment artifacts.
+Available in this checkout:
+
+- Four runnable services with REST, gRPC, Kafka, service-owned PostgreSQL state where needed, Liquibase, and actuator telemetry.
+- Docker Compose local runtime with development-only identity, seeded data, Prometheus, Grafana, and Tempo.
+- Maven integration/contract tests plus CI quality, security, container, coverage, and SBOM gates.
+- A Helm chart with probes, resource controls, security contexts, PDBs, optional HPAs, NetworkPolicies, and external infrastructure contracts.
+
+Next operational increments:
+
+- Publish immutable image digests and packaged charts from a release workflow.
+- Add rendered-manifest policy/security validation to CI without coupling cluster credentials to pull requests.
+- Add measured business metrics for order acceptance, reservation outcomes, notification age, and DLQ growth before formalizing business SLOs.
+- Rehearse database restore, Kafka replay, schema-compatible rollback, and zone-failure behavior in a target environment.
 
 ## License
 

@@ -14,7 +14,7 @@ Polaris records significant architecture choices as lightweight ADRs. Each recor
 | [0006](0006-use-grpc-and-protobuf-for-internal-rpc.md) | Accepted | Use gRPC and Protobuf for internal RPC |
 | [0007](0007-package-protobuf-contracts-in-a-dedicated-module.md) | Accepted | Package protobuf contracts in a dedicated module |
 | [0008](0008-use-kafka-for-domain-event-choreography.md) | Accepted | Use Kafka for domain event choreography |
-| [0009](0009-publish-domain-events-after-transaction-commit.md) | Accepted | Publish domain events after transaction commit |
+| [0009](0009-publish-domain-events-after-transaction-commit.md) | Superseded by 0019 | Publish domain events after transaction commit |
 | [0010](0010-use-reservation-flow-instead-of-distributed-transactions.md) | Accepted | Use reservation flow instead of distributed transactions |
 | [0011](0011-use-testcontainers-for-integration-tests.md) | Accepted | Use Testcontainers for integration tests |
 | [0012](0012-use-spring-cloud-gateway-as-the-edge-service.md) | Accepted | Use Spring Cloud Gateway as the edge service |
@@ -24,3 +24,5 @@ Polaris records significant architecture choices as lightweight ADRs. Each recor
 | [0016](0016-use-tempo-for-distributed-tracing.md) | Accepted | Use Tempo for distributed tracing |
 | [0017](0017-use-github-actions-quality-and-security-gates.md) | Accepted | Use GitHub Actions quality and security gates |
 | [0018](0018-use-spring-boot-compatible-grpc-and-observability-conventions.md) | Accepted | Use Spring Boot-compatible gRPC and observability conventions |
+| [0019](0019-use-transactional-outbox-and-consumer-inbox.md) | Accepted | Use transactional outbox and consumer inbox |
+| [0020](0020-recover-pending-orders-durably.md) | Accepted | Recover pending orders durably without distributed transactions |

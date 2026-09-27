@@ -1,6 +1,6 @@
 # Polaris Architecture
 
-Polaris models a small e-commerce order flow with a gateway and three independently deployable services. The project is intentionally compact, but the architecture uses the same production patterns expected in larger service estates: database per service, explicit API boundaries, asynchronous domain events, internal RPC contracts, containerized local development, and documented architecture decisions.
+Polaris models a small e-commerce order flow with a gateway and three independently deployable services. The project is intentionally compact, but it keeps explicit API boundaries, asynchronous domain events, internal RPC contracts, state ownership, containerized local development, and documented architecture decisions visible.
 
 ```mermaid
 flowchart LR
@@ -8,7 +8,7 @@ flowchart LR
 
     Gateway -->|REST /api/v1/orders/** + JWT| Order[Order Service]
 
-    Order <-->|gRPC stock checks and reservations| Inventory
+    Order <-->|gRPC atomic reservations| Inventory
 
     Order -->|polaris.orders.created| Kafka[(Kafka)]
     Inventory -->|polaris.inventory.adjusted| Kafka
@@ -31,11 +31,37 @@ flowchart LR
 
 External clients enter through Spring Cloud Gateway over REST. The gateway owns edge concerns such as authentication, CORS, rate limiting, and request correlation so that service implementations stay focused on domain behavior. The current public route surface is `/api/v1/orders/**`, which forwards to `order-service`.
 
-Synchronous internal calls use gRPC where a request needs an immediate answer, such as checking stock before confirming an order. gRPC keeps internal contracts explicit, strongly typed, and efficient without exposing those APIs to external clients.
+Synchronous internal calls use gRPC where a request needs an immediate answer, such as atomically reserving stock before confirming an order. Order placement does not check then reserve. It commits a pending intent first and recovers uncertain reservation results with the same identity, as described in ADR 0020. gRPC keeps internal contracts explicit, strongly typed, and efficient without exposing those APIs to external clients.
 
 Spring Boot-compatible gRPC starters own server lifecycle and client channel creation. Services add global gRPC interceptors for request ID propagation, access logs, Micrometer Observation, and Prometheus metrics. Inventory exposes gRPC health and enables reflection only in local and Docker runtime profiles.
 
 Kafka carries domain events that do not require an immediate response. Order creation, inventory adjustments, and notification outcomes are modeled as durable events so services can evolve independently and recover from transient failures.
+
+## Deployment Boundary
+
+```mermaid
+flowchart TB
+    Ingress[Ingress or port-forward] --> Gateway
+
+    subgraph Chart[Helm release: application layer]
+        Gateway --> Order[Order Service]
+        Order -->|gRPC| Inventory[Inventory Service]
+        Notification[Notification Service]
+    end
+
+    Order --> OrderDB[(External order PostgreSQL)]
+    Inventory --> InventoryDB[(External inventory PostgreSQL)]
+    Notification --> NotificationDB[(External notification PostgreSQL)]
+    Gateway --> Redis[(External Redis)]
+    Gateway --> OIDC[External OIDC/JWKS]
+    Order --> OIDC
+    Order --> Kafka[(External Kafka)]
+    Inventory --> Kafka
+    Notification --> Kafka
+    Chart -. OTLP .-> Telemetry[External telemetry backend]
+```
+
+The Helm chart owns application Deployments, Services, configuration, Secret references, probes, resource/security settings, disruption budgets, optional autoscaling, and NetworkPolicies. PostgreSQL, Kafka, Redis, identity, certificates, backups, and telemetry storage remain platform responsibilities. This keeps the repository honest about the operational work needed to run stateful systems.
 
 ## Observability
 
@@ -45,13 +71,13 @@ Grafana provisions Prometheus and Tempo datasources, the Polaris overview dashbo
 
 ## Gateway Edge Policy
 
-The gateway validates bearer JWTs with Spring Security's OAuth2 resource server support. The local default uses static issuer and JWKS URLs until the identity provider runtime is added. Health, info, and CORS preflight requests are public; order API routes require an authenticated JWT.
+The gateway validates bearer JWTs with Spring Security's OAuth2 resource server support. Docker Compose includes a development-only Keycloak realm for the local demo; Kubernetes values require an operator-supplied issuer and JWKS endpoint. Health, info, and CORS preflight requests are public; order API routes require an authenticated JWT.
 
 Gateway CORS, upstream URI, and rate-limit settings are externalized. Local development uses an in-memory fixed-window limiter, while the Docker profile selects Redis-backed fixed-window limiting. See [Gateway](services/gateway.md) for route and configuration details.
 
 ## Data Ownership
 
-Each service owns its PostgreSQL database and applies Liquibase migrations as part of its deployment lifecycle. Cross-service reads happen through APIs or events, not shared tables. This keeps service boundaries visible and makes operational ownership clear.
+Order, inventory, and notification each own a PostgreSQL database and apply Liquibase migrations as part of application startup. Notification uses its database as a durable inbox for idempotent event processing; it does not share order or inventory tables. Cross-service reads happen through APIs or events, not shared tables.
 
 ## Why These Choices
 
@@ -64,7 +90,7 @@ Each service owns its PostgreSQL database and applies Liquibase migrations as pa
 - Testcontainers makes integration tests realistic and portable in CI.
 - GitHub Actions, CodeQL, Trivy, Spotless, Checkstyle, and repository-managed Git hooks keep build, security, and style gates repeatable.
 - Prometheus, Grafana, OpenTelemetry, Tempo, and ELK-ready logs show production observability expectations.
-- Kubernetes manifests and Helm chart make deployment intent clear without requiring a permanent paid environment.
+- The Helm chart renders Kubernetes application resources while externalizing production stateful infrastructure and credentials.
 
 ## ADR Index
 
@@ -87,6 +113,8 @@ Each service owns its PostgreSQL database and applies Liquibase migrations as pa
 - [0016 - Use Tempo for Distributed Tracing](adr/0016-use-tempo-for-distributed-tracing.md)
 - [0017 - Use GitHub Actions Quality and Security Gates](adr/0017-use-github-actions-quality-and-security-gates.md)
 - [0018 - Use Spring Boot-Compatible gRPC and Observability Conventions](adr/0018-use-spring-boot-compatible-grpc-and-observability-conventions.md)
+- [0019 - Use Transactional Outbox and Consumer Inbox](adr/0019-use-transactional-outbox-and-consumer-inbox.md)
+- [0020 - Recover Pending Orders Durably](adr/0020-recover-pending-orders-durably.md)
 
 ## Service Documentation
 

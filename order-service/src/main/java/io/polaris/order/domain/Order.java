@@ -58,7 +58,11 @@ public class Order {
     }
 
     public static Order place(UUID customerId, List<OrderItem> items) {
-        Order order = new Order(UUID.randomUUID(), customerId);
+        return place(UUID.randomUUID(), customerId, items);
+    }
+
+    public static Order place(UUID orderId, UUID customerId, List<OrderItem> items) {
+        Order order = new Order(orderId, customerId);
         items.forEach(order::addItem);
         return order;
     }

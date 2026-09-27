@@ -1,0 +1,21 @@
+{{- range $serviceName, $service := .Values.services }}
+{{- if and $service.enabled $service.podDisruptionBudget.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "polaris.serviceName" (dict "root" $ "service" $serviceName) }}
+  labels:
+    {{- include "polaris.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: {{ $serviceName }}
+spec:
+  {{- if hasKey $service.podDisruptionBudget "minAvailable" }}
+  minAvailable: {{ $service.podDisruptionBudget.minAvailable }}
+  {{- else }}
+  maxUnavailable: {{ $service.podDisruptionBudget.maxUnavailable }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "polaris.selectorLabels" (dict "root" $ "service" $serviceName) | nindent 6 }}
+---
+{{- end }}
+{{- end }}

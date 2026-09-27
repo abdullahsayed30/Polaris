@@ -1,6 +1,7 @@
 package io.polaris.inventory;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.time.Duration;
@@ -9,6 +10,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -37,6 +41,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import io.grpc.health.v1.HealthCheckRequest;
 import io.grpc.health.v1.HealthCheckResponse;
 import io.grpc.health.v1.HealthGrpc;
@@ -49,6 +55,9 @@ import io.grpc.stub.StreamObserver;
 import io.polaris.inventory.domain.InventoryItem;
 import io.polaris.inventory.grpc.InventoryDecision;
 import io.polaris.inventory.grpc.InventoryServiceGrpc;
+import io.polaris.inventory.grpc.ReleaseRequest;
+import io.polaris.inventory.grpc.ReleaseResponse;
+import io.polaris.inventory.grpc.ReservationState;
 import io.polaris.inventory.grpc.ReserveRequest;
 import io.polaris.inventory.grpc.ReserveResponse;
 import io.polaris.inventory.grpc.StockItem;
@@ -164,6 +173,98 @@ class InventoryServiceIntegrationTest {
     }
 
     @Test
+    void retryAfterSuccessfulResponseIsLostReplaysReservationWithoutDecrementingAgain() {
+        UUID orderId = UUID.randomUUID();
+        ReserveRequest request = reserveRequest(orderId, "SKU-COFFEE-001", 2);
+
+        inventory.reserveStock(request); // The caller loses this response and retries the same request.
+        ReserveResponse replay = inventory.reserveStock(request);
+
+        assertThat(replay.getReserved()).isTrue();
+        assertThat(replay.getState()).isEqualTo(ReservationState.RESERVATION_STATE_RESERVED);
+        assertThat(replay.getItems(0).getRemainingQuantity()).isEqualTo(8);
+        assertThat(inventoryItems.findBySku("SKU-COFFEE-001")).isPresent()
+                .get()
+                .extracting(InventoryItem::getAvailableQuantity)
+                .isEqualTo(8);
+    }
+
+    @Test
+    void concurrentDuplicateReservationsSerializeOnOrderId() throws Exception {
+        UUID orderId = UUID.randomUUID();
+        ReserveRequest request = reserveRequest(orderId, "SKU-COFFEE-001", 2);
+        CountDownLatch start = new CountDownLatch(1);
+
+        try (ExecutorService executor = Executors.newFixedThreadPool(2)) {
+            Future<ReserveResponse> first = executor.submit(() -> {
+                start.await();
+                return inventory.reserveStock(request);
+            });
+            Future<ReserveResponse> second = executor.submit(() -> {
+                start.await();
+                return inventory.reserveStock(request);
+            });
+            start.countDown();
+
+            assertThat(first.get(10, TimeUnit.SECONDS).getReserved()).isTrue();
+            assertThat(second.get(10, TimeUnit.SECONDS).getReserved()).isTrue();
+        }
+
+        assertThat(inventoryItems.findBySku("SKU-COFFEE-001")).isPresent()
+                .get()
+                .extracting(InventoryItem::getAvailableQuantity)
+                .isEqualTo(8);
+    }
+
+    @Test
+    void sameOrderIdWithDifferentItemsIsRejected() {
+        UUID orderId = UUID.randomUUID();
+        inventory.reserveStock(reserveRequest(orderId, "SKU-COFFEE-001", 2));
+
+        assertThatThrownBy(() -> inventory.reserveStock(reserveRequest(orderId, "SKU-COFFEE-001", 3)))
+                .isInstanceOfSatisfying(StatusRuntimeException.class,
+                        ex -> assertThat(ex.getStatus().getCode()).isEqualTo(Status.Code.FAILED_PRECONDITION));
+
+        assertThat(inventoryItems.findBySku("SKU-COFFEE-001")).isPresent()
+                .get()
+                .extracting(InventoryItem::getAvailableQuantity)
+                .isEqualTo(8);
+    }
+
+    @Test
+    void releaseIsIdempotentAndReleasedReservationCannotBeReservedAgain() {
+        UUID orderId = UUID.randomUUID();
+        ReserveRequest request = reserveRequest(orderId, "SKU-COFFEE-001", 2);
+        inventory.reserveStock(request);
+
+        ReleaseRequest releaseRequest = ReleaseRequest.newBuilder().setOrderId(orderId.toString()).build();
+        ReleaseResponse released = inventory.releaseStock(releaseRequest);
+        ReleaseResponse replay = inventory.releaseStock(releaseRequest);
+
+        assertThat(released.getReleased()).isTrue();
+        assertThat(released.getState()).isEqualTo(ReservationState.RESERVATION_STATE_RELEASED);
+        assertThat(replay).isEqualTo(released);
+        assertThat(inventoryItems.findBySku("SKU-COFFEE-001")).isPresent()
+                .get()
+                .extracting(InventoryItem::getAvailableQuantity)
+                .isEqualTo(10);
+        assertThatThrownBy(() -> inventory.reserveStock(request))
+                .isInstanceOfSatisfying(StatusRuntimeException.class,
+                        ex -> assertThat(ex.getStatus().getCode()).isEqualTo(Status.Code.FAILED_PRECONDITION));
+    }
+
+    @Test
+    void rejectedReservationCannotBeReleased() {
+        UUID orderId = UUID.randomUUID();
+        inventory.reserveStock(reserveRequest(orderId, "SKU-COFFEE-001", 20));
+
+        assertThatThrownBy(() -> inventory.releaseStock(
+                ReleaseRequest.newBuilder().setOrderId(orderId.toString()).build()))
+                .isInstanceOfSatisfying(StatusRuntimeException.class,
+                        ex -> assertThat(ex.getStatus().getCode()).isEqualTo(Status.Code.FAILED_PRECONDITION));
+    }
+
+    @Test
     void grpcHealthAndReflectionAreAvailable() throws Exception {
         HealthCheckResponse health = HealthGrpc.newBlockingStub(channel)
                 .check(HealthCheckRequest.newBuilder()
@@ -182,6 +283,13 @@ class InventoryServiceIntegrationTest {
         return StockItem.newBuilder()
                 .setSku(sku)
                 .setQuantity(quantity)
+                .build();
+    }
+
+    private ReserveRequest reserveRequest(UUID orderId, String sku, int quantity) {
+        return ReserveRequest.newBuilder()
+                .setOrderId(orderId.toString())
+                .addItems(stockItem(sku, quantity))
                 .build();
     }
 

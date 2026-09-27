@@ -1,0 +1,159 @@
+{{- range $serviceName, $service := .Values.services }}
+{{- if $service.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "polaris.serviceName" (dict "root" $ "service" $serviceName) }}
+  labels:
+    {{- include "polaris.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: {{ $serviceName }}
+spec:
+  {{- if not $service.autoscaling.enabled }}
+  replicas: {{ $service.replicaCount }}
+  {{- end }}
+  revisionHistoryLimit: {{ $.Values.revisionHistoryLimit }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      {{- include "polaris.selectorLabels" (dict "root" $ "service" $serviceName) | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmaps.yaml") $ | sha256sum }}
+        prometheus.io/path: /actuator/prometheus
+        prometheus.io/port: {{ $service.httpPort | quote }}
+        prometheus.io/scrape: "true"
+        {{- with $.Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- with $service.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "polaris.selectorLabels" (dict "root" $ "service" $serviceName) | nindent 8 }}
+        {{- with $.Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ include "polaris.serviceAccountName" $ }}
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: {{ $.Values.terminationGracePeriodSeconds }}
+      securityContext:
+        {{- toYaml $.Values.podSecurityContext | nindent 8 }}
+      {{- with $.Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ $serviceName }}
+          image: {{ printf "%s:%s" $service.image.repository (default $.Chart.AppVersion $service.image.tag) | quote }}
+          imagePullPolicy: {{ $service.image.pullPolicy }}
+          securityContext:
+            {{- toYaml $.Values.containerSecurityContext | nindent 12 }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "polaris.serviceName" (dict "root" $ "service" $serviceName) }}
+          {{- if or (eq $serviceName "order-service") (eq $serviceName "inventory-service") (eq $serviceName "notification-service") (gt (len $service.secretEnv) 0) }}
+          env:
+            {{- if eq $serviceName "order-service" }}
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $.Values.infrastructure.databases.order.existingSecret }}
+                  key: {{ $.Values.infrastructure.databases.order.usernameKey }}
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $.Values.infrastructure.databases.order.existingSecret }}
+                  key: {{ $.Values.infrastructure.databases.order.passwordKey }}
+            {{- else if eq $serviceName "inventory-service" }}
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $.Values.infrastructure.databases.inventory.existingSecret }}
+                  key: {{ $.Values.infrastructure.databases.inventory.usernameKey }}
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $.Values.infrastructure.databases.inventory.existingSecret }}
+                  key: {{ $.Values.infrastructure.databases.inventory.passwordKey }}
+            {{- else if eq $serviceName "notification-service" }}
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $.Values.infrastructure.databases.notification.existingSecret }}
+                  key: {{ $.Values.infrastructure.databases.notification.usernameKey }}
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $.Values.infrastructure.databases.notification.existingSecret }}
+                  key: {{ $.Values.infrastructure.databases.notification.passwordKey }}
+            {{- end }}
+            {{- range $secret := $service.secretEnv }}
+            - name: {{ $secret.name }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $secret.secretName }}
+                  key: {{ $secret.secretKey }}
+                  optional: {{ default false $secret.optional }}
+            {{- end }}
+          {{- end }}
+          ports:
+            {{- range $port := $service.ports }}
+            - name: {{ $port.name }}
+              containerPort: {{ $port.containerPort }}
+              protocol: {{ default "TCP" $port.protocol }}
+            {{- end }}
+          startupProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            failureThreshold: {{ $service.probes.startup.failureThreshold }}
+            periodSeconds: {{ $service.probes.startup.periodSeconds }}
+            timeoutSeconds: {{ $service.probes.timeoutSeconds }}
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: http
+            failureThreshold: {{ $service.probes.readiness.failureThreshold }}
+            periodSeconds: {{ $service.probes.readiness.periodSeconds }}
+            timeoutSeconds: {{ $service.probes.timeoutSeconds }}
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            failureThreshold: {{ $service.probes.liveness.failureThreshold }}
+            periodSeconds: {{ $service.probes.liveness.periodSeconds }}
+            timeoutSeconds: {{ $service.probes.timeoutSeconds }}
+          resources:
+            {{- toYaml $service.resources | nindent 12 }}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir:
+            sizeLimit: {{ $.Values.tmpVolumeSizeLimit }}
+      {{- with $.Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $.Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $.Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $.Values.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+---
+{{- end }}
+{{- end }}

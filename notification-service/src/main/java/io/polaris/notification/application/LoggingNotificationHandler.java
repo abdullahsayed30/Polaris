@@ -14,7 +14,7 @@ public class LoggingNotificationHandler implements NotificationHandler {
     @Override
     public void handle(OrderCreatedEvent event) {
         log.info(
-                "confirmation email sent orderId={} customerId={} status={} itemCount={}",
+                "simulated confirmation notification orderId={} customerId={} status={} itemCount={}",
                 event.orderId(),
                 event.customerId(),
                 event.status(),

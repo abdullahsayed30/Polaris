@@ -1,0 +1,11 @@
+{
+  "orderId": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+  "items": [
+    {
+      "sku": "SKU-COFFEE-001",
+      "quantityChanged": -2,
+      "availableQuantity": 8
+    }
+  ],
+  "adjustedAt": "2026-05-11T12:00:00Z"
+}

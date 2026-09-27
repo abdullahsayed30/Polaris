@@ -14,9 +14,9 @@
 
 The service runs with `spring.main.web-application-type=none` by default and does not expose a business HTTP API. The `docker` profile switches on an actuator-only HTTP listener on port `8083` so Docker Compose can healthcheck the consumer and Prometheus can scrape metrics.
 
-The service does not own a database in the current blueprint stage. The local Compose stack still provisions a dedicated notification PostgreSQL container to preserve the database-per-service runtime boundary for later notification persistence.
+The service owns the `polaris_notifications` database. Its `inbox_events` table records the source topic coordinates and terminal processing state for every valid event ID. Redelivery of a committed event ID is skipped.
 
-The current notification handler logs confirmation and inventory adjustment messages. This keeps the workflow testable while leaving real email, SMS, webhook, or provider integrations behind the `NotificationHandler` port.
+The current notification handler logs simulated confirmation and inventory adjustment messages; it does not send email. This keeps the workflow testable while leaving real email, SMS, webhook, or provider integrations behind the `NotificationHandler` port.
 
 ## Kafka
 
@@ -28,6 +28,10 @@ The current notification handler logs confirmation and inventory adjustment mess
 
 The consumer group is `notification-service` by default.
 
+Both source contracts carry `EventMetadata` with a stable event ID and version. The inbox uses the event ID as its primary key. Real notification providers should receive the same ID as their idempotency key because a database inbox alone cannot make an external side effect and a local commit atomic.
+
+Retained older events without the metadata member remain supported: the Kafka adapter assigns a deterministic identity from topic/partition/offset and preserves the original occurrence timestamp. An explicit null or invalid metadata member is rejected. Replaying a legacy record at a different offset creates a new identity. Deploy compatible consumers before new producers; see [contract compatibility](../../contracts/README.md).
+
 ## Retry and Dead Lettering
 
 Notification handling is wrapped in a Resilience4j retry named `notification-workflow`.
@@ -38,16 +42,19 @@ Notification handling is wrapped in a Resilience4j retry named `notification-wor
 | `polaris.notifications.retry.initial-interval` | `250ms` |
 | `polaris.notifications.retry.multiplier` | `2.0` |
 
-When retries are exhausted, the service publishes a dead-letter event containing the source topic, source key, event type, original payload, error type, error message, and failure timestamp.
+When retries are exhausted, the service publishes a dead-letter event containing its own stable metadata plus the source event ID/version, topic, partition, offset, key, original payload, error, and failure timestamp. Malformed JSON follows the same poison-event path without a source event ID.
+
+The listener waits for Kafka to acknowledge the dead-letter record. If publication fails or times out, the exception escapes and the container retries the source record indefinitely with `polaris.notifications.dlq.redelivery-backoff`; it does not acknowledge and lose the source message. Kafka record acknowledgement is explicit.
 
 ## Package Shape
 
 | Package | Purpose |
 | --- | --- |
-| `application` | Notification handling port and logging implementation |
+| `application` | Transactional workflow, duplicate suppression, retry/outcome orchestration, handler/DLQ ports and plain delivery input |
 | `config` | Retry configuration and typed retry properties |
-| `messaging` | Kafka listeners, dead-letter event, dead-letter publisher, topic wiring |
+| `messaging` | Thin Kafka decoding listener, legacy adaptation, confirmed dead-letter adapter, error handling and topic wiring |
+| `persistence` | Inbox entity, status and Spring Data repository; no Kafka record dependency |
 
 ## Tests
 
-The integration test starts Kafka with Testcontainers, produces order and inventory events, verifies handler execution, simulates a notification outage, and asserts that a dead-letter event is published after configured retry exhaustion.
+The integration test starts PostgreSQL and Kafka with Testcontainers, produces order and inventory events, verifies inbox-backed duplicate suppression, simulates a notification outage, and asserts that a dead-letter event is published after configured retry exhaustion. Focused unit tests cover transient retry, poison payloads, duplicate delivery, and failed dead-letter broker acknowledgement.

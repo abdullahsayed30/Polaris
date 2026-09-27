@@ -9,6 +9,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
 
+import io.polaris.gateway.config.GatewayRateLimitProperties;
+
 @Configuration
 class RateLimiterConfiguration {
     @Bean

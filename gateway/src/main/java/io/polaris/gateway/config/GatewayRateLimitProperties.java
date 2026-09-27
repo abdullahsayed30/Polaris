@@ -1,4 +1,4 @@
-package io.polaris.gateway.ratelimit;
+package io.polaris.gateway.config;
 
 import java.time.Duration;
 

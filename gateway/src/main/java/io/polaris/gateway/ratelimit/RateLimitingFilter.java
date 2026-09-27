@@ -10,6 +10,8 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 
+import io.polaris.gateway.config.GatewayRateLimitProperties;
+
 import reactor.core.publisher.Mono;
 
 @Component

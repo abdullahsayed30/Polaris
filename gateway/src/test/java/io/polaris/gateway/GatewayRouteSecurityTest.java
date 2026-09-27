@@ -27,6 +27,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.mock.web.server.MockServerWebExchange;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsConfigurationSource;
@@ -41,7 +42,8 @@ import io.polaris.gateway.config.GatewayCorsProperties;
         "polaris.gateway.rate-limit.enabled=false",
         "polaris.gateway.cors.allowed-origins=http://localhost:3000",
         "polaris.gateway.cors.allowed-methods=GET,POST,PUT,PATCH,DELETE,OPTIONS",
-        "polaris.gateway.cors.allowed-headers=Authorization,Content-Type,X-Request-Id,WebTestClient-Request-Id"
+        "polaris.gateway.cors.allowed-headers=Authorization,Content-Type,Idempotency-Key,X-Request-Id,WebTestClient-Request-Id",
+        "polaris.gateway.cors.exposed-headers=Idempotency-Replayed,X-Request-Id"
 })
 @AutoConfigureWebTestClient
 class GatewayRouteSecurityTest {
@@ -83,6 +85,8 @@ class GatewayRouteSecurityTest {
 
         assertThat(corsProperties.allowedOrigins()).contains("http://localhost:3000");
         assertThat(corsProperties.allowedMethods()).contains("POST");
+        assertThat(corsProperties.allowedHeaders()).contains("Idempotency-Key");
+        assertThat(corsProperties.exposedHeaders()).contains("Idempotency-Replayed");
         assertThat(corsProperties.allowedHeaders()).contains("WebTestClient-Request-Id");
         assertThat(configuration).isNotNull();
         assertThat(configuration.checkOrigin("http://localhost:3000")).isEqualTo("http://localhost:3000");
@@ -101,7 +105,9 @@ class GatewayRouteSecurityTest {
 
     @Test
     void forwardsAuthenticatedOrderRequests() {
-        webTestClient.mutateWith(mockJwt().jwt(jwt -> jwt.subject("customer-123")))
+        webTestClient.mutateWith(mockJwt()
+                .jwt(jwt -> jwt.subject("customer-123"))
+                .authorities(new SimpleGrantedAuthority("SCOPE_orders:read")))
                 .get()
                 .uri("/api/v1/orders/{id}", UUID.randomUUID())
                 .exchange()
@@ -109,6 +115,17 @@ class GatewayRouteSecurityTest {
                 .expectHeader().exists("X-Request-Id")
                 .expectBody()
                 .jsonPath("$.backend").isEqualTo("order-service");
+    }
+
+    @Test
+    void rejectsAuthenticatedOrderRequestsWithoutRequiredScope() {
+        webTestClient.mutateWith(mockJwt()
+                .jwt(jwt -> jwt.subject("customer-123"))
+                .authorities(new SimpleGrantedAuthority("SCOPE_orders:write")))
+                .get()
+                .uri("/api/v1/orders/{id}", UUID.randomUUID())
+                .exchange()
+                .expectStatus().isForbidden();
     }
 
     @Test

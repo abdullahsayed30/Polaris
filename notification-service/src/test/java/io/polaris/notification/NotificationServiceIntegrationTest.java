@@ -1,7 +1,11 @@
 package io.polaris.notification;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.doThrow;
 
 import java.math.BigDecimal;
 import java.time.Duration;
@@ -32,6 +36,8 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.kafka.ConfluentKafkaContainer;
@@ -39,8 +45,15 @@ import org.testcontainers.utility.DockerImageName;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.polaris.notification.application.NotificationDelivery;
 import io.polaris.notification.application.NotificationHandler;
+import io.polaris.notification.messaging.DeadLetterPublicationException;
 import io.polaris.notification.messaging.NotificationDeadLetterEvent;
+import io.polaris.notification.messaging.NotificationDeadLetterPublisher;
+import io.polaris.notification.messaging.NotificationKafkaListener;
+import io.polaris.notification.persistence.InboxEventRepository;
+import io.polaris.notification.persistence.InboxStatus;
+import io.polaris.shared.events.EventMetadata;
 import io.polaris.shared.events.InventoryAdjustedEvent;
 import io.polaris.shared.events.OrderCreatedEvent;
 
@@ -59,6 +72,13 @@ class NotificationServiceIntegrationTest {
     static final ConfluentKafkaContainer kafka = new ConfluentKafkaContainer(
             DockerImageName.parse("confluentinc/cp-kafka:7.7.1"));
 
+    @Container
+    static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(
+            DockerImageName.parse("postgres:18").asCompatibleSubstituteFor("postgres"))
+            .withDatabaseName("polaris_notifications")
+            .withUsername("polaris_notification")
+            .withPassword("polaris_notification");
+
     @Autowired
     KafkaTemplate<String, Object> kafkaTemplate;
 
@@ -68,14 +88,27 @@ class NotificationServiceIntegrationTest {
     @Autowired
     ObjectMapper objectMapper;
 
+    @Autowired
+    InboxEventRepository inboxEvents;
+
+    @Autowired
+    NotificationKafkaListener listener;
+
+    @MockitoSpyBean
+    NotificationDeadLetterPublisher deadLetterPublisher;
+
     @DynamicPropertySource
     static void registerProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.kafka.bootstrap-servers", kafka::getBootstrapServers);
+        registry.add("spring.datasource.url", postgres::getJdbcUrl);
+        registry.add("spring.datasource.username", postgres::getUsername);
+        registry.add("spring.datasource.password", postgres::getPassword);
     }
 
     @BeforeEach
     void setUp() {
         notificationHandler.reset();
+        inboxEvents.deleteAll();
     }
 
     @Test
@@ -90,6 +123,8 @@ class NotificationServiceIntegrationTest {
 
         assertThat(notificationHandler.awaitOrderAttempts(1)).isTrue();
         assertThat(notificationHandler.awaitInventoryAttempts(1)).isTrue();
+        assertThat(awaitInboxStatus(orderEvent.metadata().eventId(), InboxStatus.PROCESSED)).isTrue();
+        assertThat(awaitInboxStatus(inventoryEvent.metadata().eventId(), InboxStatus.PROCESSED)).isTrue();
         assertThat(notificationHandler.lastOrder().orderId()).isEqualTo(orderEvent.orderId());
         assertThat(notificationHandler.lastInventoryAdjustment().orderId()).isEqualTo(orderEvent.orderId());
     }
@@ -111,6 +146,57 @@ class NotificationServiceIntegrationTest {
         assertThat(deadLetter.payload()).contains(orderEvent.orderId().toString());
         assertThat(deadLetter.errorType()).isEqualTo(IllegalStateException.class.getName());
         assertThat(deadLetter.errorMessage()).isEqualTo("simulated notification outage");
+        assertThat(deadLetter.sourceEventId()).isEqualTo(orderEvent.metadata().eventId());
+        assertThat(deadLetter.metadata().causationId()).isEqualTo(orderEvent.metadata().eventId());
+        assertThat(awaitInboxStatus(orderEvent.metadata().eventId(), InboxStatus.DEAD_LETTERED)).isTrue();
+    }
+
+    @Test
+    void duplicateDeliveryIsHandledOnlyOnce() throws Exception {
+        OrderCreatedEvent orderEvent = orderCreatedEvent();
+
+        kafkaTemplate.send(ORDER_CREATED_TOPIC, orderEvent.orderId().toString(), orderEvent)
+                .get(10, TimeUnit.SECONDS);
+        kafkaTemplate.send(ORDER_CREATED_TOPIC, orderEvent.orderId().toString(), orderEvent)
+                .get(10, TimeUnit.SECONDS);
+
+        assertThat(notificationHandler.awaitOrderAttempts(1)).isTrue();
+        Thread.sleep(500);
+        assertThat(notificationHandler.orderAttempts()).isOne();
+        assertThat(awaitInboxStatus(orderEvent.metadata().eventId(), InboxStatus.PROCESSED)).isTrue();
+    }
+
+    @Test
+    void failedDeadLetterRollsBackInboxAndAllowsRedelivery() throws Exception {
+        OrderCreatedEvent event = orderCreatedEvent();
+        ConsumerRecord<String, String> record = new ConsumerRecord<>(ORDER_CREATED_TOPIC, 0, 500L,
+                event.orderId().toString(), objectMapper.writeValueAsString(event));
+        notificationHandler.failOrderNotifications();
+        doThrow(new DeadLetterPublicationException(UUID.randomUUID(), new IllegalStateException("broker down")))
+                .when(deadLetterPublisher).publish(any(NotificationDelivery.class), any(EventMetadata.class), any());
+
+        assertThatThrownBy(() -> listener.onOrderCreated(record)).isInstanceOf(DeadLetterPublicationException.class);
+        assertThat(inboxEvents.findById(event.metadata().eventId())).isEmpty();
+
+        doCallRealMethod().when(deadLetterPublisher)
+                .publish(any(NotificationDelivery.class), any(EventMetadata.class), any());
+        listener.onOrderCreated(record);
+
+        assertThat(inboxEvents.findById(event.metadata().eventId())).isPresent()
+                .get().extracting(inbox -> inbox.getStatus()).isEqualTo(InboxStatus.DEAD_LETTERED);
+        assertThat(notificationHandler.orderAttempts()).isEqualTo(6);
+        assertThat(awaitDeadLetterEvent(event.orderId()).sourceEventId()).isEqualTo(event.metadata().eventId());
+    }
+
+    private boolean awaitInboxStatus(UUID eventId, InboxStatus expected) throws InterruptedException {
+        long deadline = System.nanoTime() + Duration.ofSeconds(10).toNanos();
+        while (System.nanoTime() < deadline) {
+            if (inboxEvents.findById(eventId).filter(inbox -> inbox.getStatus() == expected).isPresent()) {
+                return true;
+            }
+            Thread.sleep(50);
+        }
+        return false;
     }
 
     private NotificationDeadLetterEvent awaitDeadLetterEvent(UUID orderId) throws Exception {
@@ -140,7 +226,9 @@ class NotificationServiceIntegrationTest {
     }
 
     private OrderCreatedEvent orderCreatedEvent() {
+        Instant now = Instant.now();
         return new OrderCreatedEvent(
+                EventMetadata.initial(OrderCreatedEvent.EVENT_VERSION, now, "integration-test"),
                 UUID.randomUUID(),
                 UUID.randomUUID(),
                 OrderCreatedEvent.OrderStatus.CONFIRMED,
@@ -149,14 +237,16 @@ class NotificationServiceIntegrationTest {
                         "SKU-COFFEE-001",
                         2,
                         new BigDecimal("19.99"))),
-                Instant.now());
+                now);
     }
 
     private InventoryAdjustedEvent inventoryAdjustedEvent(UUID orderId) {
+        Instant now = Instant.now();
         return new InventoryAdjustedEvent(
+                EventMetadata.initial(InventoryAdjustedEvent.EVENT_VERSION, now, "integration-test"),
                 orderId,
                 List.of(new InventoryAdjustedEvent.Item("SKU-COFFEE-001", -2, 8)),
-                Instant.now());
+                now);
     }
 
     @TestConfiguration
@@ -212,6 +302,10 @@ class NotificationServiceIntegrationTest {
 
         boolean awaitOrderAttempts(int expectedAttempts) throws InterruptedException {
             return await(() -> orderAttempts.get() >= expectedAttempts);
+        }
+
+        int orderAttempts() {
+            return orderAttempts.get();
         }
 
         boolean awaitInventoryAttempts(int expectedAttempts) throws InterruptedException {

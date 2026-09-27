@@ -1,0 +1,84 @@
+asyncapi: 2.6.0
+info:
+  title: Polaris Kafka Events
+  version: 1.0.0
+  description: Version 1 JSON event contracts exchanged by Polaris services.
+defaultContentType: application/json
+servers:
+  local:
+    url: localhost:9092
+    protocol: kafka
+    description: Local Kafka broker
+channels:
+  polaris.orders.created:
+    description: Order outcomes emitted by order-service and observed by inventory-service and notification-service.
+    bindings:
+      kafka:
+        bindingVersion: 0.5.0
+    publish:
+      operationId: publishOrderCreated
+      message:
+        $ref: '#/components/messages/OrderCreated'
+  polaris.inventory.adjusted:
+    description: Successful reservations and releases emitted by inventory-service and consumed by notification-service.
+    bindings:
+      kafka:
+        bindingVersion: 0.5.0
+    publish:
+      operationId: publishInventoryAdjusted
+      message:
+        $ref: '#/components/messages/InventoryAdjusted'
+  polaris.notifications.dlq:
+    description: Notification failures emitted after application retry is exhausted.
+    bindings:
+      kafka:
+        bindingVersion: 0.5.0
+    publish:
+      operationId: publishNotificationDeadLetter
+      message:
+        $ref: '#/components/messages/NotificationDeadLetter'
+components:
+  messages:
+    OrderCreated:
+      name: OrderCreated
+      title: Order created event
+      correlationId:
+        location: $message.payload#/orderId
+      bindings:
+        kafka:
+          key:
+            type: string
+            format: uuid
+          bindingVersion: 0.5.0
+      schemaFormat: application/schema+json;version=draft-07
+      payload:
+        $ref: ../events/v1/order-created.schema.json
+    InventoryAdjusted:
+      name: InventoryAdjusted
+      title: Inventory adjusted event
+      correlationId:
+        location: $message.payload#/orderId
+      bindings:
+        kafka:
+          key:
+            type: string
+            format: uuid
+          bindingVersion: 0.5.0
+      schemaFormat: application/schema+json;version=draft-07
+      payload:
+        $ref: ../events/v1/inventory-adjusted.schema.json
+    NotificationDeadLetter:
+      name: NotificationDeadLetter
+      title: Notification dead-letter event
+      correlationId:
+        location: $message.payload#/metadata/eventId
+      bindings:
+        kafka:
+          key:
+            type:
+              - string
+              - 'null'
+          bindingVersion: 0.5.0
+      schemaFormat: application/schema+json;version=draft-07
+      payload:
+        $ref: ../events/v1/notification-dead-letter.schema.json
