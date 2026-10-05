@@ -116,13 +116,15 @@ Order, inventory, and notification each own a PostgreSQL database and apply Liqu
 - [0019 - Use Transactional Outbox and Consumer Inbox](adr/0019-use-transactional-outbox-and-consumer-inbox.md)
 - [0020 - Recover Pending Orders Durably](adr/0020-recover-pending-orders-durably.md)
 
+- [0021 - Adopt Hombergs Hexagonal Service Structure](adr/0021-adopt-hombergs-hexagonal-service-structure.md)
+
 ## Service Documentation
 
 Detailed runtime service documentation lives under [Services](services/README.md).
 
 ## Service Code Standard
 
-Polaris services follow a lightweight ports-and-adapters architecture. The package and dependency rules are documented in [Service Architecture Standard](service-architecture-standard.md).
+Order, inventory and notification follow the Hombergs hexagonal package structure with explicit inbound/outbound ports and separate plain business models and JPA entities (ADR 0021). Gateway retains its edge structure. The package and dependency rules are documented in [Service Architecture Standard](service-architecture-standard.md).
 
 ## Contract Packaging
 

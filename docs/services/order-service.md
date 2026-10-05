@@ -71,17 +71,18 @@ The generated inventory blocking stub is created by the Spring Boot-compatible g
 
 ## Package Shape
 
+See [ADR 0021](../adr/0021-adopt-hombergs-hexagonal-service-structure.md) and the [service standard](../service-architecture-standard.md) for dependency rules.
+
 | Package | Purpose |
 | --- | --- |
-| `api` | REST controller, request/response records, API exception handling |
-| `application` | Placement and recovery use cases, event mapping/recording port, transaction boundaries |
-| `domain` | Orders, items, statuses, and idempotency request identity |
-| `inventory` | Inventory client port and gRPC adapter |
-| `messaging` | Event-recording adapter, outbox publisher, and delivery scheduler |
-| `persistence` | Order/request repositories, outbox entities and repository |
-| `config` | Kafka/gRPC wiring, observability, typed properties, recovery scheduler |
-| `logging` | Request ID MDC and response propagation |
+| `application.domain.model` | Plain orders, items, statuses and idempotency request state |
+| `application.domain.service` | Placement/recovery use cases, business transactions and event mapping |
+| `application.port.in` / `.out` | Place/get/recover interfaces; storage, inventory, event and telemetry capabilities |
+| `adapter.in.web` / `.scheduling` | REST DTOs, security identity mapping, request correlation and recovery triggers |
+| `adapter.out.persistence` | Separate JPA models/mappers, locked storage adapters and transactional event recording |
+| `adapter.out.grpc` / `.messaging` / `.observability` | Inventory RPC, outbox delivery and metrics/correlation adapters |
+| Service root | Spring wiring, security configuration and typed properties |
 
 ## Tests
 
-The integration test starts PostgreSQL and Kafka with Testcontainers and uses a fake gRPC inventory server. It verifies confirmed and cancelled orders, duplicate and concurrent idempotent requests, payload conflicts, recovery after a lost reservation response, order lookup, validation, and Kafka publication. Focused unit tests cover gRPC request ID metadata propagation and MDC cleanup.
+The integration test starts PostgreSQL and Kafka with Testcontainers and uses a fake gRPC inventory server. It verifies confirmed and cancelled orders, duplicate and concurrent idempotent requests, payload conflicts, recovery after a lost reservation response, order lookup, validation, and Kafka publication. A database mapping test also verifies explicit persistence, stable item IDs, exact decimal scale, timestamps and optimistic versions. Focused unit tests cover gRPC request ID metadata propagation and MDC cleanup.

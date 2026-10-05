@@ -8,6 +8,8 @@
 
 Polaris is a production-oriented reference implementation of a small e-commerce order flow. It is designed as a portfolio anchor: the repository contains runnable services, an authenticated local demo, integration and contract tests, observability assets, container builds, and a Helm deployment contract. It demonstrates production patterns without claiming that a sample repository operates a production platform.
 
+Order, inventory and notification use a [Hombergs-style hexagonal architecture](docs/service-architecture-standard.md): inbound/outbound ports, pure business models and separate JPA persistence adapters. Gateway and contract modules retain their existing structure.
+
 ## Architecture
 
 ```mermaid

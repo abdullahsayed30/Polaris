@@ -1,78 +1,73 @@
 # Service Architecture Standard
 
-Polaris services use a lightweight ports-and-adapters architecture. This keeps the codebase close to Spring Boot conventions while still making domain behavior, inbound APIs, and outbound infrastructure dependencies easy to reason about.
+Order, inventory and notification use Tom Hombergs' hexagonal (ports-and-adapters) structure, following [BuckPal at the pinned reference commit](https://github.com/thombergs/buckpal/tree/dc819c66640be4f42100a622b9e97b1e82ad75a7). [ADR 0021](adr/0021-adopt-hombergs-hexagonal-service-structure.md) supersedes ADR 0005 for these three services. Gateway, shared contracts and generated protobuf code are outside this migration.
 
 ## Package Standard
 
-Every service should follow this package shape unless there is a clear reason to deviate:
+All paths below are relative to `io.polaris.<service>`:
 
-| Package | Purpose |
+| Package | Responsibility |
 | --- | --- |
-| `api` | Inbound REST/gRPC adapters, request/response DTOs, and API exception handling |
-| `application` | Use cases, transaction boundaries, orchestration, and outbound event/delivery ports |
-| `domain` | Entities, enums, value objects, and domain behavior |
-| `persistence` | Spring Data repositories, persistence adapters, and outbox/inbox bookkeeping entities |
-| `messaging` | Kafka producers, consumers, topic configuration, and event adapters |
-| `inventory`, `payment`, or other integration package | Outbound client ports and adapters for external/internal systems |
-| `config` | Spring configuration and typed configuration properties |
+| `application.domain.model` | Plain business models, state transitions, invariants and value types; no JPA or framework dependencies |
+| `application.domain.service` | Use-case implementations, orchestration, business transactions and plain policy values |
+| `application.port.in` | Inbound use-case interfaces, inputs/results and public use-case exceptions |
+| `application.port.out` | Application-owned storage, client, event, delivery and telemetry capabilities |
+| `adapter.in.web`, `.grpc`, `.messaging` | Request/record decoding, validation, response/error mapping and inbound-port calls |
+| `adapter.in.scheduling` | Scheduled recovery triggers that call an inbound port |
+| `adapter.out.persistence` | JPA entities, Spring Data repositories, mappers, storage adapters and transactional inbox/outbox recording |
+| `adapter.out.grpc`, `.messaging` | Outbound RPC and Kafka delivery, including outbox delivery bookkeeping |
+| `adapter.out.observability`, `.retry`, `.logging` | Existing telemetry, retry mechanics and simulated notification handling |
+| Service root | Bootstrap, Spring wiring, typed configuration properties and shared adapter correlation constants |
 
-## Order Service Shape
+Only packages with actual responsibilities exist. Notification has no artificial business model: inbox rows are infrastructure bookkeeping. No capability wrapper, extra runtime Maven module or Spring Modulith dependency is required.
 
-`order-service` currently applies the standard as follows:
+## Dependency Direction
 
-- `api`: exposes `POST /api/v1/orders` and `GET /api/v1/orders/{id}`.
-- `application`: owns order placement, durable pending-order recovery, transaction boundaries, and the event-recording port.
-- `domain`: owns orders, items, statuses, and idempotency request identity.
-- `persistence`: owns order/request repositories and outbox storage.
-- `inventory`: defines the `InventoryClient` port and the gRPC adapter.
-- `messaging`: implements the event-recording port and publishes committed outbox rows to Kafka.
-- `config`: wires Kafka topic creation and the Inventory gRPC channel.
+```mermaid
+flowchart LR
+    In[Inbound adapters] --> Input[Inbound ports]
+    UseCases[Application services] -. implement .-> Input
+    UseCases --> Model[Plain domain models]
+    UseCases --> Output[Outbound ports]
+    Out[Outbound adapters] -. implement .-> Output
+    Out --> Model
+    Persistence[Persistence mappers and JPA entities] --- Out
+    Wiring[Service root wiring] -. assemble .-> UseCases
+    Wiring -. assemble .-> Out
+```
 
-## Inventory Service Shape
+- Inbound adapters invoke ports; they do not reference use-case implementation classes or outbound adapters.
+- Application services may use Spring `@Service`/`@Component`, transaction annotations and SLF4J logging. These are deliberate BuckPal-style conveniences. They must not use Spring Data, JPA, transport types, concrete adapters, Micrometer, Resilience4j or bound configuration records.
+- Models depend on their own model types, JDK types and stable shared contracts only. Ports may also refer to other ports. Neither imports application services or infrastructure.
+- Root configuration translates Spring-bound properties into plain application policy where needed. Generated gRPC types stay at adapter/wiring boundaries; order's inventory port exposes its own plain decision enum.
+- Runtime services remain independent deployables and database owners. Generated `io.polaris.inventory.grpc` contracts are the only inventory namespace permitted in another service. `shared` stays framework-free contracts and small value types.
 
-`inventory-service` currently applies the standard as follows:
+## Persistence and Transactions
 
-- `api`: exposes the Inventory gRPC controller.
-- `application`: owns stock checks, reservations/releases, transaction boundaries, and the event-recording port.
-- `domain`: owns inventory items, reservations, lines, and reservation statuses.
-- `persistence`: owns inventory/reservation repositories and outbox storage.
-- `messaging`: observes order events and publishes `InventoryAdjustedEvent` after reservation commit.
-- `config`: owns gRPC interceptors, starter configuration, and topic configuration.
+Domain objects are snapshots, never managed JPA entities. Loading a model, mutating it and returning from a transaction does not persist that change. Use cases explicitly call storage ports to write state. Persistence adapters map onto existing managed entities, preserve IDs and child ownership, check optimistic versions and flush before returning. Mappers retain decimal precision/scale, creation timestamps and version information; JPA lifecycle callbacks update persistence timestamps. Returned saved models include the flushed version and update timestamp.
 
-## Notification Service Shape
+Storage ports join the caller's transaction. Reservation and order locks remain held through that transaction; adapters must not commit independently. The read-only recovery scan selects candidate IDs, then each resolution acquires its lock in a new business transaction.
 
-- `messaging`: decodes Kafka records, maps them to plain application delivery data, publishes dead letters through an application port, and manages acknowledgement/error handling.
-- `application`: owns the inbox transaction, duplicate suppression, handler retries, and terminal processing outcome. The current handler logs simulated notifications.
-- `persistence`: owns inbox bookkeeping entities, statuses, and Spring Data repositories; no Kafka transport types enter entities.
-- `config`: owns typed retry properties and retry wiring.
+- **Order:** commit pending intent and customer-bound idempotency identity before inventory mutation. Resolve by stable order ID; lock, reserve, explicitly save final state/request outcome and enqueue the outbox event in one local transaction. Recover uncertain results using the same identity (ADR 0020).
+- **Inventory:** insert/lock the order reservation, lock SKU rows in deterministic order, apply plain-model transitions, explicitly store stock/reservation lines and enqueue the adjustment atomically. Rejected decisions and released availability snapshots remain durable; retries cannot decrement or restore stock twice.
+- **Notification:** the application owns the inbox transaction and outcome. The persistence adapter wraps the managed entity returned by `saveAndFlush` in a plain receipt interface. Kafka listeners pass plain delivery metadata; the application requests retry/handler/DLQ capabilities through ports. Failed DLQ acknowledgement escapes and rolls back the inbox so the source record remains retryable.
+- **Outbox transport:** publishers own infrastructure transactions to lock/update delivery records and publish committed rows. This does not move a business use case into a transport adapter (ADR 0019).
 
-## Gateway Shape
+HTTP, protobuf, Kafka schemas and existing Liquibase migrations are unchanged. Notification delivery remains simulated; a future real provider requires provider-side idempotency.
 
-`gateway` is an edge service rather than a domain service, so it keeps infrastructure concerns explicit:
+## Gateway and Supporting Modules
 
-- `config`: owns WebFlux security, CORS configuration, and typed rate-limit properties.
-- `logging`: owns request logging and request ID response propagation.
-- `ratelimit`: owns global rate limiting, key resolution, and Redis/in-memory limiter implementations.
-- `application.yml`: owns Spring Cloud Gateway route definitions for the public order API.
+Gateway retains its existing `config`, `logging` and `ratelimit` packages and owns no business database. Its edge implementation is explicitly excluded from ADR 0021. `shared`, `proto-contracts`, generated protobuf classes and `contract-tests` retain their module/package structures. The last is a test-only cross-service harness, not a production module-dependency exception.
 
-## Why This Architecture
+## Adding a Use Case
 
-- It keeps Spring framework code at the edges instead of spreading infrastructure concerns through domain logic.
-- It gives every service the same mental model, which matters more as the system grows.
-- It keeps testing practical: use cases can be tested through APIs, while outbound systems can be replaced by fakes in integration tests.
-- It avoids overbuilding full clean architecture for a portfolio blueprint while still showing disciplined service boundaries.
+1. Add a small inbound interface and plain request/result under `application.port.in`.
+2. Implement the behavior in `application.domain.service`, placing invariants on existing or new plain models.
+3. Define only the outbound capabilities the use case needs; implement those under the matching outbound adapter.
+4. Connect the inbound transport to its port, wire configuration at the service root and test committed state/rollback for persistence changes.
 
-## Rules
+## Enforcement
 
-- Controllers should not contain business logic beyond request mapping and DTO conversion.
-- Application services own transactions and orchestration.
-- Domain classes should not depend on Spring, Kafka, gRPC, HTTP, or database clients. Existing JPA entity mappings are allowed: this is lightweight ports-and-adapters, not a mandatory persistence-free domain rewrite.
-- Outbound integrations should be hidden behind small ports/interfaces when the service logic depends on them.
-- Application code must not import concrete messaging adapters or transport record types. Kafka listeners must delegate business transactions and workflow to application services.
-- Kafka publication that represents a committed state change runs after commit. Under ADR 0019, application-owned ports record durable outbox rows inside the business transaction; publishers deliver them afterward. Publisher delivery-bookkeeping transactions are infrastructure concerns, not business use cases.
-- All Spring Data repositories and outbox/inbox storage models belong in `persistence`; typed configuration properties are records in `config`.
-- Liquibase changes should be small, ordered, SQL-based, and separated by table or schema concern.
-- Service modules may depend on `shared` and `proto-contracts`, but must not depend on another runtime service module.
-- Reusable Java contracts and helpers belong under `shared/src/main/java/io/polaris/shared`.
+`ServiceArchitectureTest` parses source references to guard package ownership, pure models/ports, application dependency direction, inbound-port use, JPA/bookkeeping placement, configuration records, shared purity and runtime isolation. Negative examples test the guards themselves. Checkstyle import controls and Maven Enforcer retain cross-service restrictions. These checks supplement code review; they are not a complete semantic proof.
 
-`contract-tests` is a test-only harness, not a runtime service dependency exception. `ServiceArchitectureTest` checks the source package boundaries during `test`, and Maven Enforcer checks module boundaries. These checks supplement review rather than proving all architectural intent. Agents must also follow the root [AGENTS.md](../AGENTS.md) and accepted ADRs.
+Run `./mvnw -B -ntp spotless:check checkstyle:check test`, then Docker-backed `./mvnw -B -ntp verify` for persistence/transaction changes. Mapping tests must verify committed values, identity, versions and rollback. Follow root [AGENTS.md](../AGENTS.md) and the accepted ADRs.

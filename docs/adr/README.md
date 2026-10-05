@@ -10,7 +10,7 @@ Polaris records significant architecture choices as lightweight ADRs. Each recor
 | [0002](0002-use-maven-multi-module-and-java-25-baseline.md) | Accepted | Use Maven multi-module and Java 25 baseline |
 | [0003](0003-use-database-per-service.md) | Accepted | Use database per service |
 | [0004](0004-use-sql-based-liquibase-migrations.md) | Accepted | Use SQL-based Liquibase migrations |
-| [0005](0005-use-ports-and-adapters-service-structure.md) | Accepted | Use ports-and-adapters service structure |
+| [0005](0005-use-ports-and-adapters-service-structure.md) | Superseded by 0021 for business services | Use ports-and-adapters service structure |
 | [0006](0006-use-grpc-and-protobuf-for-internal-rpc.md) | Accepted | Use gRPC and Protobuf for internal RPC |
 | [0007](0007-package-protobuf-contracts-in-a-dedicated-module.md) | Accepted | Package protobuf contracts in a dedicated module |
 | [0008](0008-use-kafka-for-domain-event-choreography.md) | Accepted | Use Kafka for domain event choreography |
@@ -26,3 +26,4 @@ Polaris records significant architecture choices as lightweight ADRs. Each recor
 | [0018](0018-use-spring-boot-compatible-grpc-and-observability-conventions.md) | Accepted | Use Spring Boot-compatible gRPC and observability conventions |
 | [0019](0019-use-transactional-outbox-and-consumer-inbox.md) | Accepted | Use transactional outbox and consumer inbox |
 | [0020](0020-recover-pending-orders-durably.md) | Accepted | Recover pending orders durably without distributed transactions |
+| [0021](0021-adopt-hombergs-hexagonal-service-structure.md) | Accepted | Hombergs hexagonal structure and separate business/JPA models in the three business services |

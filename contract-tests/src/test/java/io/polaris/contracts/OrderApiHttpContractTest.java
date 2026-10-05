@@ -27,16 +27,16 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.polaris.order.api.ApiExceptionHandler;
-import io.polaris.order.api.OrderController;
-import io.polaris.order.application.IdempotencyConflictException;
-import io.polaris.order.application.InvalidIdempotencyKeyException;
-import io.polaris.order.application.OrderApplicationService;
-import io.polaris.order.application.OrderNotFoundException;
-import io.polaris.order.application.PlaceOrderResult;
-import io.polaris.order.domain.Order;
-import io.polaris.order.domain.OrderItem;
-import io.polaris.order.inventory.InventoryUnavailableException;
+import io.polaris.order.adapter.in.web.ApiExceptionHandler;
+import io.polaris.order.adapter.in.web.OrderController;
+import io.polaris.order.application.domain.model.Order;
+import io.polaris.order.application.domain.model.OrderItem;
+import io.polaris.order.application.domain.service.OrderApplicationService;
+import io.polaris.order.application.port.in.IdempotencyConflictException;
+import io.polaris.order.application.port.in.InvalidIdempotencyKeyException;
+import io.polaris.order.application.port.in.OrderNotFoundException;
+import io.polaris.order.application.port.in.PlaceOrderResult;
+import io.polaris.order.application.port.out.InventoryUnavailableException;
 
 @WebMvcTest(properties = "spring.mvc.problemdetails.enabled=true")
 @Import({OrderController.class, ApiExceptionHandler.class})

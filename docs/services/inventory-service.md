@@ -66,15 +66,20 @@ The `docker` profile switches PostgreSQL and Kafka addresses to Docker service n
 
 ## Package Shape
 
+See [ADR 0021](../adr/0021-adopt-hombergs-hexagonal-service-structure.md) and the [service standard](../service-architecture-standard.md) for dependency rules.
+
 | Package | Purpose |
 | --- | --- |
-| `api` | gRPC adapter |
-| `application` | Stock check, reservation/release, and transaction boundaries |
-| `domain` | Inventory items, reservations, reservation lines and statuses |
-| `messaging` | Kafka listener, topic wiring, transactional outbox, and retry publisher |
-| `persistence` | Inventory/reservation repositories, outbox entities and repository |
-| `config` | gRPC interceptors, observability wiring, and topic configuration |
+| `application.domain.model` | Plain stock items, reservations, lines and reservation statuses |
+| `application.domain.service` | Stock check, reserve/release orchestration and business transactions |
+| `application.port.in` / `.out` | Check/reserve/release use cases; stock, reservation, event and correlation capabilities |
+| `adapter.in.grpc` / `.messaging` | gRPC mapping/health/interceptors and existing order-event observation |
+| `adapter.out.persistence` | Separate JPA models/mappers, deterministic locking, explicit writes and event recording |
+| `adapter.out.messaging` / `.observability` | Outbox delivery and event correlation |
+| Service root | Spring wiring and typed properties |
 
 ## Tests
 
 The integration test starts PostgreSQL and Kafka with Testcontainers and covers successful and rejected decisions, exact retries after a lost response, concurrent duplicates, conflicting payloads, idempotent release, invalid transitions, database mutations, Kafka publication, and gRPC health/reflection.
+
+Mapping-focused database tests additionally exercise different orders competing for stock, concurrent release retries with stable line IDs, rollback of all mapped state after an outbox failure, and rejection of stale model versions.

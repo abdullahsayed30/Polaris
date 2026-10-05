@@ -28,7 +28,7 @@ import com.sun.source.tree.Tree;
 import com.sun.source.util.JavacTask;
 import com.sun.source.util.TreeScanner;
 
-/** Source guards for ADRs 0005, 0015 and 0019; these are not a full semantic architecture proof. */
+/** Source guards for ADRs 0015, 0019 and 0021; these are not a full semantic architecture proof. */
 class ServiceArchitectureTest {
     private static final List<String> MODULES = List.of(
             "gateway", "order-service", "inventory-service", "notification-service", "shared");
@@ -60,11 +60,11 @@ class ServiceArchitectureTest {
     @Test
     void catchesImportsAndQualifiedTransportReferencesButIgnoresCommentsAndStrings() throws IOException {
         assertThat(violations("""
-                package io.polaris.order.application;
-                import io.polaris.order.messaging.OrderEventOutbox;
+                package io.polaris.order.application.domain.service;
+                import io.polaris.order.adapter.out.persistence.OrderEventOutbox;
                 class Bad {
                     io.grpc.Channel channel;
-                    // io.polaris.order.api.OrderController is only a comment.
+                    // io.polaris.order.adapter.in.web.OrderController is only a comment.
                     String explanation = "org.springframework.kafka.core.KafkaTemplate";
                 }
                 """))
@@ -76,8 +76,8 @@ class ServiceArchitectureTest {
     @Test
     void catchesDomainInfrastructureAndSharedFrameworkDependencies() throws IOException {
         assertThat(violations("""
-                package io.polaris.order.domain;
-                import io.polaris.order.inventory.InventoryClient;
+                package io.polaris.order.application.domain.model;
+                import io.polaris.order.application.port.out.InventoryClient;
                 import org.springframework.stereotype.Component;
                 class Bad { jakarta.persistence.EntityManager entityManager; }
                 """))
@@ -94,22 +94,22 @@ class ServiceArchitectureTest {
     @Test
     void catchesMisplacedRepositoriesBookkeepingAndConfigurationClasses() throws IOException {
         assertThat(violations("""
-                package io.polaris.order.messaging;
+                package io.polaris.order.adapter.out.messaging;
                 interface BadRepository extends org.springframework.data.jpa.repository.JpaRepository<Object, String> {}
                 @jakarta.persistence.Entity class OutboxEvent {}
                 @org.springframework.boot.context.properties.ConfigurationProperties("bad") class BadProperties {}
                 """))
                 .anyMatch(message -> message.contains("Spring Data repository"))
                 .anyMatch(message -> message.contains("Bookkeeping"))
-                .anyMatch(message -> message.contains("must live in config"))
+                .anyMatch(message -> message.contains("must live in the composition root"))
                 .anyMatch(message -> message.contains("must be a record"));
     }
 
     @Test
     void catchesListenerTransactionsAndDirectPersistenceAccess() throws IOException {
         assertThat(violations("""
-                package io.polaris.notification.messaging;
-                import io.polaris.notification.persistence.InboxEventRepository;
+                package io.polaris.notification.adapter.in.messaging;
+                import io.polaris.notification.adapter.out.persistence.InboxEventRepository;
                 @org.springframework.transaction.annotation.Transactional
                 class Bad {
                     @org.springframework.kafka.annotation.KafkaListener(topics = "events")
@@ -121,28 +121,26 @@ class ServiceArchitectureTest {
     }
 
     @Test
-    void allowsExistingJpaConventionPortsAndInfrastructurePublisherTransactions() throws IOException {
+    void allowsPureModelsPortsServiceTransactionsAndAdapterPersistence() throws IOException {
         for (String source : List.of(
                 """
-                        package io.polaris.order.domain;
-                        import jakarta.persistence.Entity;
-                        import jakarta.persistence.EnumType;
-                        @Entity class Order { EnumType mapping = EnumType.STRING; }
+                        package io.polaris.order.adapter.out.persistence;
+                        @jakarta.persistence.Entity class OrderJpaEntity {}
                         """,
                 """
-                        package io.polaris.order.application;
-                        import io.polaris.order.inventory.InventoryClient;
+                        package io.polaris.order.application.domain.service;
+                        import io.polaris.order.application.port.out.InventoryClient;
                         import io.polaris.shared.events.OrderCreatedEvent;
                         @org.springframework.transaction.annotation.Transactional
                         class PlaceOrder { InventoryClient inventory; OrderCreatedEvent event; }
                         """,
                 """
-                        package io.polaris.order.messaging;
+                        package io.polaris.order.adapter.out.messaging;
                         @org.springframework.transaction.annotation.Transactional
                         class OutboxPublisher {}
                         """,
                 """
-                        package io.polaris.order.config;
+                        package io.polaris.order;
                         @org.springframework.boot.context.properties.ConfigurationProperties("valid")
                         record Properties(int batchSize) {}
                         """)) {
@@ -150,21 +148,115 @@ class ServiceArchitectureTest {
         }
     }
 
+    @Test
+    void rejectsJpaModelsTransportPortsConcreteServiceDependenciesAndCrossServiceImports() throws IOException {
+        for (String source : List.of(
+                """
+                        package io.polaris.order.application.domain.model;
+                        @jakarta.persistence.Entity class Order {}
+                        """,
+                """
+                        package io.polaris.order.application.port.out;
+                        interface Stock { io.grpc.Channel channel();
+                        }
+                        """,
+                """
+                        package io.polaris.order.application.port.in;
+                        interface Stock { org.springframework.data.domain.Page page();
+                        }
+                        """,
+                """
+                        package io.polaris.order.application.domain.service;
+                        class Bad { io.polaris.order.adapter.out.persistence.OrderRepository r;
+                        }
+                        """,
+                """
+                        package io.polaris.order.adapter.in.web;
+                        class Bad { io.polaris.order.application.domain.service.OrderApplicationService s;
+                        }
+                        """,
+                """
+                        package io.polaris.order.application.domain.service;
+                        class Bad { io.polaris.order.ReservationRecoveryProperties p;
+                        }
+                        """,
+                """
+                        package io.polaris.order.adapter.out.grpc;
+                        class Bad { io.polaris.inventory.application.port.in.ReserveStockUseCase s;
+                        }
+                        """,
+                """
+                        package io.polaris.order.application.port.in;
+                        interface Bad {
+                            io.polaris.order.application.domain.service.OrderApplicationService service();
+                        }
+                        """)) {
+            assertThat(violations(source)).as(source).isNotEmpty();
+        }
+    }
+
+    @Test
+    void allowsPurePortsAndGatewayExistingStructure() throws IOException {
+        for (String source : List.of(
+                """
+                        package io.polaris.order.application.domain.model;
+                        record Amount(java.math.BigDecimal value) {}
+                        """,
+                """
+                        package io.polaris.order.application.port.in;
+                        interface Get { io.polaris.order.application.domain.model.Order get();
+                        }
+                        """,
+                """
+                        package io.polaris.order.adapter.out.grpc;
+                        class Client { io.polaris.inventory.grpc.ReserveRequest request;
+                        }
+                        """,
+                """
+                        package io.polaris.gateway.config;
+                        @org.springframework.boot.context.properties.ConfigurationProperties("rate")
+                        record Rate(int limit) {}
+                        """)) {
+            assertThat(violations(source)).as(source).isEmpty();
+        }
+    }
+
     private static List<String> violations(String source) throws IOException {
         SourceShape shape = parse(source);
+        String root = serviceRoot(shape.packageName);
+        boolean businessService = List.of("io.polaris.order", "io.polaris.inventory", "io.polaris.notification").contains(root);
+        boolean application = shape.packageName.startsWith(root + ".application.");
+        boolean model = shape.packageName.startsWith(root + ".application.domain.model");
+        boolean port = shape.packageName.startsWith(root + ".application.port.");
+        boolean inbound = shape.packageName.startsWith(root + ".adapter.in.");
+        boolean persistence = shape.packageName.equals(root + ".adapter.out.persistence");
         Set<String> failures = new LinkedHashSet<>();
+        if (businessService && !shape.packageName.equals(root)
+                && !List.of(".application.domain.model", ".application.domain.service", ".application.port.in",
+                        ".application.port.out", ".adapter.in.", ".adapter.out.").stream()
+                        .anyMatch(part -> shape.packageName.startsWith(root + part))) {
+            failures.add("Package must follow ADR 0021: " + shape.packageName);
+        }
         for (String reference : shape.references) {
-            if (inPackage(shape.packageName, "application") && applicationInfrastructure(reference)) {
-                failures.add("Application must depend on ports, not transport adapters: " + reference);
+            if (businessService && application && !allowedApplicationReference(reference, root, model, port)) {
+                failures.add((model
+                        ? "Domain must be independent of infrastructure: "
+                        : "Application must depend on ports, not transport adapters: ") + reference);
             }
-            if (inPackage(shape.packageName, "domain") && domainInfrastructure(reference, shape.packageName)) {
-                failures.add("Domain must be independent of infrastructure: " + reference);
+            if (businessService && inbound && (reference.startsWith(root + ".application.domain.service.")
+                    || reference.startsWith(root + ".adapter.out."))) {
+                failures.add("Inbound adapter must depend on an inbound port: " + reference);
+            }
+            if (reference.startsWith("io.polaris.") && !reference.startsWith(root + ".")
+                    && !reference.equals(root) && !reference.startsWith("io.polaris.shared.")
+                    && !reference.startsWith("io.polaris.inventory.grpc.")) {
+                failures.add("Runtime service must not depend on another service implementation: " + reference);
             }
             if ((shape.packageName.equals("io.polaris.shared") || shape.packageName.startsWith("io.polaris.shared."))
                     && sharedInfrastructure(reference)) {
                 failures.add("Shared contract must be framework and service independent: " + reference);
             }
-            if (springDataRepository(reference) && !inPackage(shape.packageName, "persistence")) {
+            if (springDataRepository(reference) && !persistence) {
                 failures.add("Spring Data repository must live in persistence: " + reference);
             }
             if (shape.annotations.contains("KafkaListener") && inPackage(reference, "persistence")) {
@@ -175,12 +267,18 @@ class ServiceArchitectureTest {
             String name = type.getSimpleName().toString();
             boolean bookkeeping = BOOKKEEPING_TYPES.contains(name)
                     || (hasAnnotation(type, "Entity") && (name.startsWith("Outbox") || name.startsWith("Inbox")));
-            if (bookkeeping && !inPackage(shape.packageName, "persistence")) {
+            if (bookkeeping && !persistence) {
                 failures.add("Bookkeeping model must live in persistence: " + name);
             }
+            if (businessService && hasAnnotation(type, "Entity") && !persistence) {
+                failures.add("JPA entity must live in outbound persistence: " + name);
+            }
             if (hasAnnotation(type, "ConfigurationProperties")) {
-                if (!inPackage(shape.packageName, "config")) {
-                    failures.add("Configuration properties must live in config: " + name);
+                boolean configurationPackage = businessService
+                        ? shape.packageName.equals(root)
+                        : inPackage(shape.packageName, "config");
+                if (!configurationPackage) {
+                    failures.add("Configuration properties must live in the composition root: " + name);
                 }
                 if (type.getKind() != Tree.Kind.RECORD) {
                     failures.add("Configuration properties must be a record: " + name);
@@ -193,32 +291,32 @@ class ServiceArchitectureTest {
         return List.copyOf(failures);
     }
 
-    private static boolean applicationInfrastructure(String reference) {
-        return TRANSPORT_PREFIXES.stream().anyMatch(reference::startsWith)
-                || (reference.startsWith("io.polaris.")
-                        && (inPackage(reference, "messaging") || inPackage(reference, "api") || inPackage(reference, "grpc")));
+    private static String serviceRoot(String packageName) {
+        String[] segments = packageName.split("\\.");
+        return String.join(".", segments[0], segments[1], segments[2]);
     }
 
-    private static boolean domainInfrastructure(String reference, String packageName) {
-        String serviceDomain = packageName.substring(0, packageName.indexOf(".domain") + ".domain".length());
-        if (reference.startsWith("jakarta.persistence.")) {
-            return !jpaMappingType(reference);
-        }
+    private static boolean allowedApplicationReference(String reference, String root, boolean model, boolean port) {
         if (reference.startsWith("java.")) {
-            return reference.startsWith("java.sql.") || reference.startsWith("java.net.");
+            return !reference.startsWith("java.sql.") && !reference.startsWith("java.net.");
         }
-        return !reference.equals(serviceDomain) && !reference.startsWith(serviceDomain + ".")
-                && !reference.startsWith("io.polaris.shared.");
-    }
-
-    private static boolean jpaMappingType(String reference) {
-        String typeName = reference.substring("jakarta.persistence.".length()).split("\\.", 2)[0];
-        try {
-            Class<?> type = Class.forName("jakarta.persistence." + typeName, false, ServiceArchitectureTest.class.getClassLoader());
-            return type.isAnnotation() || type.isEnum();
-        } catch (ClassNotFoundException exception) {
+        if (reference.startsWith(root + ".application.domain.model") || reference.startsWith("io.polaris.shared.")) {
+            return true;
+        }
+        if (model) {
             return false;
         }
+        if (reference.startsWith(root + ".application.port.")) {
+            return true;
+        }
+        if (port) {
+            return false;
+        }
+        return reference.startsWith(root + ".application.domain.service")
+                || reference.equals("org.springframework.stereotype.Service")
+                || reference.equals("org.springframework.stereotype.Component")
+                || reference.startsWith("org.springframework.transaction.annotation.")
+                || reference.equals("org.slf4j.Logger") || reference.equals("org.slf4j.LoggerFactory");
     }
 
     private static boolean sharedInfrastructure(String reference) {
