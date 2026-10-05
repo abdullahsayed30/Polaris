@@ -23,6 +23,8 @@ coverage/
 *.iws
 *.ipr
 out/
+# Hexagonal outbound source packages are not IDE build output.
+!**/src/**/out/
 
 # VS Code
 .vscode/

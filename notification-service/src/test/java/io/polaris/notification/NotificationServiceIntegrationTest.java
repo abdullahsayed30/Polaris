@@ -45,14 +45,14 @@ import org.testcontainers.utility.DockerImageName;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.polaris.notification.application.NotificationDelivery;
-import io.polaris.notification.application.NotificationHandler;
-import io.polaris.notification.messaging.DeadLetterPublicationException;
-import io.polaris.notification.messaging.NotificationDeadLetterEvent;
-import io.polaris.notification.messaging.NotificationDeadLetterPublisher;
-import io.polaris.notification.messaging.NotificationKafkaListener;
-import io.polaris.notification.persistence.InboxEventRepository;
-import io.polaris.notification.persistence.InboxStatus;
+import io.polaris.notification.adapter.in.messaging.NotificationKafkaListener;
+import io.polaris.notification.adapter.out.messaging.DeadLetterPublicationException;
+import io.polaris.notification.adapter.out.messaging.NotificationDeadLetterEvent;
+import io.polaris.notification.adapter.out.messaging.NotificationDeadLetterPublisher;
+import io.polaris.notification.adapter.out.persistence.InboxEventRepository;
+import io.polaris.notification.adapter.out.persistence.InboxStatus;
+import io.polaris.notification.application.port.in.NotificationDelivery;
+import io.polaris.notification.application.port.out.NotificationHandler;
 import io.polaris.shared.events.EventMetadata;
 import io.polaris.shared.events.InventoryAdjustedEvent;
 import io.polaris.shared.events.OrderCreatedEvent;

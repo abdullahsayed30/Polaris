@@ -4,7 +4,7 @@ Date: 2026-05-11
 
 ## Status
 
-Accepted
+Accepted. Package placement for the three business services is updated by [ADR 0021](0021-adopt-hombergs-hexagonal-service-structure.md); the behavioral decision remains in force.
 
 ## Context
 

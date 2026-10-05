@@ -5,7 +5,7 @@ These instructions apply to the entire repository and to every delegated task. R
 ## Read before changing code
 
 1. Read [the service architecture standard](docs/service-architecture-standard.md), [architecture overview](docs/architecture.md), and [ADR index](docs/adr/README.md).
-2. Read the accepted ADRs and service documentation relevant to the affected behavior. Follow explicit superseding records: ADR 0019 replaces ADR 0009's after-commit listener mechanism with a transactional outbox; ADR 0020 extends ADR 0010 with durable pending-order recovery.
+2. Read the accepted ADRs and service documentation relevant to the affected behavior. Follow explicit superseding records: ADR 0019 replaces ADR 0009's after-commit listener mechanism with a transactional outbox; ADR 0020 extends ADR 0010 with durable pending-order recovery; ADR 0021 supersedes ADR 0005 for the three business services and updates ADR 0015/0019 package placement.
 3. Inspect the current code, tests, Git diff, and overlapping work before editing. Existing uncommitted changes belong to the user; preserve them.
 4. State any actual conflict between the requested change and an accepted ADR. Prefer an implementation within the agreed architecture. A material architectural change requires a concrete proposal and an explicit ADR amendment or superseding record; do not silently change a rule to make code pass.
 
@@ -19,22 +19,25 @@ These instructions apply to the entire repository and to every delegated task. R
 
 ## Package ownership and dependency direction
 
+ADR 0021 applies to **order-service, inventory-service and notification-service only**. Gateway retains its edge structure; supporting modules and generated contracts are excluded.
+
 | Package | Responsibility |
 | --- | --- |
-| `api` | Thin REST/gRPC request mapping, validation, response conversion, exception mapping |
-| `application` | Use cases, orchestration, business transaction boundaries, small application-owned ports and plain inputs/results |
-| `domain` | Business entities, value objects, state transitions and invariants |
-| `persistence` | Spring Data repositories, persistence adapters, infrastructure bookkeeping entities such as outbox/inbox records |
-| `messaging` | Kafka transport decoding/encoding, producer/consumer adapters, scheduled outbox transport publishing |
-| `inventory` or another named integration | Small outbound client interface and its adapter, following `InventoryClient` |
-| `config` | Spring wiring, schedulers that trigger application use cases, typed configuration records |
+| `application.domain.model` | Plain business entities, values, transitions and invariants; no JPA or framework dependencies |
+| `application.domain.service` | Use cases, orchestration and business transactions |
+| `application.port.in` / `.out` | Inbound use-case contracts and outbound capabilities with plain inputs/results |
+| `adapter.in.web`, `.grpc`, `.messaging`, `.scheduling` | Transport/request mapping and use-case triggers through inbound ports |
+| `adapter.out.persistence` | Separate JPA entities, repositories, mappers, storage adapters, inbox/outbox recording |
+| `adapter.out.grpc`, `.messaging`, `.observability`, `.retry`, `.logging` | Existing integration, delivery, telemetry, retry and simulated handler adapters |
+| Service root | Bootstrap, Spring wiring and typed configuration records |
 
-- Application services depend on small outbound ports, not concrete Kafka/outbox adapters. Recording an event through a port must join the local business transaction; the adapter owns serialization and persistence.
-- Kafka listeners delegate transactional deduplication, processing and state transitions to application services. Keep Kafka `ConsumerRecord`, offsets and transport decoding at the adapter boundary; pass plain delivery metadata when needed.
-- Infrastructure publishers may own transactions that lock/update delivery records. This is distinct from moving a business use case into a transport adapter.
-- Domain types must not depend on Spring, Kafka, gRPC, HTTP, clients, repositories, or other service implementations. JPA mapping annotations on business entities are an existing, intentional lightweight-architecture convention; this is not a mandate to rewrite the project as strict clean architecture.
-- Put outbox/inbox repositories and bookkeeping models under `persistence`, not `messaging`. Put `@ConfigurationProperties` records under `config`. Do not move a Kafka-dependent model into `domain` to satisfy a package rule; remove the transport coupling.
-- Preserve package consistency and update imports, tests, and documentation when moving classes. A justified exception must be explicit in the standard and narrowly reflected in the architecture checks.
+- Application services depend on outbound ports and pure models. Spring DI/transaction annotations and SLF4J are allowed here; Spring Data, JPA, transport types, concrete adapters, bound configuration, Micrometer and Resilience4j are not.
+- Inbound adapters invoke inbound ports, not implementation classes or outbound adapters. Kafka record decoding and acknowledgement remain in the adapter; business transactions and outcomes remain in the use case.
+- Models and ports are framework independent. The former ADR 0005 convention permitting JPA annotations on business models is superseded by ADR 0021.
+- Plain models are detached snapshots. Persist mutations explicitly through a storage port; map onto managed JPA entities while preserving identity, child ownership, timestamps, decimals and optimistic versions. Do not rely on dirty checking of a business model.
+- Storage adapters join the business transaction and retain locks until it completes. Outbox recording must join that same transaction. Infrastructure publishers may own transactions that lock/update delivery records.
+- Inbox/outbox bookkeeping entities belong in `adapter.out.persistence`. Configuration properties remain records and live at the service root. Root wiring maps bound properties to plain application policy.
+- Do not create packages, business models or ports for hypothetical features. Preserve package consistency and update imports, tests and documentation when moving classes. Keep justified exceptions explicit and narrowly guarded.
 
 ## Reliability and contracts
 

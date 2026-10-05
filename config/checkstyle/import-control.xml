@@ -33,24 +33,16 @@
     <subpackage name="notification">
         <allow pkg="io.polaris.notification"/>
         <disallow pkg="io.polaris.gateway"/>
-        <disallow pkg="io.polaris.inventory.api"/>
-        <disallow pkg="io.polaris.inventory.application"/>
-        <disallow pkg="io.polaris.inventory.config"/>
-        <disallow pkg="io.polaris.inventory.domain"/>
-        <disallow pkg="io.polaris.inventory.messaging"/>
-        <disallow pkg="io.polaris.inventory.persistence"/>
+        <allow pkg="io.polaris.inventory.grpc"/>
+        <disallow pkg="io.polaris.inventory"/>
         <disallow pkg="io.polaris.order"/>
     </subpackage>
 
     <subpackage name="order">
         <allow pkg="io.polaris.order"/>
         <disallow pkg="io.polaris.gateway"/>
-        <disallow pkg="io.polaris.inventory.api"/>
-        <disallow pkg="io.polaris.inventory.application"/>
-        <disallow pkg="io.polaris.inventory.config"/>
-        <disallow pkg="io.polaris.inventory.domain"/>
-        <disallow pkg="io.polaris.inventory.messaging"/>
-        <disallow pkg="io.polaris.inventory.persistence"/>
+        <allow pkg="io.polaris.inventory.grpc"/>
+        <disallow pkg="io.polaris.inventory"/>
         <disallow pkg="io.polaris.notification"/>
     </subpackage>
 

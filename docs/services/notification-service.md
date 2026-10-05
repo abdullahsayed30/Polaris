@@ -48,12 +48,16 @@ The listener waits for Kafka to acknowledge the dead-letter record. If publicati
 
 ## Package Shape
 
+See [ADR 0021](../adr/0021-adopt-hombergs-hexagonal-service-structure.md) and the [service standard](../service-architecture-standard.md) for dependency rules.
+
 | Package | Purpose |
 | --- | --- |
-| `application` | Transactional workflow, duplicate suppression, retry/outcome orchestration, handler/DLQ ports and plain delivery input |
-| `config` | Retry configuration and typed retry properties |
-| `messaging` | Thin Kafka decoding listener, legacy adaptation, confirmed dead-letter adapter, error handling and topic wiring |
-| `persistence` | Inbox entity, status and Spring Data repository; no Kafka record dependency |
+| `application.domain.service` | Inbox transaction, duplicate suppression and retry/outcome orchestration |
+| `application.port.in` / `.out` | Process/reject and plain delivery input; inbox receipt, retry, handler and DLQ capabilities |
+| `adapter.in.messaging` | Kafka decoding, legacy compatibility, acknowledgement and use-case delegation |
+| `adapter.out.persistence` | Inbox entity/repository and managed receipt implementation |
+| `adapter.out.messaging` / `.retry` / `.logging` | Confirmed dead-letter delivery, Resilience4j and simulated notification handler |
+| Service root | Retry/topic/error-handler wiring and typed configuration records |
 
 ## Tests
 

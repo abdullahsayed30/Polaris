@@ -3,6 +3,9 @@ package io.polaris.inventory;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.doThrow;
 
 import java.time.Duration;
 import java.util.HashMap;
@@ -29,8 +32,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.EventListener;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+import org.springframework.test.util.AopTestUtils;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -52,7 +60,12 @@ import io.grpc.reflection.v1alpha.ServerReflectionResponse;
 import io.grpc.reflection.v1alpha.ServiceResponse;
 import io.grpc.stub.StreamObserver;
 
-import io.polaris.inventory.domain.InventoryItem;
+import io.polaris.inventory.adapter.out.persistence.InventoryItemJpaEntity;
+import io.polaris.inventory.adapter.out.persistence.InventoryItemMapper;
+import io.polaris.inventory.adapter.out.persistence.InventoryItemRepository;
+import io.polaris.inventory.application.domain.model.InventoryItem;
+import io.polaris.inventory.application.port.out.InventoryEventRecorder;
+import io.polaris.inventory.application.port.out.InventoryStock;
 import io.polaris.inventory.grpc.InventoryDecision;
 import io.polaris.inventory.grpc.InventoryServiceGrpc;
 import io.polaris.inventory.grpc.ReleaseRequest;
@@ -63,7 +76,6 @@ import io.polaris.inventory.grpc.ReserveResponse;
 import io.polaris.inventory.grpc.StockItem;
 import io.polaris.inventory.grpc.StockRequest;
 import io.polaris.inventory.grpc.StockResponse;
-import io.polaris.inventory.persistence.InventoryItemRepository;
 import io.polaris.shared.events.InventoryAdjustedEvent;
 
 import net.devh.boot.grpc.server.event.GrpcServerStartedEvent;
@@ -93,6 +105,18 @@ class InventoryServiceIntegrationTest {
     @Autowired
     ObjectMapper objectMapper;
 
+    @Autowired
+    InventoryStock stockStore;
+
+    @Autowired
+    PlatformTransactionManager transactionManager;
+
+    @Autowired
+    JdbcTemplate jdbc;
+
+    @MockitoSpyBean
+    InventoryEventRecorder eventRecorder;
+
     ManagedChannel channel;
     InventoryServiceGrpc.InventoryServiceBlockingStub inventory;
 
@@ -110,8 +134,8 @@ class InventoryServiceIntegrationTest {
     void setUp() {
         inventoryItems.deleteAll();
         inventoryItems.saveAll(List.of(
-                InventoryItem.create("SKU-COFFEE-001", 10),
-                InventoryItem.create("SKU-MUG-002", 5)));
+                InventoryItemMapper.toEntity(InventoryItem.create("SKU-COFFEE-001", 10)),
+                InventoryItemMapper.toEntity(InventoryItem.create("SKU-MUG-002", 5))));
 
         channel = ManagedChannelBuilder.forAddress("localhost", grpcServer.port())
                 .usePlaintext()
@@ -147,7 +171,7 @@ class InventoryServiceIntegrationTest {
         assertThat(reservation.getItemsList()).extracting("remainingQuantity").containsExactly(8, 4);
         assertThat(inventoryItems.findBySku("SKU-COFFEE-001")).isPresent()
                 .get()
-                .extracting(InventoryItem::getAvailableQuantity)
+                .extracting(InventoryItemJpaEntity::getAvailableQuantity)
                 .isEqualTo(8);
 
         InventoryAdjustedEvent event = awaitInventoryAdjustedEvent(orderId);
@@ -168,7 +192,7 @@ class InventoryServiceIntegrationTest {
         assertThat(reservation.getReason()).isEqualTo(InventoryDecision.INVENTORY_DECISION_INSUFFICIENT_STOCK);
         assertThat(inventoryItems.findBySku("SKU-COFFEE-001")).isPresent()
                 .get()
-                .extracting(InventoryItem::getAvailableQuantity)
+                .extracting(InventoryItemJpaEntity::getAvailableQuantity)
                 .isEqualTo(10);
     }
 
@@ -185,7 +209,7 @@ class InventoryServiceIntegrationTest {
         assertThat(replay.getItems(0).getRemainingQuantity()).isEqualTo(8);
         assertThat(inventoryItems.findBySku("SKU-COFFEE-001")).isPresent()
                 .get()
-                .extracting(InventoryItem::getAvailableQuantity)
+                .extracting(InventoryItemJpaEntity::getAvailableQuantity)
                 .isEqualTo(8);
     }
 
@@ -212,7 +236,7 @@ class InventoryServiceIntegrationTest {
 
         assertThat(inventoryItems.findBySku("SKU-COFFEE-001")).isPresent()
                 .get()
-                .extracting(InventoryItem::getAvailableQuantity)
+                .extracting(InventoryItemJpaEntity::getAvailableQuantity)
                 .isEqualTo(8);
     }
 
@@ -227,7 +251,7 @@ class InventoryServiceIntegrationTest {
 
         assertThat(inventoryItems.findBySku("SKU-COFFEE-001")).isPresent()
                 .get()
-                .extracting(InventoryItem::getAvailableQuantity)
+                .extracting(InventoryItemJpaEntity::getAvailableQuantity)
                 .isEqualTo(8);
     }
 
@@ -246,7 +270,7 @@ class InventoryServiceIntegrationTest {
         assertThat(replay).isEqualTo(released);
         assertThat(inventoryItems.findBySku("SKU-COFFEE-001")).isPresent()
                 .get()
-                .extracting(InventoryItem::getAvailableQuantity)
+                .extracting(InventoryItemJpaEntity::getAvailableQuantity)
                 .isEqualTo(10);
         assertThatThrownBy(() -> inventory.reserveStock(request))
                 .isInstanceOfSatisfying(StatusRuntimeException.class,
@@ -262,6 +286,93 @@ class InventoryServiceIntegrationTest {
                 ReleaseRequest.newBuilder().setOrderId(orderId.toString()).build()))
                 .isInstanceOfSatisfying(StatusRuntimeException.class,
                         ex -> assertThat(ex.getStatus().getCode()).isEqualTo(Status.Code.FAILED_PRECONDITION));
+    }
+
+    @Test
+    void differentOrdersCompetingForStockCannotOversell() throws Exception {
+        CountDownLatch start = new CountDownLatch(1);
+        try (ExecutorService executor = Executors.newFixedThreadPool(2)) {
+            Future<ReserveResponse> first = executor.submit(() -> {
+                start.await();
+                return inventory.reserveStock(reserveRequest(UUID.randomUUID(), "SKU-COFFEE-001", 7));
+            });
+            Future<ReserveResponse> second = executor.submit(() -> {
+                start.await();
+                return inventory.reserveStock(reserveRequest(UUID.randomUUID(), "SKU-COFFEE-001", 7));
+            });
+            start.countDown();
+            assertThat(List.of(first.get(10, TimeUnit.SECONDS).getReserved(),
+                    second.get(10, TimeUnit.SECONDS).getReserved())).containsExactlyInAnyOrder(true, false);
+        }
+        assertThat(inventoryItems.findBySku("SKU-COFFEE-001").orElseThrow().getAvailableQuantity()).isEqualTo(3);
+    }
+
+    @Test
+    void mappedReservationLinesRetainIdentityAcrossConcurrentReleaseRetries() throws Exception {
+        UUID orderId = UUID.randomUUID();
+        inventory.reserveStock(reserveRequest(orderId, "SKU-COFFEE-001", 2));
+        UUID lineId = jdbc.queryForObject("SELECT id FROM inventory_reservation_lines WHERE order_id = ?", UUID.class, orderId);
+        ReleaseRequest request = ReleaseRequest.newBuilder().setOrderId(orderId.toString()).build();
+        CountDownLatch start = new CountDownLatch(1);
+        try (ExecutorService executor = Executors.newFixedThreadPool(2)) {
+            Future<ReleaseResponse> first = executor.submit(() -> {
+                start.await();
+                return inventory.releaseStock(request);
+            });
+            Future<ReleaseResponse> second = executor.submit(() -> {
+                start.await();
+                return inventory.releaseStock(request);
+            });
+            start.countDown();
+            assertThat(first.get(10, TimeUnit.SECONDS)).isEqualTo(second.get(10, TimeUnit.SECONDS));
+        }
+        assertThat(jdbc.queryForObject("SELECT id FROM inventory_reservation_lines WHERE order_id = ?", UUID.class, orderId))
+                .isEqualTo(lineId);
+        assertThat(inventoryItems.findBySku("SKU-COFFEE-001").orElseThrow().getAvailableQuantity()).isEqualTo(10);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM outbox_events WHERE aggregate_id = ?", Integer.class, orderId.toString()))
+                .isEqualTo(2);
+    }
+
+    @Test
+    void failedOutboxWriteRollsBackMappedStockReservationAndLines() {
+        UUID orderId = UUID.randomUUID();
+        ReserveRequest request = reserveRequest(orderId, "SKU-COFFEE-001", 2);
+        doThrow(new IllegalStateException("simulated outbox failure"))
+                .when(AopTestUtils.<InventoryEventRecorder>getUltimateTargetObject(eventRecorder)).enqueue(any());
+        assertThatThrownBy(() -> inventory.reserveStock(request)).isInstanceOf(StatusRuntimeException.class);
+        assertThat(inventoryItems.findBySku("SKU-COFFEE-001").orElseThrow().getAvailableQuantity()).isEqualTo(10);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM inventory_reservations WHERE order_id = ?", Integer.class, orderId))
+                .isZero();
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM inventory_reservation_lines WHERE order_id = ?", Integer.class, orderId))
+                .isZero();
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM outbox_events WHERE aggregate_id = ?", Integer.class, orderId.toString()))
+                .isZero();
+        doCallRealMethod().when(AopTestUtils.<InventoryEventRecorder>getUltimateTargetObject(eventRecorder)).enqueue(any());
+        assertThat(inventory.reserveStock(request).getReserved()).isTrue();
+        assertThat(inventoryItems.findBySku("SKU-COFFEE-001").orElseThrow().getAvailableQuantity()).isEqualTo(8);
+    }
+
+    @Test
+    void domainSnapshotRequiresExplicitWriteAndRejectsStaleVersion() {
+        TransactionTemplate tx = new TransactionTemplate(transactionManager);
+        InventoryItem snapshot = tx.execute(status -> {
+            InventoryItem item = stockStore.findBySkuInForUpdate(List.of("SKU-COFFEE-001")).getFirst();
+            item.reserve(2);
+            return item;
+        });
+        assertThat(inventoryItems.findBySku("SKU-COFFEE-001").orElseThrow().getAvailableQuantity()).isEqualTo(10);
+        tx.executeWithoutResult(status -> {
+            stockStore.findBySkuInForUpdate(List.of("SKU-COFFEE-001"));
+            stockStore.update(List.of(snapshot));
+        });
+        var stored = inventoryItems.findBySku("SKU-COFFEE-001").orElseThrow();
+        assertThat(stored.getAvailableQuantity()).isEqualTo(8);
+        assertThat(stored.getId()).isEqualTo(snapshot.getId());
+        assertThat(stored.getVersion()).isEqualTo(snapshot.getVersion() + 1);
+        assertThat(stored.getCreatedAt()).isEqualTo(snapshot.getCreatedAt());
+        assertThat(stored.getUpdatedAt()).isAfterOrEqualTo(snapshot.getUpdatedAt());
+        assertThatThrownBy(() -> tx.executeWithoutResult(status -> stockStore.update(List.of(snapshot))))
+                .isInstanceOf(org.springframework.orm.ObjectOptimisticLockingFailureException.class);
     }
 
     @Test

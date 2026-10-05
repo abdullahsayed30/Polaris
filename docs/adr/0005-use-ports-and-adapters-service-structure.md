@@ -4,7 +4,7 @@ Date: 2026-05-11
 
 ## Status
 
-Accepted
+Superseded for order, inventory and notification by [ADR 0021](0021-adopt-hombergs-hexagonal-service-structure.md). Gateway is excluded from that migration.
 
 ## Context
 

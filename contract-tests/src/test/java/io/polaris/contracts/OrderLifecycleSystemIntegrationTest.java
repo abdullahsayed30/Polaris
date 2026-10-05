@@ -43,12 +43,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.polaris.inventory.InventoryServiceApplication;
-import io.polaris.inventory.domain.InventoryItem;
-import io.polaris.inventory.persistence.InventoryItemRepository;
+import io.polaris.inventory.adapter.out.persistence.InventoryItemJpaEntity;
+import io.polaris.inventory.adapter.out.persistence.InventoryItemMapper;
+import io.polaris.inventory.adapter.out.persistence.InventoryItemRepository;
+import io.polaris.inventory.application.domain.model.InventoryItem;
 import io.polaris.notification.NotificationServiceApplication;
-import io.polaris.notification.application.NotificationHandler;
+import io.polaris.notification.application.port.out.NotificationHandler;
 import io.polaris.order.OrderServiceApplication;
-import io.polaris.order.persistence.OrderRepository;
+import io.polaris.order.adapter.out.persistence.OrderRepository;
 import io.polaris.shared.events.InventoryAdjustedEvent;
 import io.polaris.shared.events.OrderCreatedEvent;
 
@@ -93,7 +95,7 @@ class OrderLifecycleSystemIntegrationTest {
                 .properties(inventoryProperties(inventoryGrpcPort))
                 .run();
         InventoryItemRepository inventory = inventoryContext.getBean(InventoryItemRepository.class);
-        inventory.save(InventoryItem.create("SKU-SYSTEM-001", 10));
+        inventory.save(InventoryItemMapper.toEntity(InventoryItem.create("SKU-SYSTEM-001", 10)));
 
         notificationContext = new SpringApplicationBuilder(
                 NotificationServiceApplication.class,
@@ -165,7 +167,7 @@ class OrderLifecycleSystemIntegrationTest {
         assertThat(inventoryContext.getBean(InventoryItemRepository.class).findBySku("SKU-SYSTEM-001"))
                 .isPresent()
                 .get()
-                .extracting(InventoryItem::getAvailableQuantity)
+                .extracting(InventoryItemJpaEntity::getAvailableQuantity)
                 .isEqualTo(8);
     }
 

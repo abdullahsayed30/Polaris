@@ -48,6 +48,9 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+import org.springframework.test.util.AopTestUtils;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -68,12 +71,15 @@ import io.polaris.inventory.grpc.StockItemAvailability;
 import io.polaris.inventory.grpc.StockItemReservation;
 import io.polaris.inventory.grpc.StockRequest;
 import io.polaris.inventory.grpc.StockResponse;
-import io.polaris.order.api.OrderItemRequest;
-import io.polaris.order.api.OrderResponse;
-import io.polaris.order.api.PlaceOrderRequest;
-import io.polaris.order.application.OrderEventRecorder;
-import io.polaris.order.application.ReservationRecovery;
-import io.polaris.order.domain.OrderStatus;
+import io.polaris.order.adapter.in.web.OrderItemRequest;
+import io.polaris.order.adapter.in.web.OrderResponse;
+import io.polaris.order.adapter.in.web.PlaceOrderRequest;
+import io.polaris.order.application.domain.model.Order;
+import io.polaris.order.application.domain.model.OrderItem;
+import io.polaris.order.application.domain.model.OrderStatus;
+import io.polaris.order.application.domain.service.ReservationRecovery;
+import io.polaris.order.application.port.out.OrderEventRecorder;
+import io.polaris.order.application.port.out.OrderStore;
 import io.polaris.shared.events.OrderCreatedEvent;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -124,6 +130,12 @@ class OrderServiceIntegrationTest {
 
     @Autowired
     ReservationRecovery recovery;
+
+    @Autowired
+    OrderStore orderStore;
+
+    @Autowired
+    PlatformTransactionManager transactionManager;
 
     @MockitoSpyBean
     OrderEventRecorder eventRecorder;
@@ -314,7 +326,7 @@ class OrderServiceIntegrationTest {
     void recoveryCompletesOrderWhenFinalizationRollsBackAfterInventorySuccess() {
         String key = "recovery-" + UUID.randomUUID();
         doThrow(new IllegalStateException("simulated outbox persistence failure"))
-                .doCallRealMethod().when(eventRecorder).enqueue(any());
+                .doCallRealMethod().when(AopTestUtils.<OrderEventRecorder>getUltimateTargetObject(eventRecorder)).enqueue(any());
         ResponseEntity<String> failed = placeOrder(placeOrderRequest(), CUSTOMER_ID, key, String.class);
         assertThat(failed.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
         UUID orderId = UUID.fromString(fakeInventoryService.reservedOrderIds().iterator().next());
@@ -417,6 +429,30 @@ class OrderServiceIntegrationTest {
                 "/api/v1/orders", HttpMethod.POST, new HttpEntity<>(invalidRequest, headers), String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void orderMappingPreservesItemIdentityDecimalScaleAndOptimisticVersion() {
+        TransactionTemplate tx = new TransactionTemplate(transactionManager);
+        BigDecimal price = new BigDecimal("90071992547409.91");
+        Order created = tx.execute(status -> orderStore.create(
+                Order.place(CUSTOMER_ID, List.of(OrderItem.create("SKU-PRECISE", 1, price)))));
+        tx.executeWithoutResult(status -> orderStore.findForUpdate(created.getId()).orElseThrow().confirm());
+        Order unchanged = tx.execute(status -> orderStore.findForUpdate(created.getId()).orElseThrow());
+        assertThat(unchanged.getStatus()).isEqualTo(io.polaris.order.application.domain.model.OrderStatus.PENDING);
+        Order saved = tx.execute(status -> {
+            Order locked = orderStore.findForUpdate(created.getId()).orElseThrow();
+            locked.confirm();
+            return orderStore.update(locked);
+        });
+        Order reloaded = tx.execute(status -> orderStore.findWithItemsByIdAndCustomerId(created.getId(), CUSTOMER_ID).orElseThrow());
+        assertThat(reloaded.getStatus()).isEqualTo(io.polaris.order.application.domain.model.OrderStatus.CONFIRMED);
+        assertThat(reloaded.getVersion()).isEqualTo(created.getVersion() + 1).isEqualTo(saved.getVersion());
+        assertThat(reloaded.getCreatedAt()).isEqualTo(unchanged.getCreatedAt());
+        assertThat(reloaded.getUpdatedAt()).isAfterOrEqualTo(unchanged.getUpdatedAt());
+        assertThat(reloaded.getItems().getFirst().getId()).isEqualTo(created.getItems().getFirst().getId());
+        assertThat(reloaded.getItems().getFirst().getUnitPrice()).isEqualTo(price);
+        assertThat(reloaded.getItems().getFirst().getUnitPrice().scale()).isEqualTo(2);
     }
 
     private PlaceOrderRequest placeOrderRequest() {
