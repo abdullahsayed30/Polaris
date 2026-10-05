@@ -25,7 +25,9 @@ EXPOSE 8083
 USER 10001:10001
 ENTRYPOINT ["java", "-jar", "/app/notification-service.jar"]
 
-FROM gcr.io/distroless/java25-debian13:nonroot AS production
+FROM eclipse-temurin:25-jre-alpine@sha256:3c0a9084927a221ccd1d007fcaf614465672c0af37aaa834c5184483afe56d61 AS production
+RUN addgroup -S -g 65532 polaris \
+    && adduser -S -D -H -u 65532 -G polaris polaris
 WORKDIR /app
 COPY --from=build /workspace/notification-service/target/notification-service-exec.jar /app/notification-service.jar
 USER 65532:65532

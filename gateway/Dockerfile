@@ -24,7 +24,9 @@ EXPOSE 8080
 USER 10001:10001
 ENTRYPOINT ["java", "-jar", "/app/gateway.jar"]
 
-FROM gcr.io/distroless/java25-debian13:nonroot AS production
+FROM eclipse-temurin:25-jre-alpine@sha256:3c0a9084927a221ccd1d007fcaf614465672c0af37aaa834c5184483afe56d61 AS production
+RUN addgroup -S -g 65532 polaris \
+    && adduser -S -D -H -u 65532 -G polaris polaris
 WORKDIR /app
 COPY --from=build /workspace/gateway/target/gateway-exec.jar /app/gateway.jar
 EXPOSE 8080

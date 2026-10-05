@@ -43,6 +43,12 @@ The repository security gate runs Trivy with vulnerability, secret, and misconfi
 
 After the Maven gate passes, CI builds the production target of every service image, smoke-tests its Java runtime and executable Spring Boot archive, generates a CycloneDX image SBOM, uploads image SARIF, and applies the same `HIGH` and `CRITICAL` severity gate. The repository scan can inspect checked-in Helm source, but the main workflow does not lint, render, schema-validate, or scan the rendered Kubernetes manifests. Those local checks live in `deploy/scripts/validate-helm.sh`; a future release workflow should scan the rendered output that will actually be promoted.
 
+Production targets use the digest-pinned Temurin Java 25 Alpine JRE for both amd64 and arm64. This replaces the Debian 13 Distroless runtime whose base reported eight HIGH Expat and util-linux findings in the 2026-09-30 scan. The selected Alpine base contains Expat 2.8.5 and does not include util-linux. The image still runs as UID/GID 65532, matching Helm, and the HIGH/CRITICAL gate remains unchanged with no vulnerability exclusions. Dependabot tracks the tagged digest so runtime security updates remain reviewable.
+
+The root POM imports Jackson BOM 2.21.7 before the Spring Boot BOM to apply the 2.21 security patches consistently across runtime JSON modules. The 2026-10-05 CI scan identified five HIGH findings across `jackson-core` and `jackson-databind` in Spring Boot 3.5.16's managed 2.21.4 version. Keep the explicit override until the managed baseline includes those fixes; retained-event and exact-decimal contract tests remain part of the gate.
+
+Alpine uses musl rather than glibc and includes a shell and package manager; it is not a shell-free runtime. Validate application startup and native-library compatibility when updating the base, in addition to the archive smoke test. The local-runtime target continues to serve the Compose demo.
+
 Dependabot checks Maven dependencies, GitHub Actions, Docker Compose images, and each service Dockerfile every week. CI artifacts retain test and coverage reports for 14 days and SBOMs for 30 days.
 
 ## Deferred Deployment Automation
