@@ -52,6 +52,7 @@
         <kafka.version>3.9.2</kafka.version>
         <spring-kafka.version>3.3.16</spring-kafka.version>
         <netty.version>4.1.138.Final</netty.version>
+        <jackson.version>2.21.7</jackson.version>
         <tomcat.version>10.1.60</tomcat.version>
         <postgresql.version>42.7.12</postgresql.version>
         <bouncycastle.version>1.85</bouncycastle.version>
@@ -83,6 +84,14 @@
                 <groupId>io.netty</groupId>
                 <artifactId>netty-bom</artifactId>
                 <version>${netty.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!-- Import security patch BOMs before Spring Boot so their versions take precedence. -->
+            <dependency>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>${jackson.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
