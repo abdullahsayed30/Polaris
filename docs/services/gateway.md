@@ -25,6 +25,8 @@ The upstream is controlled by `polaris.gateway.routes.order-service-uri` outside
 
 The gateway runs as an OAuth2 resource server and validates bearer JWTs. Creating an order requires `orders:write`; reading an order requires `orders:read`. The order service validates the bearer token again and uses its UUID-shaped `sub` claim as the customer ID. It never accepts an order owner from the request body, and ownership-aware lookup returns `404` when a different customer requests the order.
 
+Authentication is supplied on each request through `Authorization: Bearer <token>`. The gateway does not load or save authentication in a WebSession, cache requests for a later login, or enable Basic/form login. Cookies and query/form token parameters are not authentication credentials. Spring Security's normal CSRF protection remains enabled: resource-server defaults exempt bearer-header requests, while unsafe requests without a bearer header still require a CSRF token and can receive `403` before authentication. A valid scoped bearer POST does not require a CSRF token. The configured CORS credential flag does not enable cookie authentication.
+
 The default issuer is the browser-reachable local Keycloak URL. The JWKS URL is independently configurable so containers can fetch keys over the Compose network while still validating the token's external issuer:
 
 ```yaml

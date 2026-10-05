@@ -64,7 +64,7 @@ paths:
         '401':
           description: A valid bearer token is required by the gateway.
         '403':
-          description: The bearer token does not have the `orders:write` scope.
+          description: The bearer token lacks the `orders:write` scope, or an unsafe request without a bearer header fails CSRF validation.
         '409':
           $ref: '#/components/responses/IdempotencyConflict'
         '429':

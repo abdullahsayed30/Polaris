@@ -22,6 +22,8 @@ The service exposes these endpoints under `/api/v1/orders`. Public traffic shoul
 
 `POST /api/v1/orders` accepts at least one item. Each item requires a non-blank SKU, a positive quantity, and a unit price of at least `0.01`. The authenticated JWT subject supplies the customer ID.
 
+The service validates `Authorization: Bearer <token>` on each request and uses stateless Spring Security session handling. It does not authenticate from an existing HttpSession, token cookie, query/form parameter, or Basic/form login. Spring's default resource-server CSRF exemption permits valid bearer-header POSTs without a CSRF token; protection remains active for other unsafe requests, which can return `403` before authentication. This preserves the bearer API contract required by ADR 0013 without treating browser-supplied cookies as credentials.
+
 Clients may send an `Idempotency-Key` of at most 128 characters. Keys are scoped to the authenticated customer. Repeating the same key and payload returns the original order with `Idempotency-Replayed: true`; reusing the key for a different payload returns `409 Conflict`.
 
 Known API errors:
