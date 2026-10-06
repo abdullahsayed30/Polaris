@@ -34,24 +34,24 @@ jobs:
       - name: Verify tested source and SBOM provenance
         run: python3 .github/scripts/ci_source.py verify target
 
-      - name: Scan repository content once
+      - name: Scan resolved dependency SBOM once
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           version: v0.74.0
-          scan-type: fs
-          scan-ref: .
-          scanners: vuln,secret,misconfig
+          scan-type: sbom
+          scan-ref: target/polaris-sbom.json
+          scanners: vuln
           severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
           list-all-pkgs: 'true'
           format: json
-          output: trivy-source.json
+          output: trivy-dependencies.json
           exit-code: '0'
 
-      - name: Scan resolved dependency SBOM once with the same vulnerability database
+      - name: Scan source secrets and misconfigurations once
         run: |
-          trivy --cache-dir .cache/trivy sbom --skip-db-update --scanners vuln \
+          trivy --cache-dir .cache/trivy fs --scanners secret,misconfig \
             --format json --list-all-pkgs --exit-code 0 \
-            --output trivy-dependencies.json target/polaris-sbom.json
+            --output trivy-source.json .
 
       - name: Combine native source and dependency finding records
         run: python3 .github/scripts/merge_trivy_results.py trivy-source.json trivy-dependencies.json trivy-repository.json
