@@ -84,6 +84,21 @@ class TrivyConversionTest(unittest.TestCase):
                     for package in entry.get("Packages", [])]
         self.assertTrue(any(package.get("Name") == "example:fixture" for package in packages), result.stdout)
 
+    def test_source_scan_keeps_maven_resolution_out_of_secret_analysis(self):
+        (self.directory / "pom.xml").write_text(
+            '<project><modelVersion>4.0.0</modelVersion><parent>'
+            '<groupId>example.invalid</groupId><artifactId>unresolvable-parent</artifactId>'
+            '<version>1</version></parent><artifactId>fixture</artifactId></project>'
+        )
+        result = subprocess.run(
+            [self.trivy, "fs", "--scanners", "secret", "--pkg-types", "os",
+             "--offline-scan", "--skip-version-check", "--format", "json", str(self.directory)],
+            capture_output=True, text=True,
+        )
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertEqual([], json.loads(result.stdout).get("Results", []))
+        self.assertNotIn("[pom]", result.stderr)
+
     def test_missing_or_malformed_report_fails(self):
         for content in (None, "{"):
             with self.subTest(content=content):

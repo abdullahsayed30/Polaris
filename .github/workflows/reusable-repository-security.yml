@@ -49,7 +49,7 @@ jobs:
 
       - name: Scan source secrets and misconfigurations once
         run: |
-          trivy --cache-dir .cache/trivy fs --scanners secret,misconfig \
+          trivy --cache-dir .cache/trivy fs --scanners secret,misconfig --pkg-types os --offline-scan \
             --format json --list-all-pkgs --exit-code 0 \
             --output trivy-source.json .
 
