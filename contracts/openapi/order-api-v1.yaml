@@ -62,9 +62,9 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
-          description: A valid bearer token is required by the gateway.
+          description: A valid bearer token with a complete hyphenated UUID customer subject is required by both gateway and order-service. Missing, blank, malformed or shortened UUID subjects are rejected.
         '403':
-          description: The bearer token does not have the `orders:write` scope.
+          description: The bearer token lacks the `orders:write` scope, or an unsafe request without a bearer header fails CSRF validation.
         '409':
           $ref: '#/components/responses/IdempotencyConflict'
         '429':
@@ -99,7 +99,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
-          description: A valid bearer token is required by the gateway.
+          description: A valid bearer token with a complete hyphenated UUID customer subject is required by both gateway and order-service. Missing, blank, malformed or shortened UUID subjects are rejected.
         '403':
           description: The bearer token does not have the `orders:read` scope.
         '404':
