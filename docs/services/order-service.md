@@ -67,7 +67,9 @@ JPA validates the schema at startup with `hibernate.ddl-auto=validate`. The serv
 | `shared` | `OrderCreatedEvent` payload |
 | `proto-contracts` | Generated inventory gRPC stubs |
 
-The inventory gRPC target is configured with `polaris.inventory.grpc.host`, `polaris.inventory.grpc.port`, and `polaris.inventory.grpc.deadline`. The default deadline is `2s`.
+The inventory gRPC target is configured with `polaris.inventory.grpc.host`, `polaris.inventory.grpc.port`, and `polaris.inventory.grpc.deadline`. The default deadline is `2s`. The managed channel uses `dns:///<host>:<port>` so failed hostname resolution can be retried when Inventory becomes available after Order starts. Compose and Helm supply the hostname and port through these same properties. Resolution and connection backoff, JVM DNS caching, and pending-order scheduling affect recovery latency; there is no fixed completion-time guarantee.
+
+When overriding `grpc.client.inventory-service.address`, retain the `dns:///` scheme for service hostnames. The starter's `static://` resolver captures addresses once and does not refresh them, so an unresolved startup address can remain unusable after the dependency returns. See the [starter's target configuration](https://grpc-ecosystem.github.io/grpc-spring/en/client/configuration.html#choosing-the-target).
 
 The generated inventory blocking stub is created by the Spring Boot-compatible gRPC client starter. `GrpcInventoryClient` still applies the configured per-call deadline before invoking `CheckStock` and `ReserveStock`.
 
@@ -90,3 +92,5 @@ See [ADR 0021](../adr/0021-adopt-hombergs-hexagonal-service-structure.md) and th
 ## Tests
 
 The integration test starts PostgreSQL and Kafka with Testcontainers and uses a fake gRPC inventory server. It verifies confirmed and cancelled orders, duplicate and concurrent idempotent requests, payload conflicts, recovery after a lost reservation response, order lookup, validation, and Kafka publication. A database mapping test also verifies explicit persistence, stable item IDs, exact decimal scale, timestamps and optimistic versions. Focused unit tests cover gRPC request ID metadata propagation and MDC cleanup.
+
+`InventoryDiscoveryRecoveryIntegrationTest` in `contract-tests` starts Order while Inventory's hostname is unresolvable, verifies the committed customer-bound pending intent after an authenticated HTTP failure, then makes the real Inventory service resolvable. An isolated JVM hosts file controls name availability without changing the developer's DNS or the other tests. The production target configuration, generated stub, managed server/channel and scheduled recovery must confirm the original order without restarting Order. Committed reservation, stock, request binding and outbox assertions verify one business outcome, including an exact reservation retry.
