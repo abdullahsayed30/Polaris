@@ -1,11 +1,16 @@
 package io.polaris.order;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.math.BigDecimal;
@@ -23,6 +28,9 @@ import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.http.Cookie;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -32,6 +40,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.core.context.SecurityContextImpl;
+import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
+import org.springframework.security.oauth2.core.OAuth2TokenValidator;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
@@ -123,16 +134,40 @@ class OrderServiceSecurityTest {
                 .header(HttpHeaders.AUTHORIZATION, bearer("orders:write"))
                 .contentType(MediaType.APPLICATION_JSON).content(VALID_ORDER))
                 .andExpect(status().isCreated()).andReturn();
+        verify(orderService).placeOrder(any(), eq(CUSTOMER_ID), any());
         assertThat(response.getRequest().getSession(false)).isNull();
         assertThat(response.getResponse().getHeader(HttpHeaders.SET_COOKIE)).isNull();
         mvc.perform(get("/api/v1/orders/{id}", ORDER_ID)).andExpect(status().isUnauthorized());
     }
 
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = {" ", "\t", "not-a-uuid", "1-1-1-1-1",
+            "11111111111141118111111111111111", "11111111-1111-4111-8111-11111111111g",
+            "11111111-1111-4111-8111-111111111111 ", " 11111111-1111-4111-8111-111111111111",
+            "111111111-111-4111-8111-111111111111"})
+    void rejectsInvalidCustomerSubjectsBeforeCallingOrderUseCases(String subject) throws Exception {
+        String authorization = "Bearer " + signedToken("orders:read orders:write",
+                Instant.now().plusSeconds(300), SIGNING_KEY, subject, ISSUER);
+        mvc.perform(get("/api/v1/orders/{id}", ORDER_ID)
+                .header(HttpHeaders.AUTHORIZATION, authorization))
+                .andExpect(status().isUnauthorized())
+                .andExpect(header().string(HttpHeaders.WWW_AUTHENTICATE, containsString("invalid_token")));
+        mvc.perform(post("/api/v1/orders")
+                .header(HttpHeaders.AUTHORIZATION, authorization)
+                .contentType(MediaType.APPLICATION_JSON).content(VALID_ORDER))
+                .andExpect(status().isUnauthorized())
+                .andExpect(header().string(HttpHeaders.WWW_AUTHENTICATE, containsString("invalid_token")));
+        verifyNoInteractions(orderService);
+    }
+
     @Test
-    void rejectsInvalidSignatureExpiredAndMalformedBearerTokens() throws Exception {
+    void rejectsInvalidSignatureExpiredWrongIssuerAndMalformedBearerTokens() throws Exception {
         for (String token : List.of(
                 signedToken("orders:write", Instant.now().plusSeconds(300), signingKey()),
                 signedToken("orders:write", Instant.now().minusSeconds(300), SIGNING_KEY),
+                signedToken("orders:write", Instant.now().plusSeconds(300), SIGNING_KEY, CUSTOMER_ID.toString(),
+                        "https://wrong-issuer.test"),
                 "not-a-jwt")) {
             mvc.perform(post("/api/v1/orders")
                     .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
@@ -189,8 +224,12 @@ class OrderServiceSecurityTest {
     }
 
     private static String signedToken(String scope, Instant expiresAt, KeyPair key) throws Exception {
+        return signedToken(scope, expiresAt, key, CUSTOMER_ID.toString(), ISSUER);
+    }
+
+    private static String signedToken(String scope, Instant expiresAt, KeyPair key, String subject, String issuer) throws Exception {
         SignedJWT jwt = new SignedJWT(new JWSHeader(JWSAlgorithm.RS256), new JWTClaimsSet.Builder()
-                .issuer(ISSUER).subject(CUSTOMER_ID.toString()).claim("scope", scope)
+                .issuer(issuer).subject(subject).claim("scope", scope)
                 .issueTime(Date.from(Instant.now().minusSeconds(600))).expirationTime(Date.from(expiresAt)).build());
         jwt.sign(new RSASSASigner(key.getPrivate()));
         return jwt.serialize();
@@ -209,9 +248,10 @@ class OrderServiceSecurityTest {
     @TestConfiguration
     static class TokenConfiguration {
         @Bean
-        JwtDecoder jwtDecoder() {
+        JwtDecoder jwtDecoder(OAuth2TokenValidator<Jwt> customerSubjectValidator) {
             NimbusJwtDecoder decoder = NimbusJwtDecoder.withPublicKey((RSAPublicKey) SIGNING_KEY.getPublic()).build();
-            decoder.setJwtValidator(JwtValidators.createDefaultWithIssuer(ISSUER));
+            decoder.setJwtValidator(new DelegatingOAuth2TokenValidator<>(
+                    JwtValidators.createDefaultWithIssuer(ISSUER), customerSubjectValidator));
             return decoder;
         }
     }

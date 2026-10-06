@@ -19,6 +19,9 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -36,6 +39,9 @@ import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.mock.web.server.MockServerWebExchange;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextImpl;
+import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
+import org.springframework.security.oauth2.core.OAuth2TokenValidator;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusReactiveJwtDecoder;
 import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
@@ -60,7 +66,8 @@ import reactor.core.publisher.Mono;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
         "polaris.gateway.routes.order-service-uri=forward:/__stub/orders",
-        "polaris.gateway.rate-limit.enabled=false",
+        "polaris.gateway.rate-limit.enabled=true",
+        "polaris.gateway.rate-limit.backend=in-memory",
         "polaris.gateway.cors.allowed-origins=http://localhost:3000",
         "polaris.gateway.cors.allowed-methods=GET,POST,PUT,PATCH,DELETE,OPTIONS",
         "polaris.gateway.cors.allowed-headers=Authorization,Content-Type,Idempotency-Key,X-Request-Id,WebTestClient-Request-Id",
@@ -68,6 +75,7 @@ import reactor.core.publisher.Mono;
 })
 @AutoConfigureWebTestClient
 class GatewayRouteSecurityTest {
+    private static final String CUSTOMER_SUBJECT = "11111111-1111-4111-8111-111111111111";
     private static final String ISSUER = "https://issuer.polaris.test";
     private static final KeyPair SIGNING_KEY = signingKey();
     @Autowired
@@ -192,11 +200,34 @@ class GatewayRouteSecurityTest {
                 .exchange().expectStatus().isForbidden();
     }
 
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = {" ", "\t", "not-a-uuid", "1-1-1-1-1",
+            "11111111111141118111111111111111", "11111111-1111-4111-8111-11111111111g",
+            "11111111-1111-4111-8111-111111111111 ", " 11111111-1111-4111-8111-111111111111",
+            "111111111-111-4111-8111-111111111111"})
+    void rejectsInvalidCustomerSubjectsBeforeRateLimitingAndForwarding(String subject) throws Exception {
+        String authorization = "Bearer " + signedToken("orders:read orders:write",
+                Instant.now().plusSeconds(300), SIGNING_KEY, subject, ISSUER);
+        webTestClient.get().uri("/api/v1/orders/{id}", UUID.randomUUID())
+                .header(HttpHeaders.AUTHORIZATION, authorization)
+                .exchange().expectStatus().isUnauthorized()
+                .expectHeader().value(HttpHeaders.WWW_AUTHENTICATE,
+                        value -> assertThat(value).contains("Bearer", "invalid_token"));
+        webTestClient.post().uri("/api/v1/orders")
+                .header(HttpHeaders.AUTHORIZATION, authorization)
+                .contentType(MediaType.APPLICATION_JSON).bodyValue("{}")
+                .exchange().expectStatus().isUnauthorized()
+                .expectHeader().value(HttpHeaders.WWW_AUTHENTICATE,
+                        value -> assertThat(value).contains("Bearer", "invalid_token"));
+    }
+
     @Test
-    void rejectsInvalidSignatureExpiredAndMalformedBearerTokens() throws Exception {
+    void rejectsInvalidSignatureExpiredWrongIssuerAndMalformedBearerTokens() throws Exception {
         for (String token : List.of(
                 signedToken("orders:write", Instant.now().plusSeconds(300), signingKey()),
                 signedToken("orders:write", Instant.now().minusSeconds(300), SIGNING_KEY),
+                signedToken("orders:write", Instant.now().plusSeconds(300), SIGNING_KEY, CUSTOMER_SUBJECT, "https://wrong-issuer.test"),
                 "not-a-jwt")) {
             webTestClient.post().uri("/api/v1/orders")
                     .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
@@ -261,8 +292,12 @@ class GatewayRouteSecurityTest {
     }
 
     private static String signedToken(String scope, Instant expiresAt, KeyPair key) throws Exception {
+        return signedToken(scope, expiresAt, key, CUSTOMER_SUBJECT, ISSUER);
+    }
+
+    private static String signedToken(String scope, Instant expiresAt, KeyPair key, String subject, String issuer) throws Exception {
         SignedJWT jwt = new SignedJWT(new JWSHeader(JWSAlgorithm.RS256), new JWTClaimsSet.Builder()
-                .issuer(ISSUER).subject("11111111-1111-4111-8111-111111111111").claim("scope", scope)
+                .issuer(issuer).subject(subject).claim("scope", scope)
                 .issueTime(Date.from(Instant.now().minusSeconds(600))).expirationTime(Date.from(expiresAt)).build());
         jwt.sign(new RSASSASigner(key.getPrivate()));
         return jwt.serialize();
@@ -281,10 +316,11 @@ class GatewayRouteSecurityTest {
     @TestConfiguration
     static class StubOrderBackendConfiguration {
         @Bean
-        ReactiveJwtDecoder jwtDecoder() {
+        ReactiveJwtDecoder jwtDecoder(OAuth2TokenValidator<Jwt> customerSubjectValidator) {
             NimbusReactiveJwtDecoder decoder = NimbusReactiveJwtDecoder
                     .withPublicKey((RSAPublicKey) SIGNING_KEY.getPublic()).build();
-            decoder.setJwtValidator(JwtValidators.createDefaultWithIssuer(ISSUER));
+            decoder.setJwtValidator(new DelegatingOAuth2TokenValidator<>(
+                    JwtValidators.createDefaultWithIssuer(ISSUER), customerSubjectValidator));
             return decoder;
         }
 
