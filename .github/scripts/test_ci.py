@@ -1,6 +1,7 @@
 """Regression tests for false-green aggregation and reused SBOM provenance."""
 
 import os
+import copy
 import subprocess
 import sys
 import tempfile
@@ -10,6 +11,7 @@ from unittest.mock import patch
 
 import check_ci_results
 import ci_source
+import merge_trivy_results
 
 
 class RequiredCheckTest(unittest.TestCase):
@@ -90,6 +92,37 @@ class SourceProvenanceTest(unittest.TestCase):
         (self.directory / "polaris-sbom.json").unlink()
         with self.assertRaises(OSError):
             ci_source.process("verify", self.directory)
+
+
+class RepositoryEvidenceTest(unittest.TestCase):
+    def setUp(self):
+        self.source = {"SchemaVersion": 2, "Trivy": {"Version": "0.74.0"},
+                       "Results": [{"Secrets": [{"Severity": "HIGH"}]}]}
+        self.dependencies = {"SchemaVersion": 2, "Trivy": {"Version": "0.74.0"},
+                             "Results": [{"Packages": [{"Name": "fixture"}],
+                                          "Vulnerabilities": [{"Severity": "MEDIUM"}]}]}
+
+    def test_complete_native_records_and_severities_are_preserved(self):
+        original = copy.deepcopy((self.source, self.dependencies))
+        combined = merge_trivy_results.merge(self.source, self.dependencies)
+        self.assertEqual(self.source["Results"] + self.dependencies["Results"], combined["Results"])
+        self.assertEqual(original, (self.source, self.dependencies))
+
+    def test_clean_source_report_can_have_no_results(self):
+        self.source.pop("Results")
+        self.assertEqual(self.dependencies["Results"], merge_trivy_results.merge(self.source, self.dependencies)["Results"])
+
+    def test_mismatched_schema_or_scanner_version_fails(self):
+        for key, value in (("SchemaVersion", 1), ("Trivy", {"Version": "different"})):
+            with self.subTest(key=key):
+                changed = {**self.dependencies, key: value}
+                with self.assertRaises(ValueError):
+                    merge_trivy_results.merge(self.source, changed)
+
+    def test_missing_dependency_inventory_fails(self):
+        self.dependencies["Results"] = [{"Vulnerabilities": []}]
+        with self.assertRaises(ValueError):
+            merge_trivy_results.merge(self.source, self.dependencies)
 
 
 if __name__ == "__main__":

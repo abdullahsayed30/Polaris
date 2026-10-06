@@ -34,7 +34,7 @@ jobs:
       - name: Verify tested source and SBOM provenance
         run: python3 .github/scripts/ci_source.py verify target
 
-      - name: Scan repository and dependency SBOM once
+      - name: Scan repository content once
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           version: v0.74.0
@@ -44,8 +44,17 @@ jobs:
           severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
           list-all-pkgs: 'true'
           format: json
-          output: trivy-repository.json
+          output: trivy-source.json
           exit-code: '0'
+
+      - name: Scan resolved dependency SBOM once with the same vulnerability database
+        run: |
+          trivy --cache-dir .cache/trivy sbom --skip-db-update --scanners vuln \
+            --format json --list-all-pkgs --exit-code 0 \
+            --output trivy-dependencies.json target/polaris-sbom.json
+
+      - name: Combine native source and dependency finding records
+        run: python3 .github/scripts/merge_trivy_results.py trivy-source.json trivy-dependencies.json trivy-repository.json
 
       - name: Verify Trivy conversion severity policy
         run: python3 .github/scripts/test_trivy_conversion.py
@@ -63,11 +72,13 @@ jobs:
           category: trivy-repository
 
       - name: Upload full repository security reports
-        if: ${{ !cancelled() && hashFiles('trivy-repository.json') != '' }}
+        if: ${{ !cancelled() && hashFiles('trivy-source.json', 'trivy-dependencies.json') != '' }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: ${{ inputs.artifact-name }}-repository-security
           path: |
+            trivy-source.json
+            trivy-dependencies.json
             trivy-repository.json
             trivy-repository.sarif
           if-no-files-found: error
