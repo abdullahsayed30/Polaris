@@ -1,0 +1,115 @@
+name: Reusable container security
+
+on:
+  workflow_call:
+    inputs:
+      artifact-name:
+        description: Name prefix for uploaded image reports and SBOMs.
+        required: false
+        type: string
+        default: polaris
+
+permissions:
+  actions: read
+  contents: read
+  security-events: write
+
+jobs:
+  scan:
+    name: Container security (${{ matrix.service }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - service: gateway
+            jar: /app/gateway.jar
+          - service: order-service
+            jar: /app/order-service.jar
+          - service: inventory-service
+            jar: /app/inventory-service.jar
+          - service: notification-service
+            jar: /app/notification-service.jar
+    env:
+      IMAGE_REF: polaris/${{ matrix.service }}:${{ github.sha }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+
+      - name: Build production image from this source
+        env:
+          SERVICE: ${{ matrix.service }}
+        run: docker build --file "$SERVICE/Dockerfile" --target production --tag "$IMAGE_REF" .
+
+      - name: Smoke-test image runtime and application archive
+        env:
+          JAR: ${{ matrix.jar }}
+        run: |
+          set -euo pipefail
+          docker run --rm --entrypoint java "$IMAGE_REF" -version
+          docker run --rm --entrypoint java "$IMAGE_REF" \
+            -Djarmode=tools -jar "$JAR" list-layers \
+            | grep -Fx application
+
+      - name: Scan production image once
+        if: ${{ !cancelled() && !failure() }}
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          version: v0.74.0
+          scan-type: image
+          image-ref: ${{ env.IMAGE_REF }}
+          scanners: vuln,secret,misconfig
+          severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
+          list-all-pkgs: 'true'
+          format: json
+          output: trivy-${{ matrix.service }}.json
+          exit-code: '0'
+
+      - name: Convert full image results to SARIF
+        if: ${{ !cancelled() && hashFiles(format('trivy-{0}.json', matrix.service)) != '' }}
+        env:
+          SERVICE: ${{ matrix.service }}
+        run: trivy convert --format sarif --output "trivy-$SERVICE.sarif" "trivy-$SERVICE.json"
+
+      - name: Generate image SBOM from the same results
+        if: ${{ !cancelled() && hashFiles(format('trivy-{0}.json', matrix.service)) != '' }}
+        env:
+          SERVICE: ${{ matrix.service }}
+        run: trivy convert --format cyclonedx --output "$SERVICE.cdx.json" "trivy-$SERVICE.json"
+
+      - name: Upload Trivy image SARIF
+        if: ${{ !cancelled() && hashFiles(format('trivy-{0}.sarif', matrix.service)) != '' }}
+        uses: github/codeql-action/upload-sarif@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4
+        continue-on-error: true
+        with:
+          sarif_file: trivy-${{ matrix.service }}.sarif
+          category: trivy-image-${{ matrix.service }}
+
+      - name: Upload full image security reports
+        if: ${{ !cancelled() && hashFiles(format('trivy-{0}.json', matrix.service)) != '' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: ${{ inputs.artifact-name }}-${{ matrix.service }}-security
+          path: |
+            trivy-${{ matrix.service }}.json
+            trivy-${{ matrix.service }}.sarif
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload image SBOM
+        if: ${{ !cancelled() && hashFiles(format('{0}.cdx.json', matrix.service)) != '' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: ${{ inputs.artifact-name }}-${{ matrix.service }}-sbom
+          path: ${{ matrix.service }}.cdx.json
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Enforce HIGH and CRITICAL image findings
+        if: ${{ !cancelled() }}
+        env:
+          SERVICE: ${{ matrix.service }}
+        run: trivy convert --format table --scanners vuln,secret,misconfig --severity HIGH,CRITICAL --exit-code 1 "trivy-$SERVICE.json"
