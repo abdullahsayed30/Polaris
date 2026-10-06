@@ -67,6 +67,23 @@ class TrivyConversionTest(unittest.TestCase):
         packages = json.loads(sbom.read_text())["components"]
         self.assertTrue(any(package.get("name") == "fixture" for package in packages))
 
+    def test_sbom_scan_reads_resolved_cyclonedx_inventory(self):
+        sbom = self.directory / "polaris-sbom.json"
+        sbom.write_text(json.dumps({
+            "bomFormat": "CycloneDX", "specVersion": "1.6", "version": 1,
+            "components": [{"type": "library", "group": "example", "name": "fixture",
+                            "version": "1", "purl": "pkg:maven/example/fixture@1"}],
+        }))
+        result = subprocess.run(
+            [self.trivy, "sbom", "--scanners", "license", "--format", "json",
+             "--list-all-pkgs", str(sbom)],
+            capture_output=True, text=True,
+        )
+        self.assertEqual(0, result.returncode, result.stderr)
+        packages = [package for entry in json.loads(result.stdout)["Results"]
+                    for package in entry.get("Packages", [])]
+        self.assertTrue(any(package.get("Name") == "example:fixture" for package in packages), result.stdout)
+
     def test_missing_or_malformed_report_fails(self):
         for content in (None, "{"):
             with self.subTest(content=content):
