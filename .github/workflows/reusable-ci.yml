@@ -61,7 +61,7 @@ jobs:
 
       - name: Generate aggregate SBOM and source provenance
         run: |
-          ./mvnw -B -ntp -DskipTests cyclonedx:makeAggregateBom
+          ./mvnw -B -ntp -DskipTests -DincludeTestScope=true cyclonedx:makeAggregateBom
           python3 .github/scripts/ci_source.py write target
 
       - name: Generate coverage reports after a failed build
