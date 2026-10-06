@@ -69,7 +69,7 @@ logging:
 grpc:
   client:
     inventory-service:
-      address: static://${polaris.inventory.grpc.host:localhost}:${polaris.inventory.grpc.port:9090}
+      address: dns:///${polaris.inventory.grpc.host:localhost}:${polaris.inventory.grpc.port:9090}
       negotiation-type: plaintext
 
 polaris:
