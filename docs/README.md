@@ -6,6 +6,8 @@ This folder documents the architecture, service boundaries, and significant deci
 
 | Document | Purpose |
 | --- | --- |
+| [Reviewer Quick Start](../demo/README.md) | Clean-clone authenticated demo, prerequisites and troubleshooting |
+| [How to Add a Service](add-service.md) | Practical extension workflow grounded in the service standard |
 | [Architecture](architecture.md) | System overview, communication patterns, data ownership, and major conventions |
 | [Services](services/README.md) | Runtime service documentation for gateway, order, inventory, and notification services |
 | [Service Architecture Standard](service-architecture-standard.md) | Package structure and coding rules for service modules |
@@ -31,6 +33,7 @@ docs/
 |   |-- order-service.md
 |   |-- inventory-service.md
 |   `-- notification-service.md
+|-- add-service.md
 |-- architecture.md
 |-- deployment.md
 |-- gateway.md

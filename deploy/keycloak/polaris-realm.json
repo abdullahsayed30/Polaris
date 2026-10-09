@@ -48,6 +48,17 @@
         "roles",
         "orders:read",
         "orders:write"
+      ],
+      "protocolMappers": [
+        {
+          "name": "subject",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-sub-mapper",
+          "consentRequired": false,
+          "config": {
+            "access.token.claim": "true"
+          }
+        }
       ]
     }
   ],
