@@ -88,11 +88,15 @@ def render(target, report, policy, prefix="polaris", now=None):
     if policy_error:
         lines.append(f"\n**Risk-acceptance policy invalid; gate cannot pass:** {text(policy_error)}.\n")
     else:
-        lines.append(f"\n**Gate-only accepted risk:** {trivy_gate.CVE}, {text(trivy_gate.PURL)}, "
-                     f"owner {trivy_gate.OWNER}; expires after **June 30, 2027 UTC**, "
+        lines.append(f"\n**Gate-only accepted risk:** owner {trivy_gate.OWNER}; expires after **June 30, 2027 UTC**, "
                      f"enforced from **{trivy_gate.EXPIRES_AT}**. Matching raw findings: **{len(accepted)}**. "
                      "The vulnerable version remains installed; runtime applicability is unproven. "
                      "This is accepted risk, not a patch or a VEX non-applicability assertion.\n")
+        lines.extend(["| Approved CVE | Exact installed package scope |",
+                      "| --- | --- |"])
+        for cve, purls in trivy_gate.APPROVED.items():
+            lines.append(f"| {cve} | {', '.join(text(purl) for purl in purls)} |")
+        lines.append("")
     lines.extend(["| Vulnerability | Package | Installed | Fixed | Severity | Gate status | Source |",
                   "| --- | --- | --- | --- | --- | --- | --- |"])
     vulnerabilities = sorted(groups["Vulnerabilities"], key=lambda finding: (

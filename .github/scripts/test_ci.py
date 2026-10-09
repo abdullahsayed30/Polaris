@@ -14,6 +14,9 @@ import check_ci_results
 import ci_source
 import merge_trivy_results
 import trivy_gate
+
+FIXTURE_CVE = "CVE-2026-47884"
+FIXTURE_PURL = "pkg:maven/org.springframework/spring-webmvc@6.2.19"
 import trivy_summary
 
 
@@ -23,8 +26,8 @@ class TrivySummaryTest(unittest.TestCase):
         self.now = datetime(2026, 10, 10, tzinfo=timezone.utc)
         self.report = {"SchemaVersion": 2, "Trivy": {"Version": "0.74.0"},
                        "ArtifactName": "fixture", "ArtifactType": "filesystem", "Results": []}
-        self.accepted = {"VulnerabilityID": trivy_gate.CVE,
-                         "PkgIdentifier": {"PURL": trivy_gate.PURL, "UID": "fixture"},
+        self.accepted = {"VulnerabilityID": FIXTURE_CVE,
+                         "PkgIdentifier": {"PURL": FIXTURE_PURL, "UID": "fixture"},
                          "PkgName": "org.springframework:spring-webmvc", "InstalledVersion": "6.2.19",
                          "FixedVersion": "7.0.9", "Severity": "CRITICAL",
                          "PrimaryURL": "https://spring.io/security/cve-2026-47884/"}
@@ -45,7 +48,7 @@ class TrivySummaryTest(unittest.TestCase):
         self.assertTrue(valid)
         self.assertIn("| 1 | 1 | 1 | 1 | 1 |", markdown)
         self.assertIn("| Vulnerabilities | 3 | 2 | 1 |", markdown)
-        self.assertIn(trivy_gate.CVE, markdown)
+        self.assertIn(FIXTURE_CVE, markdown)
         self.assertIn("Accepted / suppressed for gate only", markdown)
         self.assertIn("owner abdullahsayed30", markdown)
         self.assertIn("June 30, 2027 UTC", markdown)
@@ -62,6 +65,27 @@ class TrivySummaryTest(unittest.TestCase):
                 self.assertIn("No vulnerability findings", markdown)
                 self.assertIn("polaris-" + target + "-security", markdown)
                 self.assertIn(target, markdown)
+
+    def test_all_four_approved_pairs_are_visible_without_accepting_cross_pairs_or_lz4(self):
+        approved = []
+        for cve, purls in trivy_gate.APPROVED.items():
+            for purl in purls:
+                approved.append({**self.accepted, "VulnerabilityID": cve,
+                                 "PkgIdentifier": {"PURL": purl, "UID": "fixture"},
+                                 "PkgName": purl.removeprefix("pkg:maven/").partition("@")[0].replace("/", ":")})
+        unapproved = [{**approved[0], "VulnerabilityID": "CVE-2026-47892"},
+                      {**approved[-1], "VulnerabilityID": "CVE-2026-47884"},
+                      {"VulnerabilityID": "CVE-2026-106451", "Severity": "HIGH"}]
+        self.report["Results"] = [{"Vulnerabilities": approved + unapproved}]
+        markdown, valid = self.render()
+        self.assertTrue(valid)
+        self.assertIn("| Vulnerabilities | 7 | 7 | 3 |", markdown)
+        self.assertIn("Matching raw findings: **4**", markdown)
+        self.assertEqual(4, markdown.count("Accepted / suppressed for gate only"))
+        for cve, purls in trivy_gate.APPROVED.items():
+            self.assertIn(cve, markdown)
+            for purl in purls:
+                self.assertIn(purl, markdown)
 
     def test_expired_or_missing_policy_cannot_claim_effective_zero(self):
         self.report["Results"] = [{"Vulnerabilities": [self.accepted]}]
@@ -156,8 +180,22 @@ class RiskAcceptancePolicyTest(unittest.TestCase):
             del policy["vulnerabilities"][0][field]
             with self.subTest(field=field), self.assertRaises(ValueError):
                 trivy_gate.validate_policy(policy, self.before)
+
+    def test_every_entry_is_frozen_and_duplicate_or_missing_cves_fail(self):
+        for index, entry in enumerate(self.policy["vulnerabilities"]):
+            for field, value in (("owner", "other"), ("expired_at", "2028-07-01T00:00:00Z"),
+                                 ("purls", []), ("id", "CVE-2099-0001")):
+                policy = copy.deepcopy(self.policy)
+                policy["vulnerabilities"][index][field] = value
+                with self.subTest(index=index, field=field), self.assertRaises(ValueError):
+                    trivy_gate.validate_policy(policy, self.before)
+        duplicate = copy.deepcopy(self.policy)
+        duplicate["vulnerabilities"][-1] = duplicate["vulnerabilities"][0]
+        for policy in (duplicate, {"vulnerabilities": self.policy["vulnerabilities"][:-1]}):
+            with self.subTest(policy=policy), self.assertRaises(ValueError):
+                trivy_gate.validate_policy(policy, self.before)
         for purls in (["pkg:maven/org.springframework/spring-webmvc"],
-                      [trivy_gate.PURL, "pkg:maven/example/other@1"]):
+                      [FIXTURE_PURL, "pkg:maven/example/other@1"]):
             policy = copy.deepcopy(self.policy)
             policy["vulnerabilities"][0]["purls"] = purls
             with self.subTest(purls=purls), self.assertRaises(ValueError):

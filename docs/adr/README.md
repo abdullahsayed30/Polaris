@@ -22,7 +22,7 @@ Polaris records significant architecture choices as lightweight ADRs. Each recor
 | [0014](0014-use-notification-retry-and-dead-letter-topic.md) | Accepted | Use notification retry and dead-letter topic |
 | [0015](0015-use-records-for-configuration-properties.md) | Accepted | Use records for configuration properties |
 | [0016](0016-use-tempo-for-distributed-tracing.md) | Accepted | Use Tempo for distributed tracing |
-| [0017](0017-use-github-actions-quality-and-security-gates.md) | Accepted; scoped risk amendment 2026-10-10 | Use GitHub Actions quality and security gates; owner-approved CVE-2026-47884 gate exception through 2027-06-30 UTC |
+| [0017](0017-use-github-actions-quality-and-security-gates.md) | Accepted; scoped risk amendment 2026-10-10 | Use GitHub Actions quality and security gates; owner-approved CVE-2026-47884/47890/47892 package-scoped gate exceptions through 2027-06-30 UTC |
 | [0018](0018-use-spring-boot-compatible-grpc-and-observability-conventions.md) | Accepted | Use Spring Boot-compatible gRPC and observability conventions |
 | [0019](0019-use-transactional-outbox-and-consumer-inbox.md) | Accepted | Use transactional outbox and consumer inbox |
 | [0020](0020-recover-pending-orders-durably.md) | Accepted | Recover pending orders durably without distributed transactions |

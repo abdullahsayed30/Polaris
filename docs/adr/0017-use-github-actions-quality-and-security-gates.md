@@ -20,11 +20,19 @@ Run Trivy against the repository filesystem for vulnerabilities, secrets, and mi
 
 ### Accepted Risk Amendment — 2026-10-10
 
-Owner `abdullahsayed30` explicitly accepts the longer temporary risk of **CVE-2026-47884** only for **`pkg:maven/org.springframework/spring-webmvc@6.2.19`**, through **June 30, 2027 UTC**. The blocking severity gate resumes at **2027-07-01T00:00:00Z**. The installed version remains vulnerable and runtime applicability is not yet proven; this is neither a patch nor a VEX non-applicability assertion. The [Spring advisory](https://spring.io/security/cve-2026-47884/) lists the compatible 6.2.20 fix as Enterprise Support Only and 7.0.9 as the public fix; this decision does not amend ADR 0018's platform baseline.
+Owner `abdullahsayed30` explicitly accepts the longer temporary risk of these three current Spring CVEs, limited to the four exact versioned package pairs below, through **June 30, 2027 UTC**. The blocking severity gate resumes at **2027-07-01T00:00:00Z**.
 
-The scoped [native ignore policy](../../.github/security/trivy-gate-ignore.yaml) applies only during HIGH/CRITICAL gate conversion for repository and production-image reports. Full all-severity JSON, SARIF and SBOM remain unsuppressed. Every other vulnerability, secret and failing misconfiguration retains the existing threshold; scan/report failures and the final CI aggregate fail closed. Validate the exact owner, CVE, versioned PURL and UTC cutoff before native filtering. Missing/ambiguous finding identities or missing/malformed/broadened policy must not pass. Summary pages show raw versus effective blockers and the explicit accepted risk.
+| CVE | Exact installed package scope |
+| --- | --- |
+| CVE-2026-47884 | `pkg:maven/org.springframework/spring-webmvc@6.2.19` |
+| CVE-2026-47890 | `pkg:maven/org.springframework/spring-webmvc@6.2.19`, `pkg:maven/org.springframework/spring-webflux@6.2.19` |
+| CVE-2026-47892 | `pkg:maven/org.springframework/spring-webflux@6.2.19` |
 
-Remove this exception earlier when a reviewed compatible dependency fix lands. There is no automatic renewal. Before expiry the owner must reassess advisory changes, runtime applicability, compatible fixes and the migration plan. A later extension requires a new explicit owner decision and reviewed policy, validator and documentation changes. See [CI/CD](../ci-cd.md#dependency-finding-and-accepted-risk) for date-boundary semantics and regression evidence.
+The installed versions remain vulnerable and runtime applicability is not yet proven; this is neither a patch nor a VEX non-applicability assertion. The official [XsltView advisory](https://spring.io/security/cve-2026-47884/), [SSE advisory](https://spring.io/security/cve-2026-47890/) and [WebFlux advisory](https://spring.io/security/cve-2026-47892/) list the compatible 6.2.20 fix as Enterprise Support Only and 7.0.9 as the public fix. This decision does not amend ADR 0018's platform baseline. No future CVE, other Spring package, different version or LZ4 finding is accepted automatically.
+
+The scoped [native ignore policy](../../.github/security/trivy-gate-ignore.yaml) applies only during HIGH/CRITICAL gate conversion for repository and production-image reports. Full all-severity JSON, SARIF and SBOM remain unsuppressed. Every other vulnerability, secret and failing misconfiguration retains the existing threshold; scan/report failures and the final CI aggregate fail closed. Validate the exact owner, CVE-to-versioned-PURL mapping and UTC cutoff before native filtering. Missing/ambiguous finding identities or missing/malformed/broadened policy must not pass. Summary pages show raw versus effective blockers and the explicit accepted risk.
+
+Remove each exception earlier when a reviewed compatible dependency fix lands. There is no automatic renewal. Before expiry the owner must reassess advisory changes, runtime applicability, compatible fixes and the migration plan. A later extension requires a new explicit owner decision and reviewed policy, validator and documentation changes. See [CI/CD](../ci-cd.md#dependency-finding-and-accepted-risk) for date-boundary semantics and regression evidence.
 
 ## Consequences
 
