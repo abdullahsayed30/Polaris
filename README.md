@@ -38,7 +38,7 @@ flowchart LR
 | Spring Cloud      | 2025.0.x                                     |
 | Database          | PostgreSQL 18, one database per stateful service |
 | Schema migrations | Liquibase                                    |
-| Async messaging   | Spring Kafka; Kafka 3.7.2 in local Compose   |
+| Async messaging   | Spring Kafka; Kafka 3.7 family via Confluent 7.7.12 in local Compose |
 | Internal RPC      | gRPC + Protobuf                              |
 | Auth              | JWT resource servers; local Keycloak realm   |
 | Testing           | JUnit 5, Mockito, Testcontainers             |
@@ -75,22 +75,22 @@ See [Gateway](docs/services/gateway.md) for configuration details.
 
 ## Quick Start
 
-For the fastest reviewer path, install:
+Use JDK **25 exactly**, a running Docker daemon with Docker Compose supporting `--wait`, and `curl`/`jq`. The Maven Wrapper is included and pinned to Maven **3.9.15**; no separate Maven install is needed.
 
-- Java 25
-- Maven Wrapper, pinned to Maven 3.9.15
-- Docker with Docker Compose
-- `curl` and `jq` for the authenticated demo
-
-Verify the codebase, start the local stack, and run the customer-isolation demo:
+From a separate clone, run:
 
 ```bash
-./mvnw clean verify
-docker compose up --build --wait
+git clone https://github.com/abdullahsayed30/Polaris.git polaris-review
+cd polaris-review
+./mvnw -B -ntp clean verify
+docker compose config --quiet
+COMPOSE_PARALLEL_LIMIT=1 docker compose up --build --wait
 ./demo/polaris-demo.sh
 ```
 
-The demo obtains local Keycloak tokens for two users, places and reads an order through the gateway, and verifies that one customer cannot read another customer's order. The realm, users, passwords, and password-grant flow are development fixtures only; see [Local authenticated demo](demo/README.md).
+The demo checks confirmed creation, the same order ID and replay header on retry, matching readback, and cross-customer denial through the gateway. It exits nonzero on a failed assertion. Notifications are simulated; local Keycloak/password grant/plaintext are development fixtures.
+
+Follow [Reviewer quick start](demo/README.md) for preflight, expected output, startup/troubleshooting and distinct stop/data-reset steps. Only one default stack can own the fixed ports/network at a time. Docker-skipped integration tests and Compose healthchecks alone are not proof of the authenticated journey. See [demo validation evidence](demo/validation.md) and [How to add a service](docs/add-service.md).
 
 Useful local endpoints:
 
@@ -109,7 +109,7 @@ Useful local endpoints:
 Run the fast local gate without Testcontainers-backed integration tests:
 
 ```bash
-./mvnw spotless:check checkstyle:check test
+./mvnw -B -ntp spotless:check checkstyle:check test
 ```
 
 Configure the required local Git hooks once per clone:

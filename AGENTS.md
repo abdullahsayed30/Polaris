@@ -61,6 +61,7 @@ ADR 0021 applies to **order-service, inventory-service and notification-service 
 
 ## Git identity and attribution
 
+- Prefer Rebase and merge for final pull request integration unless the user explicitly chooses another strategy. If it is unavailable, report the blocker and obtain the user's agreement before using another strategy. This preference does not authorize rewriting published history or force-pushing; the user-only identity and attribution rules below still apply.
 - Name new branches by purpose: `feature/`, `fix/` or `bugfix/`, `chore/`, `docs/`, or `refactor/`, followed by a short descriptive name. Do not use an assistant or tool name as a branch prefix. This convention does not authorize renaming existing published branches, rewriting history, or force-pushing.
 - Keep repository-facing content free of coding-assistant or assistant-vendor branding and attribution, including branch names, commit messages, pull request titles/descriptions, documentation, and release notes. Use the user's identity and describe the project change directly.
 - Commit and push only using the user's GitHub account, `abdullahsayed30`, and their Git identity. Verify the authenticated account and commit author/committer before pushing; if authentication is missing or belongs to another account, stop and ask the user to sign in with their account.
