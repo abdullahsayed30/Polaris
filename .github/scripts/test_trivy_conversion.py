@@ -12,6 +12,9 @@ from pathlib import Path
 
 import trivy_gate
 
+FIXTURE_CVE = "CVE-2026-47884"
+FIXTURE_PURL = "pkg:maven/org.springframework/spring-webmvc@6.2.19"
+
 
 class TrivyConversionTest(unittest.TestCase):
     def setUp(self):
@@ -41,18 +44,19 @@ class TrivyConversionTest(unittest.TestCase):
             capture_output=True, text=True, cwd=self.directory,
         )
 
-    def risk_fixture(self, purl=trivy_gate.PURL):
+    def risk_fixture(self, purl=FIXTURE_PURL, cve=FIXTURE_CVE):
         self.fixture("Vulnerabilities", "CRITICAL")
         report = json.loads(self.report.read_text())
         report["Trivy"] = {"Version": "0.74.0"}
         finding = report["Results"][0]["Vulnerabilities"][0]
-        finding.update({"VulnerabilityID": trivy_gate.CVE,
-                        "PkgName": "org.springframework:spring-webmvc",
+        package = purl.removeprefix("pkg:maven/").partition("@")[0].replace("/", ":")
+        finding.update({"VulnerabilityID": cve,
+                        "PkgName": package,
                         "InstalledVersion": "6.2.19",
                         "PkgIdentifier": {"PURL": purl, "UID": "fixture-uid"}})
         report["Results"][0]["Packages"] = [{
-            "ID": "org.springframework:spring-webmvc:6.2.19",
-            "Name": "org.springframework:spring-webmvc", "Version": "6.2.19",
+            "ID": package + ":6.2.19",
+            "Name": package, "Version": "6.2.19",
             "Identifier": {"PURL": purl, "UID": "fixture-uid"},
         }]
         self.report.write_text(json.dumps(report))
@@ -75,16 +79,43 @@ class TrivyConversionTest(unittest.TestCase):
 
     def test_pinned_convert_applies_approved_purl_to_repository_and_image_shapes(self):
         self.copy_gate()
-        for purl in (trivy_gate.PURL, trivy_gate.PURL + "?type=jar"):
-            with self.subTest(purl=purl):
-                self.risk_fixture(purl)
-                original = self.report.read_bytes()
-                unexcepted = self.convert("--format", "table", "--severity", "HIGH,CRITICAL", "--exit-code", "1")
-                self.assertEqual(1, unexcepted.returncode, unexcepted.stderr)
-                accepted = self.gate()
-                self.assertEqual(0, accepted.returncode, accepted.stderr)
-                self.assertIn("Gate-only accepted risk", accepted.stdout)
-                self.assertEqual(original, self.report.read_bytes())
+        for cve, purls in trivy_gate.APPROVED.items():
+            for base_purl in purls:
+                for purl in (base_purl, base_purl + "?type=jar"):
+                    with self.subTest(cve=cve, purl=purl):
+                        self.risk_fixture(purl, cve)
+                        original = self.report.read_bytes()
+                        unexcepted = self.convert("--format", "table", "--severity", "HIGH,CRITICAL", "--exit-code", "1")
+                        self.assertEqual(1, unexcepted.returncode, unexcepted.stderr)
+                        accepted = self.gate()
+                        self.assertEqual(0, accepted.returncode, accepted.stderr)
+                        self.assertIn("Gate-only accepted risk", accepted.stdout)
+                        self.assertEqual(original, self.report.read_bytes())
+
+    def test_unapproved_spring_pairs_and_lz4_are_never_suppressed(self):
+        self.copy_gate()
+        for cve, purl in (("CVE-2026-47884", "pkg:maven/org.springframework/spring-webflux@6.2.19"),
+                          ("CVE-2026-47892", FIXTURE_PURL),
+                          ("CVE-2026-106451", "pkg:maven/at.yawk.lz4/lz4-java@1.10.1")):
+            with self.subTest(cve=cve, purl=purl):
+                report = self.risk_fixture(purl, cve)
+                if cve == "CVE-2026-106451":
+                    report["Results"][0]["Vulnerabilities"][0]["InstalledVersion"] = "1.10.1"
+                    self.report.write_text(json.dumps(report))
+                result = self.gate()
+                self.assertEqual(1, result.returncode, result.stderr)
+                self.assertIn("Gate-only accepted risk", result.stdout)
+
+    def test_every_approved_cve_requires_an_unambiguous_identifier(self):
+        self.copy_gate()
+        for cve, purls in trivy_gate.APPROVED.items():
+            with self.subTest(cve=cve):
+                report = self.risk_fixture(purls[0], cve)
+                report["Results"][0]["Vulnerabilities"][0]["PkgIdentifier"].pop("PURL")
+                self.report.write_text(json.dumps(report))
+                result = self.gate()
+                self.assertEqual(1, result.returncode)
+                self.assertIn("Invalid security gate evidence", result.stderr)
 
     def test_other_cve_package_version_and_namespace_remain_blocking(self):
         self.copy_gate()
@@ -105,9 +136,9 @@ class TrivyConversionTest(unittest.TestCase):
 
     def test_missing_purl_uid_or_inconsistent_identity_fails_closed(self):
         self.copy_gate()
-        for change in ({"PkgIdentifier": {}}, {"PkgIdentifier": {"PURL": trivy_gate.PURL}},
+        for change in ({"PkgIdentifier": {}}, {"PkgIdentifier": {"PURL": FIXTURE_PURL}},
                        {"InstalledVersion": "6.2.18"}, {"PkgName": "example:other"},
-                       {"PkgIdentifier": {"PURL": trivy_gate.PURL + "?type=war", "UID": "fixture-uid"}}):
+                       {"PkgIdentifier": {"PURL": FIXTURE_PURL + "?type=war", "UID": "fixture-uid"}}):
             with self.subTest(change=change):
                 report = self.risk_fixture()
                 report["Results"][0]["Vulnerabilities"][0].update(change)
@@ -195,10 +226,18 @@ class TrivyConversionTest(unittest.TestCase):
 
     def test_full_json_sarif_and_sbom_keep_accepted_risk_finding(self):
         self.copy_gate()
-        self.risk_fixture()
+        report = self.risk_fixture()
+        findings, packages = [], []
+        for cve, purls in trivy_gate.APPROVED.items():
+            for purl in purls:
+                fixture = self.risk_fixture(purl, cve)
+                findings.extend(fixture["Results"][0]["Vulnerabilities"])
+                packages.extend(fixture["Results"][0]["Packages"])
+        report["Results"][0].update({"Vulnerabilities": findings, "Packages": packages})
+        self.report.write_text(json.dumps(report))
         original = self.report.read_bytes()
         # A broad default ignore must not influence full report conversion.
-        (self.directory / ".trivyignore").write_text(trivy_gate.CVE)
+        (self.directory / ".trivyignore").write_text("\n".join(trivy_gate.APPROVED))
         self.assertEqual(0, self.gate().returncode)
         for format_name in ("sarif", "cyclonedx"):
             with self.subTest(format=format_name):
@@ -207,10 +246,14 @@ class TrivyConversionTest(unittest.TestCase):
                 self.assertEqual(0, result.returncode, result.stderr)
                 converted = json.loads(output.read_text())
                 if format_name == "sarif":
-                    self.assertTrue(any(trivy_gate.CVE in item["ruleId"] for item in converted["runs"][0]["results"]))
+                    for cve in trivy_gate.APPROVED:
+                        self.assertTrue(any(cve in item["ruleId"] for item in converted["runs"][0]["results"]))
+                    self.assertEqual(4, len(converted["runs"][0]["results"]))
                 else:
-                    self.assertTrue(any(item["id"] == trivy_gate.CVE for item in converted["vulnerabilities"]))
-                    self.assertTrue(any(item["purl"] == trivy_gate.PURL for item in converted["components"]))
+                    for cve, purls in trivy_gate.APPROVED.items():
+                        self.assertTrue(any(item["id"] == cve for item in converted["vulnerabilities"]))
+                        for purl in purls:
+                            self.assertTrue(any(item["purl"] == purl for item in converted["components"]))
         self.assertEqual(original, self.report.read_bytes())
 
     def test_high_and_critical_findings_fail_for_every_scanner(self):
