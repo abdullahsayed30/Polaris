@@ -1,0 +1,53 @@
+{
+  "application_source_sha": "fcd4a8efe48f797091297dba531d0958400e48eb",
+  "command": "./mvnw -B -ntp spotless:check checkstyle:check verify",
+  "full_reactor_result": "BUILD SUCCESS",
+  "commit_hook_result": "BUILD SUCCESS",
+  "integration_suites": [
+    {
+      "name": "io.polaris.contracts.OrderLifecycleSystemIntegrationTest",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "3086.406"
+    },
+    {
+      "name": "io.polaris.inventory.InventoryServiceIntegrationTest",
+      "tests": "12",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "995.794"
+    },
+    {
+      "name": "io.polaris.notification.NotificationServiceIntegrationTest",
+      "tests": "5",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "700.547"
+    },
+    {
+      "name": "io.polaris.order.OrderServiceIntegrationTest",
+      "tests": "15",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "3863.433"
+    },
+    {
+      "name": "io.polaris.order.adapter.out.observability.DurableRecoveryIntegrationTest",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "1306.148"
+    }
+  ],
+  "notes": [
+    "Initial pre-final-source verify had one existing Kafka-delivery timeout; later unchanged-source full gates passed without changing its timeout.",
+    "e02d471 live proof exposed a Micrometer scheduler-parent propagation gap, corrected and tested at fcd4a8e; that older live run is failure evidence, not complete full-flow proof.",
+    "Recorded final bridge reactor elapsed3h54; gate result alone is not a live performance claim."
+  ]
+}

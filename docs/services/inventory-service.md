@@ -40,6 +40,8 @@ If any item is missing or insufficient, no inventory row is mutated and the dura
 
 No other service reads or writes this database.
 
+Each outbox row also retains a nullable bounded trace carrier captured during the stock transaction. Every publication attempt restores its original trace and parent; retries preserve both event identity and carrier. Storage spans measure adapter persistence blocks, and cached backlog snapshots expose sample failure/staleness. See [observability](../observability.md) for the metric and trace contracts.
+
 ## Kafka
 
 | Topic | Direction | Purpose |

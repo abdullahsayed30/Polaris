@@ -1,76 +1,32 @@
 {
-  "annotations": {
-    "list": [
-      {
-        "builtIn": 1,
-        "datasource": {
-          "type": "grafana",
-          "uid": "-- Grafana --"
-        },
-        "enable": true,
-        "hide": true,
-        "iconColor": "rgba(0, 211, 255, 1)",
-        "name": "Annotations & Alerts",
-        "type": "dashboard"
-      }
-    ]
+  "title": "Polaris gRPC",
+  "uid": "polaris-grpc",
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": false,
+  "timezone": "browser",
+  "refresh": "15s",
+  "time": {
+    "from": "now-30m",
+    "to": "now"
   },
-  "editable": true,
-  "fiscalYearStartMonth": 0,
-  "graphTooltip": 0,
-  "id": null,
-  "links": [],
-  "liveNow": false,
+  "tags": [
+    "polaris"
+  ],
   "panels": [
     {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "Prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "reqps"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 0
-      },
       "id": 1,
-      "options": {
-        "legend": {
-          "displayMode": "table",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "none"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "Prometheus"
-          },
-          "editorMode": "code",
-          "expr": "sum by (grpc_service, grpc_method) (rate(grpc_server_processing_duration_seconds_count[5m]))",
-          "legendFormat": "{{grpc_service}}/{{grpc_method}}",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Server Request Rate",
-      "type": "timeseries"
-    },
-    {
+      "title": "Inventory RPC server request rate",
+      "type": "timeseries",
       "datasource": {
         "type": "prometheus",
         "uid": "Prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 8
       },
       "fieldConfig": {
         "defaults": {
@@ -78,44 +34,77 @@
         },
         "overrides": []
       },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 0
-      },
-      "id": 2,
       "options": {
         "legend": {
           "displayMode": "table",
           "placement": "bottom",
           "showLegend": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "none"
         }
       },
       "targets": [
         {
+          "refId": "A",
+          "expr": "sum by(method,statusCode) (rate(grpc_server_processing_duration_seconds_count{service=\"polaris.inventory.v1.InventoryService\"}[5m]))",
+          "legendFormat": "{{method}} {{statusCode}}",
           "datasource": {
             "type": "prometheus",
             "uid": "Prometheus"
-          },
-          "editorMode": "code",
-          "expr": "sum by (grpc_service, grpc_method) (rate(grpc_client_processing_duration_seconds_count[5m]))",
-          "legendFormat": "{{grpc_service}}/{{grpc_method}}",
-          "range": true,
-          "refId": "A"
+          }
         }
-      ],
-      "title": "Client Request Rate",
-      "type": "timeseries"
+      ]
     },
     {
+      "id": 2,
+      "title": "Inventory RPC client request rate",
+      "type": "timeseries",
       "datasource": {
         "type": "prometheus",
         "uid": "Prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by(method,statusCode) (rate(grpc_client_processing_duration_seconds_count{service=\"polaris.inventory.v1.InventoryService\"}[5m]))",
+          "legendFormat": "{{method}} {{statusCode}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "Prometheus"
+          }
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Inventory RPC p95 latency",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "Prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 8,
+        "w": 12,
+        "h": 8
       },
       "fieldConfig": {
         "defaults": {
@@ -123,44 +112,38 @@
         },
         "overrides": []
       },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 8
-      },
-      "id": 3,
       "options": {
         "legend": {
           "displayMode": "table",
           "placement": "bottom",
           "showLegend": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "none"
         }
       },
       "targets": [
         {
+          "refId": "A",
+          "expr": "histogram_quantile(0.95, sum by(le,method) (rate(grpc_server_processing_duration_seconds_bucket{service=\"polaris.inventory.v1.InventoryService\"}[5m])))",
+          "legendFormat": "{{method}}",
           "datasource": {
             "type": "prometheus",
             "uid": "Prometheus"
-          },
-          "editorMode": "code",
-          "expr": "sum by (grpc_service, grpc_method) (rate(grpc_server_processing_duration_seconds_sum[5m])) / sum by (grpc_service, grpc_method) (rate(grpc_server_processing_duration_seconds_count[5m]))",
-          "legendFormat": "{{grpc_service}}/{{grpc_method}}",
-          "range": true,
-          "refId": "A"
+          }
         }
-      ],
-      "title": "Server Mean Latency",
-      "type": "timeseries"
+      ]
     },
     {
+      "id": 4,
+      "title": "Inventory RPC system errors",
+      "type": "timeseries",
       "datasource": {
         "type": "prometheus",
         "uid": "Prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 8,
+        "w": 12,
+        "h": 8
       },
       "fieldConfig": {
         "defaults": {
@@ -168,59 +151,41 @@
         },
         "overrides": []
       },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 8
-      },
-      "id": 4,
       "options": {
         "legend": {
           "displayMode": "table",
           "placement": "bottom",
           "showLegend": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "none"
         }
       },
       "targets": [
         {
+          "refId": "A",
+          "expr": "sum by(method,statusCode) (rate(grpc_server_processing_duration_seconds_count{service=\"polaris.inventory.v1.InventoryService\",statusCode=~\"UNKNOWN|INTERNAL|UNAVAILABLE|DEADLINE_EXCEEDED|DATA_LOSS|RESOURCE_EXHAUSTED\"}[5m]))",
+          "legendFormat": "server {{method}} {{statusCode}}",
           "datasource": {
             "type": "prometheus",
             "uid": "Prometheus"
-          },
-          "editorMode": "code",
-          "expr": "sum by (grpc_service, grpc_method, grpc_status) (rate(grpc_server_processing_duration_seconds_count{grpc_status!=\"OK\"}[5m]))",
-          "legendFormat": "{{grpc_service}}/{{grpc_method}} {{grpc_status}}",
-          "range": true,
-          "refId": "A"
+          }
+        },
+        {
+          "refId": "B",
+          "expr": "sum by(method,statusCode) (rate(grpc_client_processing_duration_seconds_count{service=\"polaris.inventory.v1.InventoryService\",statusCode=~\"UNKNOWN|INTERNAL|UNAVAILABLE|DEADLINE_EXCEEDED|DATA_LOSS|RESOURCE_EXHAUSTED\"}[5m]))",
+          "legendFormat": "client {{method}} {{statusCode}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "Prometheus"
+          }
         }
-      ],
-      "title": "Server Error Rate",
-      "type": "timeseries"
+      ]
     }
   ],
-  "refresh": "15s",
-  "schemaVersion": 40,
-  "style": "dark",
-  "tags": [
-    "polaris",
-    "grpc"
-  ],
-  "templating": {
-    "list": []
-  },
-  "time": {
-    "from": "now-30m",
-    "to": "now"
-  },
-  "timepicker": {},
-  "timezone": "browser",
-  "title": "Polaris gRPC",
-  "uid": "polaris-grpc",
-  "version": 1,
-  "weekStart": ""
+  "links": [
+    {
+      "title": "Tempo trace search",
+      "url": "/explore?schemaVersion=1&panes={\"trace\":{\"datasource\":\"Tempo\",\"queries\":[{\"refId\":\"A\",\"queryType\":\"traceql\",\"query\":\"{resource.service.namespace=\\\"polaris\\\"}\"}],\"range\":{\"from\":\"now-30m\",\"to\":\"now\"}}}",
+      "type": "link",
+      "targetBlank": true
+    }
+  ]
 }

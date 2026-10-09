@@ -1,0 +1,31 @@
+{
+  "application_source": "fcd4a8efe48f797091297dba531d0958400e48eb",
+  "dashboard_source": "2a747dbc3430099ca6800d69497bb9a9c524c1e5",
+  "cases": {
+    "warm_http_idempotency_full_flow": "passed no client traceparent, same order ID on HTTP retry, actual original trace all4 services DB/Kafka/notification",
+    "pending_restart": "ID/carrier durable after restart; automatic dependency-return recovery FAILED due static gRPC resolver; additional order restart with inventory online recovered original ID and trace",
+    "outbox_restart": "both RETRY rows preserved eventID/carrier after order+inventory restart; broker-return publication PUBLISHED, attempts3 and2, committed matching inbox",
+    "replay": "passed second stable original-record replay: duplicates+1, completion counters unchanged, committed inbox unchanged, original trace notification.duplicate suppressed",
+    "handler_failure": "controlled synthetic OrderCreated items:null, three handler attempts, two retries, ack DLQ eventID preserved, committed DEAD_LETTERED",
+    "failed_dlq_source_redelivery": "Testcontainers integration passed; not live fixture outage proof",
+    "rollback": "real DB/inbox rollback integration and SDK transaction outcome tests passed; not live rollback injection",
+    "dashboard": "all24 actual PromQL queries success and actual Grafana/Tempo navigation/screenshots",
+    "logs": "92 matching ECS JSON traceId/spanId entries; no log backend"
+  },
+  "fixture_deviations": [
+    "isolated ports, cached production base images with rebuilt fcd4a8e JAR binds",
+    "fixture-only PostgreSQL18 volume target correction",
+    "fixture-only Keycloak subject mapper",
+    "fixture-only wget readiness replacing missing production-image wait-for-it",
+    "cached Confluent7.7.1 ARM broker instead tracked Bitnami"
+  ],
+  "sequencing_failures": [
+    "Kafka temporarily stopped before confirming pending recovery; restored and retained outcome",
+    "initial DLQ reader used wrong topic; actual polaris.notifications.dlq reader verified record"
+  ],
+  "limitations": [
+    "local elapsed delay minutes, no hours-long live claim",
+    "initial proof uses one-hour cutoff source; final fidelity correction must have separate provenance",
+    "no stock clean-clone launch proof, production notification provider, log backend or automatic DLQ redrive"
+  ]
+}

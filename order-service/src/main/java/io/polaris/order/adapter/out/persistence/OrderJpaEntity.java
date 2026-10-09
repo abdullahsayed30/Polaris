@@ -41,6 +41,13 @@ public class OrderJpaEntity {
     @Column(name = "updated_at", nullable = false)
     Instant updatedAt;
 
+    @Column(name = "recovery_trace_context", updatable = false, columnDefinition = "TEXT")
+    String recoveryTraceContext;
+
+    public String getRecoveryTraceContext() {
+        return recoveryTraceContext;
+    }
+
     @Version
     @Column(nullable = false)
     long version;

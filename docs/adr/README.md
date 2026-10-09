@@ -27,3 +27,4 @@ Polaris records significant architecture choices as lightweight ADRs. Each recor
 | [0019](0019-use-transactional-outbox-and-consumer-inbox.md) | Accepted | Use transactional outbox and consumer inbox |
 | [0020](0020-recover-pending-orders-durably.md) | Accepted | Recover pending orders durably without distributed transactions |
 | [0021](0021-adopt-hombergs-hexagonal-service-structure.md) | Accepted | Hombergs hexagonal structure and separate business/JPA models in the three business services |
+| [0022](0022-preserve-durable-business-trace-context.md) | Accepted 2026-10-10 | Preserve durable business trace context and committed observability |

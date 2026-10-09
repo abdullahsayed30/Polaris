@@ -1,0 +1,752 @@
+[
+  {
+    "@timestamp": "2026-10-06T08:15:30.654236049Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "grpc client call method=polaris.inventory.v1.InventoryService/ReserveStock status=OK durationMs=179 requestId=4178fe0e-8",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "44df0d94fa98aea2"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:31.041430924Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "initializing Kafka metrics collector",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "a42029626b5aae66"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:32.093423008Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "[Producer clientId=order-service-producer-1] Instantiated an idempotent producer.",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "a42029626b5aae66"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:32.193098508Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "Couldn't resolve server kafka:9092 from bootstrap.servers as DNS resolution failed for kafka",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "a42029626b5aae66"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:32.199089008Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "[Producer clientId=order-service-producer-1] Closing the Kafka producer with timeoutMillis = 0 ms.",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "a42029626b5aae66"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:32.213076758Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "Metrics scheduler closed",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "a42029626b5aae66"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:32.218099425Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "Closing reporter org.apache.kafka.common.metrics.JmxReporter",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "a42029626b5aae66"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:32.232746342Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "Closing reporter org.apache.kafka.common.telemetry.internals.ClientTelemetryReporter",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "a42029626b5aae66"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:32.240181633Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "Metrics reporters closed",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "a42029626b5aae66"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:32.246245008Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "App info kafka.producer for order-service-producer-1 unregistered",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "a42029626b5aae66"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:32.306445092Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "Outbox publication failed eventId=9e9b3e25-9df6-4b99-b64d-d034e631f623 eventType=OrderCreated attempts=1 status=RETRY nextAttemptAt=2026-10-06T08:15:31.821929924Z",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "5ec49c5cfa332217"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:33.035148967Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "initializing Kafka metrics collector",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "738e2ac4876319f9"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:33.041181425Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "[Producer clientId=order-service-producer-2] Instantiated an idempotent producer.",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "738e2ac4876319f9"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:33.046109759Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "Couldn't resolve server kafka:9092 from bootstrap.servers as DNS resolution failed for kafka",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "738e2ac4876319f9"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:33.046954717Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "[Producer clientId=order-service-producer-2] Closing the Kafka producer with timeoutMillis = 0 ms.",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "738e2ac4876319f9"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:33.048777259Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "Metrics scheduler closed",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "738e2ac4876319f9"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:33.049113550Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "Closing reporter org.apache.kafka.common.metrics.JmxReporter",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "738e2ac4876319f9"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:33.050348217Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "Closing reporter org.apache.kafka.common.telemetry.internals.ClientTelemetryReporter",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "738e2ac4876319f9"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:33.051973342Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "Metrics reporters closed",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "738e2ac4876319f9"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:33.052495217Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "App info kafka.producer for order-service-producer-2 unregistered",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "738e2ac4876319f9"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:33.054112342Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "Outbox publication failed eventId=9e9b3e25-9df6-4b99-b64d-d034e631f623 eventType=OrderCreated attempts=2 status=RETRY nextAttemptAt=2026-10-06T08:15:34.953854634Z",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "80d73b76b8389c76"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:35.150835301Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "initializing Kafka metrics collector",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "075040006352b085"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:35.162080885Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "[Producer clientId=order-service-producer-3] Instantiated an idempotent producer.",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "075040006352b085"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:35.163251801Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "Couldn't resolve server kafka:9092 from bootstrap.servers as DNS resolution failed for kafka",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "075040006352b085"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:35.163455385Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "[Producer clientId=order-service-producer-3] Closing the Kafka producer with timeoutMillis = 0 ms.",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "075040006352b085"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:35.166564301Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "Metrics scheduler closed",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "075040006352b085"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:35.166817426Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "Closing reporter org.apache.kafka.common.metrics.JmxReporter",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "075040006352b085"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:35.167408176Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "Closing reporter org.apache.kafka.common.telemetry.internals.ClientTelemetryReporter",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "075040006352b085"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:35.168132051Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "Metrics reporters closed",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "075040006352b085"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:35.168453760Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "App info kafka.producer for order-service-producer-3 unregistered",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "075040006352b085"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:35.170819426Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "Outbox publication failed eventId=9e9b3e25-9df6-4b99-b64d-d034e631f623 eventType=OrderCreated attempts=3 status=RETRY nextAttemptAt=2026-10-06T08:15:39.132243968Z",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "3125ca9ddf3152a7"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:39.330040637Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "initializing Kafka metrics collector",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "bbbc5608a8c870b9"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:39.340524637Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "[Producer clientId=order-service-producer-4] Instantiated an idempotent producer.",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "bbbc5608a8c870b9"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:39.347272720Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "Couldn't resolve server kafka:9092 from bootstrap.servers as DNS resolution failed for kafka",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "bbbc5608a8c870b9"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:39.347981970Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "[Producer clientId=order-service-producer-4] Closing the Kafka producer with timeoutMillis = 0 ms.",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "bbbc5608a8c870b9"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:39.351819678Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "Metrics scheduler closed",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "bbbc5608a8c870b9"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:39.352071387Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "Closing reporter org.apache.kafka.common.metrics.JmxReporter",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "bbbc5608a8c870b9"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:39.352406095Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "Closing reporter org.apache.kafka.common.telemetry.internals.ClientTelemetryReporter",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "bbbc5608a8c870b9"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:39.352750303Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "Metrics reporters closed",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "bbbc5608a8c870b9"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:39.352978970Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "App info kafka.producer for order-service-producer-4 unregistered",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "bbbc5608a8c870b9"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:39.356048178Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "Outbox publication failed eventId=9e9b3e25-9df6-4b99-b64d-d034e631f623 eventType=OrderCreated attempts=4 status=RETRY nextAttemptAt=2026-10-06T08:15:47.253321553Z",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "92d27b800f563ecd"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:47.568124793Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "initializing Kafka metrics collector",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "7e337fb6e47716ed"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:47.571816835Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "[Producer clientId=order-service-producer-5] Instantiated an idempotent producer.",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "7e337fb6e47716ed"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:47.581661001Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "Couldn't resolve server kafka:9092 from bootstrap.servers as DNS resolution failed for kafka",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "7e337fb6e47716ed"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:47.583285710Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "[Producer clientId=order-service-producer-5] Closing the Kafka producer with timeoutMillis = 0 ms.",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "7e337fb6e47716ed"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:47.584592085Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "Metrics scheduler closed",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "7e337fb6e47716ed"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:47.585089668Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "Closing reporter org.apache.kafka.common.metrics.JmxReporter",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "7e337fb6e47716ed"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:47.586448543Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "Closing reporter org.apache.kafka.common.telemetry.internals.ClientTelemetryReporter",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "7e337fb6e47716ed"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:47.587182251Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "Metrics reporters closed",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "7e337fb6e47716ed"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:47.587861626Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "App info kafka.producer for order-service-producer-5 unregistered",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "7e337fb6e47716ed"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:47.590891876Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "Outbox publication failed eventId=9e9b3e25-9df6-4b99-b64d-d034e631f623 eventType=OrderCreated attempts=5 status=RETRY nextAttemptAt=2026-10-06T08:16:03.556416960Z",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "0471843fa73ccb2d"
+  },
+  {
+    "@timestamp": "2026-10-06T08:16:03.665211259Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "initializing Kafka metrics collector",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "c9d3dd1dae3630ac"
+  },
+  {
+    "@timestamp": "2026-10-06T08:16:03.669082259Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "[Producer clientId=order-service-producer-10] Instantiated an idempotent producer.",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "c9d3dd1dae3630ac"
+  },
+  {
+    "@timestamp": "2026-10-06T08:16:03.671805259Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "Couldn't resolve server kafka:9092 from bootstrap.servers as DNS resolution failed for kafka",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "c9d3dd1dae3630ac"
+  },
+  {
+    "@timestamp": "2026-10-06T08:16:03.672532217Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "[Producer clientId=order-service-producer-10] Closing the Kafka producer with timeoutMillis = 0 ms.",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "c9d3dd1dae3630ac"
+  },
+  {
+    "@timestamp": "2026-10-06T08:16:03.673669134Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "Metrics scheduler closed",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "c9d3dd1dae3630ac"
+  },
+  {
+    "@timestamp": "2026-10-06T08:16:03.673884134Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "Closing reporter org.apache.kafka.common.metrics.JmxReporter",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "c9d3dd1dae3630ac"
+  },
+  {
+    "@timestamp": "2026-10-06T08:16:03.674043092Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "Closing reporter org.apache.kafka.common.telemetry.internals.ClientTelemetryReporter",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "c9d3dd1dae3630ac"
+  },
+  {
+    "@timestamp": "2026-10-06T08:16:03.674160176Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "Metrics reporters closed",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "c9d3dd1dae3630ac"
+  },
+  {
+    "@timestamp": "2026-10-06T08:16:03.675135967Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "App info kafka.producer for order-service-producer-10 unregistered",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "c9d3dd1dae3630ac"
+  },
+  {
+    "@timestamp": "2026-10-06T08:16:03.676898884Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "Outbox publication failed eventId=9e9b3e25-9df6-4b99-b64d-d034e631f623 eventType=OrderCreated attempts=6 status=RETRY nextAttemptAt=2026-10-06T08:16:35.653511592Z",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "448615eb170d5ba4"
+  },
+  {
+    "@timestamp": "2026-10-06T08:16:35.965569843Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "Outbox event published eventId=9e9b3e25-9df6-4b99-b64d-d034e631f623 eventType=OrderCreated attempts=7",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "5917849f9cd28a17"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:30.573032924Z",
+    "service": {
+      "name": "inventory-service",
+      "node": {}
+    },
+    "message": "grpc server call method=polaris.inventory.v1.InventoryService/ReserveStock status=OK durationMs=73 requestId=4178fe0e-8",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "87155039e6a0ee51"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:40.900359929Z",
+    "service": {
+      "name": "inventory-service",
+      "node": {}
+    },
+    "message": "Outbox publication failed eventId=30c12159-d3ef-402d-b8bd-5a9a0a69db08 eventType=InventoryAdjusted attempts=1 status=RETRY nextAttemptAt=2026-10-06T08:15:31.846198174Z",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "0697e1994d8a59f9"
+  },
+  {
+    "@timestamp": "2026-10-06T08:15:51.493364711Z",
+    "service": {
+      "name": "inventory-service",
+      "node": {}
+    },
+    "message": "Outbox publication failed eventId=30c12159-d3ef-402d-b8bd-5a9a0a69db08 eventType=InventoryAdjusted attempts=2 status=RETRY nextAttemptAt=2026-10-06T08:15:43.461606471Z",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "68f9fbf1ab1871c3"
+  },
+  {
+    "@timestamp": "2026-10-06T08:16:02.073627675Z",
+    "service": {
+      "name": "inventory-service",
+      "node": {}
+    },
+    "message": "Outbox publication failed eventId=30c12159-d3ef-402d-b8bd-5a9a0a69db08 eventType=InventoryAdjusted attempts=3 status=RETRY nextAttemptAt=2026-10-06T08:15:56.050758503Z",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "912c3993ff5f73b7"
+  },
+  {
+    "@timestamp": "2026-10-06T08:16:12.625300638Z",
+    "service": {
+      "name": "inventory-service",
+      "node": {}
+    },
+    "message": "Outbox publication failed eventId=30c12159-d3ef-402d-b8bd-5a9a0a69db08 eventType=InventoryAdjusted attempts=4 status=RETRY nextAttemptAt=2026-10-06T08:16:10.604989217Z",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "eb8761cb116ceb78"
+  },
+  {
+    "@timestamp": "2026-10-06T08:16:22.118487753Z",
+    "service": {
+      "name": "notification-service",
+      "node": {}
+    },
+    "message": "inventory adjustment notification processed orderId=e644e780-f3fd-3ab8-8f92-7d879ec3770a itemCount=1",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "94da01579791ffd0"
+  },
+  {
+    "@timestamp": "2026-10-06T08:16:22.180243545Z",
+    "service": {
+      "name": "notification-service",
+      "node": {}
+    },
+    "message": "Duplicate notification event skipped eventId=30c12159-d3ef-402d-b8bd-5a9a0a69db08 eventType=InventoryAdjusted",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "45c96e75313eb5b3"
+  },
+  {
+    "@timestamp": "2026-10-06T08:16:22.191608462Z",
+    "service": {
+      "name": "notification-service",
+      "node": {}
+    },
+    "message": "Duplicate notification event skipped eventId=30c12159-d3ef-402d-b8bd-5a9a0a69db08 eventType=InventoryAdjusted",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "ab47d619222fc125"
+  },
+  {
+    "@timestamp": "2026-10-06T08:16:22.201288754Z",
+    "service": {
+      "name": "notification-service",
+      "node": {}
+    },
+    "message": "Duplicate notification event skipped eventId=30c12159-d3ef-402d-b8bd-5a9a0a69db08 eventType=InventoryAdjusted",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "9f22ae4c5f02cdf9"
+  },
+  {
+    "@timestamp": "2026-10-06T08:16:22.218327212Z",
+    "service": {
+      "name": "notification-service",
+      "node": {}
+    },
+    "message": "Duplicate notification event skipped eventId=30c12159-d3ef-402d-b8bd-5a9a0a69db08 eventType=InventoryAdjusted",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "0cfecfe456146066"
+  },
+  {
+    "@timestamp": "2026-10-06T08:16:35.998887302Z",
+    "service": {
+      "name": "notification-service",
+      "node": {}
+    },
+    "message": "simulated confirmation notification orderId=e644e780-f3fd-3ab8-8f92-7d879ec3770a customerId=11111111-1111-4111-8111-111111111111 status=CONFIRMED itemCount=1",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "846b3ecf67fcd51c"
+  },
+  {
+    "@timestamp": "2026-10-06T08:16:20.275278503Z",
+    "service": {
+      "name": "inventory-service",
+      "node": {}
+    },
+    "message": "Outbox event published eventId=30c12159-d3ef-402d-b8bd-5a9a0a69db08 eventType=InventoryAdjusted attempts=5",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "43d62775a2302d77"
+  },
+  {
+    "@timestamp": "2026-10-06T08:16:35.977849760Z",
+    "service": {
+      "name": "inventory-service",
+      "node": {}
+    },
+    "message": "Observed order event orderId=e644e780-f3fd-3ab8-8f92-7d879ec3770a status=CONFIRMED itemCount=1",
+    "traceId": "656faf060af37c6cd645d85fa6d2ccf7",
+    "spanId": "f3f1e0bb1a01db59"
+  }
+]

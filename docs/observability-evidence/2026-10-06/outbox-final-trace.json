@@ -1,0 +1,5237 @@
+{
+  "batches": [
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "gateway"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "org.springframework.boot",
+            "version": "3.5.16"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "j5QykoI0h5I=",
+              "name": "http post",
+              "kind": "SPAN_KIND_SERVER",
+              "startTimeUnixNano": "1791273766272455917",
+              "endTimeUnixNano": "1791273768338619710",
+              "attributes": [
+                {
+                  "key": "exception",
+                  "value": {
+                    "stringValue": "none"
+                  }
+                },
+                {
+                  "key": "method",
+                  "value": {
+                    "stringValue": "POST"
+                  }
+                },
+                {
+                  "key": "outcome",
+                  "value": {
+                    "stringValue": "SUCCESS"
+                  }
+                },
+                {
+                  "key": "status",
+                  "value": {
+                    "stringValue": "201"
+                  }
+                },
+                {
+                  "key": "uri",
+                  "value": {
+                    "stringValue": "UNKNOWN"
+                  }
+                },
+                {
+                  "key": "http.url",
+                  "value": {
+                    "stringValue": "/api/v1/orders"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "gateway"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "org.springframework.boot",
+            "version": "3.5.16"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "fKjGUFVuM60=",
+              "parentSpanId": "j5QykoI0h5I=",
+              "name": "security filterchain before",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1791273766277610917",
+              "endTimeUnixNano": "1791273766384729209",
+              "attributes": [
+                {
+                  "key": "spring.security.filterchain.position",
+                  "value": {
+                    "stringValue": "9"
+                  }
+                },
+                {
+                  "key": "spring.security.filterchain.size",
+                  "value": {
+                    "stringValue": "9"
+                  }
+                },
+                {
+                  "key": "spring.security.reached.filter.name",
+                  "value": {
+                    "stringValue": "AuthorizationWebFilter"
+                  }
+                },
+                {
+                  "key": "spring.security.reached.filter.section",
+                  "value": {
+                    "stringValue": "before"
+                  }
+                }
+              ],
+              "status": {
+                "code": "STATUS_CODE_OK"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "gateway"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "org.springframework.boot",
+            "version": "3.5.16"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "QLcRV9WCI/g=",
+              "parentSpanId": "fKjGUFVuM60=",
+              "name": "authorize exchange",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1791273766373543709",
+              "endTimeUnixNano": "1791273766384029709",
+              "attributes": [
+                {
+                  "key": "spring.security.authentication.authorities",
+                  "value": {
+                    "stringValue": "[SCOPE_orders:write, SCOPE_orders:read]"
+                  }
+                },
+                {
+                  "key": "spring.security.authentication.type",
+                  "value": {
+                    "stringValue": "JwtAuthenticationToken"
+                  }
+                },
+                {
+                  "key": "spring.security.authorization.decision",
+                  "value": {
+                    "stringValue": "true"
+                  }
+                },
+                {
+                  "key": "spring.security.authorization.decision.details",
+                  "value": {
+                    "stringValue": "AuthorityAuthorizationDecision [granted=true, authorities=[SCOPE_orders:write]]"
+                  }
+                },
+                {
+                  "key": "spring.security.object",
+                  "value": {
+                    "stringValue": "exchange"
+                  }
+                }
+              ],
+              "status": {
+                "code": "STATUS_CODE_OK"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "gateway"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "org.springframework.boot",
+            "version": "3.5.16"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "UkWMIuLs4NI=",
+              "parentSpanId": "fKjGUFVuM60=",
+              "name": "secured request",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1791273766384790626",
+              "endTimeUnixNano": "1791273768335414627",
+              "status": {
+                "code": "STATUS_CODE_OK"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "gateway"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "org.springframework.boot",
+            "version": "3.5.16"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "LAq50DtYxjg=",
+              "parentSpanId": "UkWMIuLs4NI=",
+              "name": "HTTP POST",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1791273766411351251",
+              "endTimeUnixNano": "1791273768321621877",
+              "attributes": [
+                {
+                  "key": "http.status_code",
+                  "value": {
+                    "stringValue": "201"
+                  }
+                },
+                {
+                  "key": "http.uri",
+                  "value": {
+                    "stringValue": "http://localhost:18080/api/v1/orders"
+                  }
+                },
+                {
+                  "key": "spring.cloud.gateway.route.id",
+                  "value": {
+                    "stringValue": "order-create"
+                  }
+                },
+                {
+                  "key": "spring.cloud.gateway.route.uri",
+                  "value": {
+                    "stringValue": "http://order-service:8081"
+                  }
+                },
+                {
+                  "key": "http.method",
+                  "value": {
+                    "stringValue": "POST"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "order-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "org.springframework.boot",
+            "version": "3.5.16"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "1mNhbIjJCqk=",
+              "parentSpanId": "LAq50DtYxjg=",
+              "name": "http post /api/v1/orders",
+              "kind": "SPAN_KIND_SERVER",
+              "startTimeUnixNano": "1791273766468717918",
+              "endTimeUnixNano": "1791273768315929502",
+              "attributes": [
+                {
+                  "key": "exception",
+                  "value": {
+                    "stringValue": "none"
+                  }
+                },
+                {
+                  "key": "method",
+                  "value": {
+                    "stringValue": "POST"
+                  }
+                },
+                {
+                  "key": "outcome",
+                  "value": {
+                    "stringValue": "SUCCESS"
+                  }
+                },
+                {
+                  "key": "status",
+                  "value": {
+                    "stringValue": "201"
+                  }
+                },
+                {
+                  "key": "uri",
+                  "value": {
+                    "stringValue": "/api/v1/orders"
+                  }
+                },
+                {
+                  "key": "http.url",
+                  "value": {
+                    "stringValue": "/api/v1/orders"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "order-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "org.springframework.boot",
+            "version": "3.5.16"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "SVJruENAQiU=",
+              "parentSpanId": "1mNhbIjJCqk=",
+              "name": "security filterchain before",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1791273766490697418",
+              "endTimeUnixNano": "1791273767347752544",
+              "attributes": [
+                {
+                  "key": "spring.security.filterchain.position",
+                  "value": {
+                    "stringValue": "12"
+                  }
+                },
+                {
+                  "key": "spring.security.filterchain.size",
+                  "value": {
+                    "stringValue": "12"
+                  }
+                },
+                {
+                  "key": "spring.security.reached.filter.name",
+                  "value": {
+                    "stringValue": "AuthorizationFilter"
+                  }
+                },
+                {
+                  "key": "spring.security.reached.filter.section",
+                  "value": {
+                    "stringValue": "before"
+                  }
+                }
+              ],
+              "events": [
+                {
+                  "timeUnixNano": "1791273766490000000",
+                  "name": "before DisableEncodeUrlFilter"
+                },
+                {
+                  "timeUnixNano": "1791273766491000000",
+                  "name": "before WebAsyncManagerIntegrationFilter"
+                },
+                {
+                  "timeUnixNano": "1791273766491000000",
+                  "name": "before SecurityContextHolderFilter"
+                },
+                {
+                  "timeUnixNano": "1791273766491000000",
+                  "name": "before HeaderWriterFilter"
+                },
+                {
+                  "timeUnixNano": "1791273766491000000",
+                  "name": "before LogoutFilter"
+                },
+                {
+                  "timeUnixNano": "1791273766492000000",
+                  "name": "before BearerTokenAuthenticationFilter"
+                },
+                {
+                  "timeUnixNano": "1791273767326000000",
+                  "name": "before AuthenticationFilter"
+                },
+                {
+                  "timeUnixNano": "1791273767328000000",
+                  "name": "before RequestCacheAwareFilter"
+                },
+                {
+                  "timeUnixNano": "1791273767328000000",
+                  "name": "before SecurityContextHolderAwareRequestFilter"
+                },
+                {
+                  "timeUnixNano": "1791273767328000000",
+                  "name": "before AnonymousAuthenticationFilter"
+                },
+                {
+                  "timeUnixNano": "1791273767328000000",
+                  "name": "before ExceptionTranslationFilter"
+                },
+                {
+                  "timeUnixNano": "1791273767328000000",
+                  "name": "before AuthorizationFilter"
+                }
+              ],
+              "status": {
+                "code": "STATUS_CODE_OK"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "order-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "org.springframework.boot",
+            "version": "3.5.16"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "6MNsgT7xPgc=",
+              "parentSpanId": "SVJruENAQiU=",
+              "name": "authenticate bearertoken",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1791273766507758960",
+              "endTimeUnixNano": "1791273767326023877",
+              "attributes": [
+                {
+                  "key": "authentication.failure.type",
+                  "value": {
+                    "stringValue": "n/a"
+                  }
+                },
+                {
+                  "key": "authentication.method",
+                  "value": {
+                    "stringValue": "ProviderManager"
+                  }
+                },
+                {
+                  "key": "authentication.request.type",
+                  "value": {
+                    "stringValue": "BearerTokenAuthenticationToken"
+                  }
+                },
+                {
+                  "key": "authentication.result.type",
+                  "value": {
+                    "stringValue": "JwtAuthenticationToken"
+                  }
+                }
+              ],
+              "status": {
+                "code": "STATUS_CODE_OK"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "order-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "org.springframework.boot",
+            "version": "3.5.16"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "CFpLql9MZII=",
+              "parentSpanId": "SVJruENAQiU=",
+              "name": "authorize request",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1791273767328710127",
+              "endTimeUnixNano": "1791273767347428335",
+              "attributes": [
+                {
+                  "key": "spring.security.authentication.authorities",
+                  "value": {
+                    "stringValue": "[SCOPE_orders:write, SCOPE_orders:read]"
+                  }
+                },
+                {
+                  "key": "spring.security.authentication.type",
+                  "value": {
+                    "stringValue": "JwtAuthenticationToken"
+                  }
+                },
+                {
+                  "key": "spring.security.authorization.decision",
+                  "value": {
+                    "stringValue": "true"
+                  }
+                },
+                {
+                  "key": "spring.security.authorization.decision.details",
+                  "value": {
+                    "stringValue": "AuthorityAuthorizationDecision [granted=true, authorities=[SCOPE_orders:write]]"
+                  }
+                },
+                {
+                  "key": "spring.security.object",
+                  "value": {
+                    "stringValue": "request"
+                  }
+                }
+              ],
+              "status": {
+                "code": "STATUS_CODE_OK"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "order-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "org.springframework.boot",
+            "version": "3.5.16"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "Hq0DOl4pnMs=",
+              "parentSpanId": "1mNhbIjJCqk=",
+              "name": "secured request",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1791273767347815669",
+              "endTimeUnixNano": "1791273768309736377",
+              "status": {
+                "code": "STATUS_CODE_OK"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "order-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "polaris.order"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "q1dzOci/gG0=",
+              "parentSpanId": "Hq0DOl4pnMs=",
+              "name": "order.intent.create",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1791273768094074461",
+              "endTimeUnixNano": "1791273768166402836",
+              "attributes": [
+                {
+                  "key": "polaris.identity",
+                  "value": {
+                    "stringValue": "91a916d1-8bd7-308c-9810-f0df9a3e9871"
+                  }
+                },
+                {
+                  "key": "polaris.transaction",
+                  "value": {
+                    "stringValue": "committed"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "order-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "polaris.order"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "nhMh2EJ8eNg=",
+              "parentSpanId": "q1dzOci/gG0=",
+              "name": "db.orders.insert",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1791273768096069961",
+              "endTimeUnixNano": "1791273768149978586",
+              "attributes": [
+                {
+                  "key": "db.collection.name",
+                  "value": {
+                    "stringValue": "orders"
+                  }
+                },
+                {
+                  "key": "db.operation.name",
+                  "value": {
+                    "stringValue": "INSERT"
+                  }
+                },
+                {
+                  "key": "db.system.name",
+                  "value": {
+                    "stringValue": "postgresql"
+                  }
+                },
+                {
+                  "key": "polaris.outcome",
+                  "value": {
+                    "stringValue": "executed"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "order-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "polaris.order"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "6dERTsBySlA=",
+              "parentSpanId": "Hq0DOl4pnMs=",
+              "name": "db.orders.update",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1791273768150370627",
+              "endTimeUnixNano": "1791273768155298627",
+              "attributes": [
+                {
+                  "key": "db.collection.name",
+                  "value": {
+                    "stringValue": "orders"
+                  }
+                },
+                {
+                  "key": "db.operation.name",
+                  "value": {
+                    "stringValue": "UPDATE"
+                  }
+                },
+                {
+                  "key": "db.system.name",
+                  "value": {
+                    "stringValue": "postgresql"
+                  }
+                },
+                {
+                  "key": "polaris.outcome",
+                  "value": {
+                    "stringValue": "executed"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "order-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "polaris.order"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "vT1mUph/1rE=",
+              "parentSpanId": "Hq0DOl4pnMs=",
+              "name": "db.orders.select",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1791273768167315794",
+              "endTimeUnixNano": "1791273768169627377",
+              "attributes": [
+                {
+                  "key": "db.collection.name",
+                  "value": {
+                    "stringValue": "orders"
+                  }
+                },
+                {
+                  "key": "db.operation.name",
+                  "value": {
+                    "stringValue": "SELECT"
+                  }
+                },
+                {
+                  "key": "db.system.name",
+                  "value": {
+                    "stringValue": "postgresql"
+                  }
+                },
+                {
+                  "key": "polaris.outcome",
+                  "value": {
+                    "stringValue": "executed"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "order-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "polaris.order"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "Y8phXQ63aVA=",
+              "parentSpanId": "q1dzOci/gG0=",
+              "name": "order.resolve.attempt",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1791273768171377418",
+              "endTimeUnixNano": "1791273768282459710",
+              "attributes": [
+                {
+                  "key": "polaris.identity",
+                  "value": {
+                    "stringValue": "91a916d1-8bd7-308c-9810-f0df9a3e9871"
+                  }
+                },
+                {
+                  "key": "polaris.transaction",
+                  "value": {
+                    "stringValue": "committed"
+                  }
+                }
+              ],
+              "links": [
+                {
+                  "traceId": "2llO126KQwwQBxgooQqoaQ==",
+                  "spanId": "Hq0DOl4pnMs="
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "order-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "polaris.order"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "h81Fj0UtYfI=",
+              "parentSpanId": "Y8phXQ63aVA=",
+              "name": "db.orders.select",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1791273768171631585",
+              "endTimeUnixNano": "1791273768174545085",
+              "attributes": [
+                {
+                  "key": "db.collection.name",
+                  "value": {
+                    "stringValue": "orders"
+                  }
+                },
+                {
+                  "key": "db.operation.name",
+                  "value": {
+                    "stringValue": "SELECT"
+                  }
+                },
+                {
+                  "key": "db.system.name",
+                  "value": {
+                    "stringValue": "postgresql"
+                  }
+                },
+                {
+                  "key": "polaris.outcome",
+                  "value": {
+                    "stringValue": "executed"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "order-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "org.springframework.boot",
+            "version": "3.5.16"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "jVbFV583lwo=",
+              "parentSpanId": "Y8phXQ63aVA=",
+              "name": "polaris.inventory.v1.InventoryService/ReserveStock",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1791273768175968377",
+              "endTimeUnixNano": "1791273768256199127",
+              "attributes": [
+                {
+                  "key": "grpc.status_code",
+                  "value": {
+                    "stringValue": "OK"
+                  }
+                },
+                {
+                  "key": "net.peer.name",
+                  "value": {
+                    "stringValue": "inventory-service"
+                  }
+                },
+                {
+                  "key": "net.peer.port",
+                  "value": {
+                    "stringValue": "9090"
+                  }
+                },
+                {
+                  "key": "rpc.method",
+                  "value": {
+                    "stringValue": "ReserveStock"
+                  }
+                },
+                {
+                  "key": "rpc.service",
+                  "value": {
+                    "stringValue": "polaris.inventory.v1.InventoryService"
+                  }
+                },
+                {
+                  "key": "rpc.type",
+                  "value": {
+                    "stringValue": "UNARY"
+                  }
+                }
+              ],
+              "events": [
+                {
+                  "timeUnixNano": "1791273768177949418",
+                  "name": "sent"
+                },
+                {
+                  "timeUnixNano": "1791273768255055502",
+                  "name": "received"
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "order-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "org.springframework.boot",
+            "version": "3.5.16"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "OaYzFQzxZWk=",
+              "parentSpanId": "jVbFV583lwo=",
+              "name": "polaris.inventory.v1.InventoryService/ReserveStock",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1791273768176464085",
+              "endTimeUnixNano": "1791273768255378252",
+              "attributes": [
+                {
+                  "key": "grpc.status_code",
+                  "value": {
+                    "stringValue": "OK"
+                  }
+                },
+                {
+                  "key": "net.peer.name",
+                  "value": {
+                    "stringValue": "inventory-service"
+                  }
+                },
+                {
+                  "key": "net.peer.port",
+                  "value": {
+                    "stringValue": "9090"
+                  }
+                },
+                {
+                  "key": "rpc.method",
+                  "value": {
+                    "stringValue": "ReserveStock"
+                  }
+                },
+                {
+                  "key": "rpc.service",
+                  "value": {
+                    "stringValue": "polaris.inventory.v1.InventoryService"
+                  }
+                },
+                {
+                  "key": "rpc.type",
+                  "value": {
+                    "stringValue": "UNARY"
+                  }
+                }
+              ],
+              "events": [
+                {
+                  "timeUnixNano": "1791273768178079293",
+                  "name": "sent"
+                },
+                {
+                  "timeUnixNano": "1791273768254719418",
+                  "name": "received"
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "inventory-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "org.springframework.boot",
+            "version": "3.5.16"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "u++DGKJNizA=",
+              "parentSpanId": "OaYzFQzxZWk=",
+              "name": "polaris.inventory.v1.InventoryService/ReserveStock",
+              "kind": "SPAN_KIND_SERVER",
+              "startTimeUnixNano": "1791273768198500543",
+              "endTimeUnixNano": "1791273768253942627",
+              "attributes": [
+                {
+                  "key": "grpc.status_code",
+                  "value": {
+                    "stringValue": "OK"
+                  }
+                },
+                {
+                  "key": "net.peer.name",
+                  "value": {
+                    "stringValue": "inventory-service"
+                  }
+                },
+                {
+                  "key": "net.peer.port",
+                  "value": {
+                    "stringValue": "9090"
+                  }
+                },
+                {
+                  "key": "rpc.method",
+                  "value": {
+                    "stringValue": "ReserveStock"
+                  }
+                },
+                {
+                  "key": "rpc.service",
+                  "value": {
+                    "stringValue": "polaris.inventory.v1.InventoryService"
+                  }
+                },
+                {
+                  "key": "rpc.type",
+                  "value": {
+                    "stringValue": "UNARY"
+                  }
+                }
+              ],
+              "events": [
+                {
+                  "timeUnixNano": "1791273768200245377",
+                  "name": "received"
+                },
+                {
+                  "timeUnixNano": "1791273768250582085",
+                  "name": "sent"
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "inventory-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "org.springframework.boot",
+            "version": "3.5.16"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "+WaVniWa3W4=",
+              "parentSpanId": "OaYzFQzxZWk=",
+              "name": "polaris.inventory.v1.InventoryService/ReserveStock",
+              "kind": "SPAN_KIND_SERVER",
+              "startTimeUnixNano": "1791273768199218085",
+              "endTimeUnixNano": "1791273768253896126",
+              "attributes": [
+                {
+                  "key": "grpc.status_code",
+                  "value": {
+                    "stringValue": "OK"
+                  }
+                },
+                {
+                  "key": "net.peer.name",
+                  "value": {
+                    "stringValue": "inventory-service"
+                  }
+                },
+                {
+                  "key": "net.peer.port",
+                  "value": {
+                    "stringValue": "9090"
+                  }
+                },
+                {
+                  "key": "rpc.method",
+                  "value": {
+                    "stringValue": "ReserveStock"
+                  }
+                },
+                {
+                  "key": "rpc.service",
+                  "value": {
+                    "stringValue": "polaris.inventory.v1.InventoryService"
+                  }
+                },
+                {
+                  "key": "rpc.type",
+                  "value": {
+                    "stringValue": "UNARY"
+                  }
+                }
+              ],
+              "events": [
+                {
+                  "timeUnixNano": "1791273768200339335",
+                  "name": "received"
+                },
+                {
+                  "timeUnixNano": "1791273768250519793",
+                  "name": "sent"
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "inventory-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "polaris.inventory"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "Yf3sJewUFjY=",
+              "parentSpanId": "+WaVniWa3W4=",
+              "name": "db.inventory_reservations.insert",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1791273768203585293",
+              "endTimeUnixNano": "1791273768211872043",
+              "attributes": [
+                {
+                  "key": "db.collection.name",
+                  "value": {
+                    "stringValue": "inventory_reservations"
+                  }
+                },
+                {
+                  "key": "db.operation.name",
+                  "value": {
+                    "stringValue": "INSERT"
+                  }
+                },
+                {
+                  "key": "db.system.name",
+                  "value": {
+                    "stringValue": "postgresql"
+                  }
+                },
+                {
+                  "key": "polaris.outcome",
+                  "value": {
+                    "stringValue": "executed"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "inventory-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "polaris.inventory"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "Nogd/Y8OMzw=",
+              "parentSpanId": "+WaVniWa3W4=",
+              "name": "db.inventory_reservations.select",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1791273768212181376",
+              "endTimeUnixNano": "1791273768220536585",
+              "attributes": [
+                {
+                  "key": "db.collection.name",
+                  "value": {
+                    "stringValue": "inventory_reservations"
+                  }
+                },
+                {
+                  "key": "db.operation.name",
+                  "value": {
+                    "stringValue": "SELECT"
+                  }
+                },
+                {
+                  "key": "db.system.name",
+                  "value": {
+                    "stringValue": "postgresql"
+                  }
+                },
+                {
+                  "key": "polaris.outcome",
+                  "value": {
+                    "stringValue": "executed"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "inventory-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "polaris.inventory"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "NC4iVFIggS8=",
+              "parentSpanId": "+WaVniWa3W4=",
+              "name": "db.inventory_items.select",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1791273768220749626",
+              "endTimeUnixNano": "1791273768230017376",
+              "attributes": [
+                {
+                  "key": "db.collection.name",
+                  "value": {
+                    "stringValue": "inventory_items"
+                  }
+                },
+                {
+                  "key": "db.operation.name",
+                  "value": {
+                    "stringValue": "SELECT"
+                  }
+                },
+                {
+                  "key": "db.system.name",
+                  "value": {
+                    "stringValue": "postgresql"
+                  }
+                },
+                {
+                  "key": "polaris.outcome",
+                  "value": {
+                    "stringValue": "executed"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "inventory-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "polaris.inventory"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "EaadrvYW5Vc=",
+              "parentSpanId": "+WaVniWa3W4=",
+              "name": "db.inventory_items.update",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1791273768231129210",
+              "endTimeUnixNano": "1791273768236839835",
+              "attributes": [
+                {
+                  "key": "db.collection.name",
+                  "value": {
+                    "stringValue": "inventory_items"
+                  }
+                },
+                {
+                  "key": "db.operation.name",
+                  "value": {
+                    "stringValue": "UPDATE"
+                  }
+                },
+                {
+                  "key": "db.system.name",
+                  "value": {
+                    "stringValue": "postgresql"
+                  }
+                },
+                {
+                  "key": "polaris.outcome",
+                  "value": {
+                    "stringValue": "executed"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "inventory-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "polaris.inventory"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "Ql12BIm6Ulc=",
+              "parentSpanId": "+WaVniWa3W4=",
+              "name": "db.inventory_reservations.update",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1791273768236936793",
+              "endTimeUnixNano": "1791273768240995710",
+              "attributes": [
+                {
+                  "key": "db.collection.name",
+                  "value": {
+                    "stringValue": "inventory_reservations"
+                  }
+                },
+                {
+                  "key": "db.operation.name",
+                  "value": {
+                    "stringValue": "UPDATE"
+                  }
+                },
+                {
+                  "key": "db.system.name",
+                  "value": {
+                    "stringValue": "postgresql"
+                  }
+                },
+                {
+                  "key": "polaris.outcome",
+                  "value": {
+                    "stringValue": "executed"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "inventory-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "polaris.inventory"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "FdSrhoHGoTc=",
+              "parentSpanId": "+WaVniWa3W4=",
+              "name": "outbox.event.create",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1791273768241416876",
+              "endTimeUnixNano": "1791273768249969168",
+              "attributes": [
+                {
+                  "key": "polaris.identity",
+                  "value": {
+                    "stringValue": "54489fef-0452-4aea-b1e8-4e4112ad94ed"
+                  }
+                },
+                {
+                  "key": "polaris.transaction",
+                  "value": {
+                    "stringValue": "committed"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "inventory-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "polaris.inventory"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "5vZZFYG2r50=",
+              "parentSpanId": "FdSrhoHGoTc=",
+              "name": "db.outbox_events.insert",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1791273768242723251",
+              "endTimeUnixNano": "1791273768248374418",
+              "attributes": [
+                {
+                  "key": "db.collection.name",
+                  "value": {
+                    "stringValue": "outbox_events"
+                  }
+                },
+                {
+                  "key": "db.operation.name",
+                  "value": {
+                    "stringValue": "INSERT"
+                  }
+                },
+                {
+                  "key": "db.system.name",
+                  "value": {
+                    "stringValue": "postgresql"
+                  }
+                },
+                {
+                  "key": "polaris.outcome",
+                  "value": {
+                    "stringValue": "executed"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "order-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "polaris.order"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "dYOREKf3xDw=",
+              "parentSpanId": "Y8phXQ63aVA=",
+              "name": "db.orders.update",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1791273768260908585",
+              "endTimeUnixNano": "1791273768264765835",
+              "attributes": [
+                {
+                  "key": "db.collection.name",
+                  "value": {
+                    "stringValue": "orders"
+                  }
+                },
+                {
+                  "key": "db.operation.name",
+                  "value": {
+                    "stringValue": "UPDATE"
+                  }
+                },
+                {
+                  "key": "db.system.name",
+                  "value": {
+                    "stringValue": "postgresql"
+                  }
+                },
+                {
+                  "key": "polaris.outcome",
+                  "value": {
+                    "stringValue": "executed"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "order-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "polaris.order"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "w7U5XR1hEbo=",
+              "parentSpanId": "Y8phXQ63aVA=",
+              "name": "outbox.event.create",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1791273768265040502",
+              "endTimeUnixNano": "1791273768282495460",
+              "attributes": [
+                {
+                  "key": "polaris.identity",
+                  "value": {
+                    "stringValue": "67f59a19-739f-4bf0-b943-a60cb0838e81"
+                  }
+                },
+                {
+                  "key": "polaris.transaction",
+                  "value": {
+                    "stringValue": "committed"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "order-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "polaris.order"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "e/kW6Kch6QY=",
+              "parentSpanId": "w7U5XR1hEbo=",
+              "name": "db.outbox_events.insert",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1791273768265658418",
+              "endTimeUnixNano": "1791273768270050168",
+              "attributes": [
+                {
+                  "key": "db.collection.name",
+                  "value": {
+                    "stringValue": "outbox_events"
+                  }
+                },
+                {
+                  "key": "db.operation.name",
+                  "value": {
+                    "stringValue": "INSERT"
+                  }
+                },
+                {
+                  "key": "db.system.name",
+                  "value": {
+                    "stringValue": "postgresql"
+                  }
+                },
+                {
+                  "key": "polaris.outcome",
+                  "value": {
+                    "stringValue": "executed"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "order-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "org.springframework.boot",
+            "version": "3.5.16"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "RHnW0kxIlbo=",
+              "parentSpanId": "1mNhbIjJCqk=",
+              "name": "security filterchain after",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1791273768310044711",
+              "endTimeUnixNano": "1791273768311453044",
+              "attributes": [
+                {
+                  "key": "spring.security.filterchain.position",
+                  "value": {
+                    "stringValue": "12"
+                  }
+                },
+                {
+                  "key": "spring.security.filterchain.size",
+                  "value": {
+                    "stringValue": "12"
+                  }
+                },
+                {
+                  "key": "spring.security.reached.filter.name",
+                  "value": {
+                    "stringValue": "DisableEncodeUrlFilter"
+                  }
+                },
+                {
+                  "key": "spring.security.reached.filter.section",
+                  "value": {
+                    "stringValue": "after"
+                  }
+                }
+              ],
+              "events": [
+                {
+                  "timeUnixNano": "1791273768310000000",
+                  "name": "after AuthorizationFilter"
+                },
+                {
+                  "timeUnixNano": "1791273768310000000",
+                  "name": "after ExceptionTranslationFilter"
+                },
+                {
+                  "timeUnixNano": "1791273768310000000",
+                  "name": "after AnonymousAuthenticationFilter"
+                },
+                {
+                  "timeUnixNano": "1791273768310000000",
+                  "name": "after SecurityContextHolderAwareRequestFilter"
+                },
+                {
+                  "timeUnixNano": "1791273768310000000",
+                  "name": "after RequestCacheAwareFilter"
+                },
+                {
+                  "timeUnixNano": "1791273768310000000",
+                  "name": "after AuthenticationFilter"
+                },
+                {
+                  "timeUnixNano": "1791273768310000000",
+                  "name": "after BearerTokenAuthenticationFilter"
+                },
+                {
+                  "timeUnixNano": "1791273768311000000",
+                  "name": "after LogoutFilter"
+                },
+                {
+                  "timeUnixNano": "1791273768311000000",
+                  "name": "after HeaderWriterFilter"
+                },
+                {
+                  "timeUnixNano": "1791273768311000000",
+                  "name": "after SecurityContextHolderFilter"
+                },
+                {
+                  "timeUnixNano": "1791273768311000000",
+                  "name": "after WebAsyncManagerIntegrationFilter"
+                },
+                {
+                  "timeUnixNano": "1791273768311000000",
+                  "name": "after DisableEncodeUrlFilter"
+                }
+              ],
+              "status": {
+                "code": "STATUS_CODE_OK"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "gateway"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "org.springframework.boot",
+            "version": "3.5.16"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "RWhTczaMXig=",
+              "parentSpanId": "j5QykoI0h5I=",
+              "name": "security filterchain after",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1791273768336576835",
+              "endTimeUnixNano": "1791273768337478710",
+              "attributes": [
+                {
+                  "key": "spring.security.filterchain.position",
+                  "value": {
+                    "stringValue": "9"
+                  }
+                },
+                {
+                  "key": "spring.security.filterchain.size",
+                  "value": {
+                    "stringValue": "9"
+                  }
+                },
+                {
+                  "key": "spring.security.reached.filter.name",
+                  "value": {
+                    "stringValue": "ServerWebExchangeReactorContextWebFilter"
+                  }
+                },
+                {
+                  "key": "spring.security.reached.filter.section",
+                  "value": {
+                    "stringValue": "after"
+                  }
+                }
+              ],
+              "status": {
+                "code": "STATUS_CODE_OK"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "order-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "polaris.order"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "uVSNRo1DvaE=",
+              "parentSpanId": "w7U5XR1hEbo=",
+              "name": "outbox.publish.attempt",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1791273768343398418",
+              "endTimeUnixNano": "1791273778393716923",
+              "attributes": [
+                {
+                  "key": "error.type",
+                  "value": {
+                    "stringValue": "java.util.concurrent.TimeoutException"
+                  }
+                },
+                {
+                  "key": "polaris.identity",
+                  "value": {
+                    "stringValue": "67f59a19-739f-4bf0-b943-a60cb0838e81"
+                  }
+                },
+                {
+                  "key": "polaris.transaction",
+                  "value": {
+                    "stringValue": "committed"
+                  }
+                }
+              ],
+              "links": [
+                {
+                  "traceId": "yRx2LZDmdPKvebqF1UwB+g==",
+                  "spanId": "PwivuW30R/Q="
+                }
+              ],
+              "status": {
+                "code": "STATUS_CODE_ERROR"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "order-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "polaris.order"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "zCXfm4BKEcw=",
+              "parentSpanId": "q1dzOci/gG0=",
+              "name": "order.resolve.attempt",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1791273768472475460",
+              "endTimeUnixNano": "1791273768477935002",
+              "attributes": [
+                {
+                  "key": "polaris.identity",
+                  "value": {
+                    "stringValue": "91a916d1-8bd7-308c-9810-f0df9a3e9871"
+                  }
+                },
+                {
+                  "key": "polaris.transaction",
+                  "value": {
+                    "stringValue": "committed"
+                  }
+                }
+              ],
+              "links": [
+                {
+                  "traceId": "DPw3ZpF7l+a7AMHbk0CDFg==",
+                  "spanId": "bkqITqJ2MBE="
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "order-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "polaris.order"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "niRlbZejC8o=",
+              "parentSpanId": "zCXfm4BKEcw=",
+              "name": "db.orders.select",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1791273768472656043",
+              "endTimeUnixNano": "1791273768477111835",
+              "attributes": [
+                {
+                  "key": "db.collection.name",
+                  "value": {
+                    "stringValue": "orders"
+                  }
+                },
+                {
+                  "key": "db.operation.name",
+                  "value": {
+                    "stringValue": "SELECT"
+                  }
+                },
+                {
+                  "key": "db.system.name",
+                  "value": {
+                    "stringValue": "postgresql"
+                  }
+                },
+                {
+                  "key": "polaris.outcome",
+                  "value": {
+                    "stringValue": "executed"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "inventory-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "polaris.inventory"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "Nrli/hD2TgI=",
+              "parentSpanId": "FdSrhoHGoTc=",
+              "name": "outbox.publish.attempt",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1791273768764936294",
+              "endTimeUnixNano": "1791273778883458340",
+              "attributes": [
+                {
+                  "key": "error.type",
+                  "value": {
+                    "stringValue": "java.util.concurrent.TimeoutException"
+                  }
+                },
+                {
+                  "key": "polaris.identity",
+                  "value": {
+                    "stringValue": "54489fef-0452-4aea-b1e8-4e4112ad94ed"
+                  }
+                },
+                {
+                  "key": "polaris.transaction",
+                  "value": {
+                    "stringValue": "committed"
+                  }
+                }
+              ],
+              "links": [
+                {
+                  "traceId": "oitlGN9d9w0zRNZVW2mjiQ==",
+                  "spanId": "75skzaoqMPs="
+                }
+              ],
+              "status": {
+                "code": "STATUS_CODE_ERROR"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "order-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "polaris.order"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "dlt/LGewJjw=",
+              "parentSpanId": "uVSNRo1DvaE=",
+              "name": "db.outbox_events.update",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1791273778373135839",
+              "endTimeUnixNano": "1791273778392326548",
+              "attributes": [
+                {
+                  "key": "db.collection.name",
+                  "value": {
+                    "stringValue": "outbox_events"
+                  }
+                },
+                {
+                  "key": "db.operation.name",
+                  "value": {
+                    "stringValue": "UPDATE"
+                  }
+                },
+                {
+                  "key": "db.system.name",
+                  "value": {
+                    "stringValue": "postgresql"
+                  }
+                },
+                {
+                  "key": "polaris.outcome",
+                  "value": {
+                    "stringValue": "executed"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "inventory-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "polaris.inventory"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "kLXL1sV6chA=",
+              "parentSpanId": "Nrli/hD2TgI=",
+              "name": "db.outbox_events.update",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1791273778868582965",
+              "endTimeUnixNano": "1791273778880817465",
+              "attributes": [
+                {
+                  "key": "db.collection.name",
+                  "value": {
+                    "stringValue": "outbox_events"
+                  }
+                },
+                {
+                  "key": "db.operation.name",
+                  "value": {
+                    "stringValue": "UPDATE"
+                  }
+                },
+                {
+                  "key": "db.system.name",
+                  "value": {
+                    "stringValue": "postgresql"
+                  }
+                },
+                {
+                  "key": "polaris.outcome",
+                  "value": {
+                    "stringValue": "executed"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "inventory-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "polaris.inventory"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "FaRdcz6fXuU=",
+              "parentSpanId": "FdSrhoHGoTc=",
+              "name": "outbox.publish.attempt",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1791273826071051001",
+              "endTimeUnixNano": "1791273828105399586",
+              "attributes": [
+                {
+                  "key": "polaris.identity",
+                  "value": {
+                    "stringValue": "54489fef-0452-4aea-b1e8-4e4112ad94ed"
+                  }
+                },
+                {
+                  "key": "polaris.outcome",
+                  "value": {
+                    "stringValue": "broker_acknowledged"
+                  }
+                },
+                {
+                  "key": "polaris.transaction",
+                  "value": {
+                    "stringValue": "committed"
+                  }
+                }
+              ],
+              "links": [
+                {
+                  "traceId": "zNfoen3DlNuIo26TMdwfCg==",
+                  "spanId": "TE/D9p95TeM="
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "inventory-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "org.springframework.boot",
+            "version": "3.5.16"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "al6spvbhfZE=",
+              "parentSpanId": "FaRdcz6fXuU=",
+              "name": "polaris.inventory.adjusted send",
+              "kind": "SPAN_KIND_PRODUCER",
+              "startTimeUnixNano": "1791273826100891210",
+              "endTimeUnixNano": "1791273826765089877",
+              "attributes": [
+                {
+                  "key": "messaging.destination.kind",
+                  "value": {
+                    "stringValue": "topic"
+                  }
+                },
+                {
+                  "key": "messaging.destination.name",
+                  "value": {
+                    "stringValue": "polaris.inventory.adjusted"
+                  }
+                },
+                {
+                  "key": "messaging.operation",
+                  "value": {
+                    "stringValue": "publish"
+                  }
+                },
+                {
+                  "key": "messaging.system",
+                  "value": {
+                    "stringValue": "kafka"
+                  }
+                },
+                {
+                  "key": "peer.service",
+                  "value": {
+                    "stringValue": "Apache Kafka: MkU3OEVBNTcwNTJENDM2Qk"
+                  }
+                },
+                {
+                  "key": "spring.kafka.template.name",
+                  "value": {
+                    "stringValue": "kafkaTemplate"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "notification-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "org.springframework.boot",
+            "version": "3.5.16"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "+9cIeEEscdk=",
+              "parentSpanId": "al6spvbhfZE=",
+              "name": "polaris.inventory.adjusted receive",
+              "kind": "SPAN_KIND_CONSUMER",
+              "startTimeUnixNano": "1791273826748372959",
+              "endTimeUnixNano": "1791273826811540959",
+              "attributes": [
+                {
+                  "key": "messaging.consumer.id",
+                  "value": {
+                    "stringValue": "notification-service - consumer-notification-service-1"
+                  }
+                },
+                {
+                  "key": "messaging.kafka.client_id",
+                  "value": {
+                    "stringValue": "consumer-notification-service-1"
+                  }
+                },
+                {
+                  "key": "messaging.kafka.consumer.group",
+                  "value": {
+                    "stringValue": "notification-service"
+                  }
+                },
+                {
+                  "key": "messaging.kafka.message.offset",
+                  "value": {
+                    "stringValue": "5"
+                  }
+                },
+                {
+                  "key": "messaging.kafka.source.partition",
+                  "value": {
+                    "stringValue": "0"
+                  }
+                },
+                {
+                  "key": "messaging.operation",
+                  "value": {
+                    "stringValue": "receive"
+                  }
+                },
+                {
+                  "key": "messaging.source.kind",
+                  "value": {
+                    "stringValue": "topic"
+                  }
+                },
+                {
+                  "key": "messaging.source.name",
+                  "value": {
+                    "stringValue": "polaris.inventory.adjusted"
+                  }
+                },
+                {
+                  "key": "messaging.system",
+                  "value": {
+                    "stringValue": "kafka"
+                  }
+                },
+                {
+                  "key": "peer.service",
+                  "value": {
+                    "stringValue": "Apache Kafka: MkU3OEVBNTcwNTJENDM2Qk"
+                  }
+                },
+                {
+                  "key": "spring.kafka.listener.id",
+                  "value": {
+                    "stringValue": "org.springframework.kafka.KafkaListenerEndpointContainer#0-0"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "inventory-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "polaris.inventory"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "fIk8PO6HM6k=",
+              "parentSpanId": "FaRdcz6fXuU=",
+              "name": "db.outbox_events.update",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1791273826761018293",
+              "endTimeUnixNano": "1791273828069485544",
+              "attributes": [
+                {
+                  "key": "db.collection.name",
+                  "value": {
+                    "stringValue": "outbox_events"
+                  }
+                },
+                {
+                  "key": "db.operation.name",
+                  "value": {
+                    "stringValue": "UPDATE"
+                  }
+                },
+                {
+                  "key": "db.system.name",
+                  "value": {
+                    "stringValue": "postgresql"
+                  }
+                },
+                {
+                  "key": "polaris.outcome",
+                  "value": {
+                    "stringValue": "executed"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "notification-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "polaris.notification"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "pZImzqnDeL0=",
+              "parentSpanId": "+9cIeEEscdk=",
+              "name": "db.inbox_events.select",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1791273826765503501",
+              "endTimeUnixNano": "1791273826781330959",
+              "attributes": [
+                {
+                  "key": "db.collection.name",
+                  "value": {
+                    "stringValue": "inbox_events"
+                  }
+                },
+                {
+                  "key": "db.operation.name",
+                  "value": {
+                    "stringValue": "SELECT"
+                  }
+                },
+                {
+                  "key": "db.system.name",
+                  "value": {
+                    "stringValue": "postgresql"
+                  }
+                },
+                {
+                  "key": "polaris.outcome",
+                  "value": {
+                    "stringValue": "executed"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "notification-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "polaris.notification"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "ZKeaKs+LvgY=",
+              "parentSpanId": "+9cIeEEscdk=",
+              "name": "notification.process",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1791273826781866709",
+              "endTimeUnixNano": "1791273826806595918",
+              "attributes": [
+                {
+                  "key": "polaris.identity",
+                  "value": {
+                    "stringValue": "54489fef-0452-4aea-b1e8-4e4112ad94ed"
+                  }
+                },
+                {
+                  "key": "polaris.outcome",
+                  "value": {
+                    "stringValue": "simulated_processed"
+                  }
+                },
+                {
+                  "key": "polaris.transaction",
+                  "value": {
+                    "stringValue": "committed"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "notification-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "polaris.notification"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "TIYAEpmPzaM=",
+              "parentSpanId": "ZKeaKs+LvgY=",
+              "name": "db.inbox_events.insert",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1791273826781939501",
+              "endTimeUnixNano": "1791273826796592459",
+              "attributes": [
+                {
+                  "key": "db.collection.name",
+                  "value": {
+                    "stringValue": "inbox_events"
+                  }
+                },
+                {
+                  "key": "db.operation.name",
+                  "value": {
+                    "stringValue": "INSERT"
+                  }
+                },
+                {
+                  "key": "db.system.name",
+                  "value": {
+                    "stringValue": "postgresql"
+                  }
+                },
+                {
+                  "key": "polaris.outcome",
+                  "value": {
+                    "stringValue": "executed"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "notification-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "polaris.notification"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "lSgBuXTi+TM=",
+              "parentSpanId": "ZKeaKs+LvgY=",
+              "name": "notification.handler.attempt",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1791273826796758543",
+              "endTimeUnixNano": "1791273826798809751",
+              "attributes": [
+                {
+                  "key": "polaris.outcome",
+                  "value": {
+                    "stringValue": "simulated"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "notification-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "polaris.notification"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "WGJUDde1dG8=",
+              "parentSpanId": "ZKeaKs+LvgY=",
+              "name": "db.inbox_events.update",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1791273826798908043",
+              "endTimeUnixNano": "1791273826801836918",
+              "attributes": [
+                {
+                  "key": "db.collection.name",
+                  "value": {
+                    "stringValue": "inbox_events"
+                  }
+                },
+                {
+                  "key": "db.operation.name",
+                  "value": {
+                    "stringValue": "UPDATE"
+                  }
+                },
+                {
+                  "key": "db.system.name",
+                  "value": {
+                    "stringValue": "postgresql"
+                  }
+                },
+                {
+                  "key": "polaris.outcome",
+                  "value": {
+                    "stringValue": "executed"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "order-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "polaris.order"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "mZeOOy5MHcU=",
+              "parentSpanId": "w7U5XR1hEbo=",
+              "name": "outbox.publish.attempt",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1791273828046155877",
+              "endTimeUnixNano": "1791273829311232127",
+              "attributes": [
+                {
+                  "key": "polaris.identity",
+                  "value": {
+                    "stringValue": "67f59a19-739f-4bf0-b943-a60cb0838e81"
+                  }
+                },
+                {
+                  "key": "polaris.outcome",
+                  "value": {
+                    "stringValue": "broker_acknowledged"
+                  }
+                },
+                {
+                  "key": "polaris.transaction",
+                  "value": {
+                    "stringValue": "committed"
+                  }
+                }
+              ],
+              "links": [
+                {
+                  "traceId": "OEc1CYLURmOpbnNGXcsuxQ==",
+                  "spanId": "MGla4jLuObU="
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "order-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "org.springframework.boot",
+            "version": "3.5.16"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "pygQonEYM3U=",
+              "parentSpanId": "mZeOOy5MHcU=",
+              "name": "polaris.orders.created send",
+              "kind": "SPAN_KIND_PRODUCER",
+              "startTimeUnixNano": "1791273828100427668",
+              "endTimeUnixNano": "1791273829172858877",
+              "attributes": [
+                {
+                  "key": "messaging.destination.kind",
+                  "value": {
+                    "stringValue": "topic"
+                  }
+                },
+                {
+                  "key": "messaging.destination.name",
+                  "value": {
+                    "stringValue": "polaris.orders.created"
+                  }
+                },
+                {
+                  "key": "messaging.operation",
+                  "value": {
+                    "stringValue": "publish"
+                  }
+                },
+                {
+                  "key": "messaging.system",
+                  "value": {
+                    "stringValue": "kafka"
+                  }
+                },
+                {
+                  "key": "peer.service",
+                  "value": {
+                    "stringValue": "Apache Kafka: MkU3OEVBNTcwNTJENDM2Qk"
+                  }
+                },
+                {
+                  "key": "spring.kafka.template.name",
+                  "value": {
+                    "stringValue": "kafkaTemplate"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "notification-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "org.springframework.boot",
+            "version": "3.5.16"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "e1tR94oLX/o=",
+              "parentSpanId": "pygQonEYM3U=",
+              "name": "polaris.orders.created receive",
+              "kind": "SPAN_KIND_CONSUMER",
+              "startTimeUnixNano": "1791273829134531002",
+              "endTimeUnixNano": "1791273829169907377",
+              "attributes": [
+                {
+                  "key": "messaging.consumer.id",
+                  "value": {
+                    "stringValue": "notification-service - consumer-notification-service-2"
+                  }
+                },
+                {
+                  "key": "messaging.kafka.client_id",
+                  "value": {
+                    "stringValue": "consumer-notification-service-2"
+                  }
+                },
+                {
+                  "key": "messaging.kafka.consumer.group",
+                  "value": {
+                    "stringValue": "notification-service"
+                  }
+                },
+                {
+                  "key": "messaging.kafka.message.offset",
+                  "value": {
+                    "stringValue": "6"
+                  }
+                },
+                {
+                  "key": "messaging.kafka.source.partition",
+                  "value": {
+                    "stringValue": "0"
+                  }
+                },
+                {
+                  "key": "messaging.operation",
+                  "value": {
+                    "stringValue": "receive"
+                  }
+                },
+                {
+                  "key": "messaging.source.kind",
+                  "value": {
+                    "stringValue": "topic"
+                  }
+                },
+                {
+                  "key": "messaging.source.name",
+                  "value": {
+                    "stringValue": "polaris.orders.created"
+                  }
+                },
+                {
+                  "key": "messaging.system",
+                  "value": {
+                    "stringValue": "kafka"
+                  }
+                },
+                {
+                  "key": "peer.service",
+                  "value": {
+                    "stringValue": "Apache Kafka: MkU3OEVBNTcwNTJENDM2Qk"
+                  }
+                },
+                {
+                  "key": "spring.kafka.listener.id",
+                  "value": {
+                    "stringValue": "org.springframework.kafka.KafkaListenerEndpointContainer#1-0"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "notification-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "polaris.notification"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "kExqLr5FjwY=",
+              "parentSpanId": "e1tR94oLX/o=",
+              "name": "db.inbox_events.select",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1791273829145484002",
+              "endTimeUnixNano": "1791273829150452169",
+              "attributes": [
+                {
+                  "key": "db.collection.name",
+                  "value": {
+                    "stringValue": "inbox_events"
+                  }
+                },
+                {
+                  "key": "db.operation.name",
+                  "value": {
+                    "stringValue": "SELECT"
+                  }
+                },
+                {
+                  "key": "db.system.name",
+                  "value": {
+                    "stringValue": "postgresql"
+                  }
+                },
+                {
+                  "key": "polaris.outcome",
+                  "value": {
+                    "stringValue": "executed"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "notification-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "polaris.notification"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "wJKssas1SP4=",
+              "parentSpanId": "e1tR94oLX/o=",
+              "name": "notification.process",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1791273829150956419",
+              "endTimeUnixNano": "1791273829168777877",
+              "attributes": [
+                {
+                  "key": "polaris.identity",
+                  "value": {
+                    "stringValue": "67f59a19-739f-4bf0-b943-a60cb0838e81"
+                  }
+                },
+                {
+                  "key": "polaris.outcome",
+                  "value": {
+                    "stringValue": "simulated_processed"
+                  }
+                },
+                {
+                  "key": "polaris.transaction",
+                  "value": {
+                    "stringValue": "committed"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "notification-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "polaris.notification"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "BpTFtEqB8Eg=",
+              "parentSpanId": "wJKssas1SP4=",
+              "name": "db.inbox_events.insert",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1791273829151070211",
+              "endTimeUnixNano": "1791273829158898794",
+              "attributes": [
+                {
+                  "key": "db.collection.name",
+                  "value": {
+                    "stringValue": "inbox_events"
+                  }
+                },
+                {
+                  "key": "db.operation.name",
+                  "value": {
+                    "stringValue": "INSERT"
+                  }
+                },
+                {
+                  "key": "db.system.name",
+                  "value": {
+                    "stringValue": "postgresql"
+                  }
+                },
+                {
+                  "key": "polaris.outcome",
+                  "value": {
+                    "stringValue": "executed"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "order-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "polaris.order"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "2VQaJmDjx6U=",
+              "parentSpanId": "mZeOOy5MHcU=",
+              "name": "db.outbox_events.update",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1791273829158594460",
+              "endTimeUnixNano": "1791273829305989086",
+              "attributes": [
+                {
+                  "key": "db.collection.name",
+                  "value": {
+                    "stringValue": "outbox_events"
+                  }
+                },
+                {
+                  "key": "db.operation.name",
+                  "value": {
+                    "stringValue": "UPDATE"
+                  }
+                },
+                {
+                  "key": "db.system.name",
+                  "value": {
+                    "stringValue": "postgresql"
+                  }
+                },
+                {
+                  "key": "polaris.outcome",
+                  "value": {
+                    "stringValue": "executed"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "notification-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "polaris.notification"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "4na/9pC5GxU=",
+              "parentSpanId": "wJKssas1SP4=",
+              "name": "notification.handler.attempt",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1791273829159729086",
+              "endTimeUnixNano": "1791273829161228544",
+              "attributes": [
+                {
+                  "key": "polaris.outcome",
+                  "value": {
+                    "stringValue": "simulated"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "notification-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "polaris.notification"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "cvPEL2OOgbM=",
+              "parentSpanId": "wJKssas1SP4=",
+              "name": "db.inbox_events.update",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1791273829161513169",
+              "endTimeUnixNano": "1791273829165105919",
+              "attributes": [
+                {
+                  "key": "db.collection.name",
+                  "value": {
+                    "stringValue": "inbox_events"
+                  }
+                },
+                {
+                  "key": "db.operation.name",
+                  "value": {
+                    "stringValue": "UPDATE"
+                  }
+                },
+                {
+                  "key": "db.system.name",
+                  "value": {
+                    "stringValue": "postgresql"
+                  }
+                },
+                {
+                  "key": "polaris.outcome",
+                  "value": {
+                    "stringValue": "executed"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "observability-evidence"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "polaris"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.49.0"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "inventory-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "org.springframework.boot",
+            "version": "3.5.16"
+          },
+          "spans": [
+            {
+              "traceId": "2llO126KQwwQBxgooQqoaQ==",
+              "spanId": "gA/bebXOVFM=",
+              "parentSpanId": "pygQonEYM3U=",
+              "name": "polaris.orders.created receive",
+              "kind": "SPAN_KIND_CONSUMER",
+              "startTimeUnixNano": "1791273851372245513",
+              "endTimeUnixNano": "1791273851374455096",
+              "attributes": [
+                {
+                  "key": "messaging.consumer.id",
+                  "value": {
+                    "stringValue": "inventory-service - consumer-inventory-service-1"
+                  }
+                },
+                {
+                  "key": "messaging.kafka.client_id",
+                  "value": {
+                    "stringValue": "consumer-inventory-service-1"
+                  }
+                },
+                {
+                  "key": "messaging.kafka.consumer.group",
+                  "value": {
+                    "stringValue": "inventory-service"
+                  }
+                },
+                {
+                  "key": "messaging.kafka.message.offset",
+                  "value": {
+                    "stringValue": "6"
+                  }
+                },
+                {
+                  "key": "messaging.kafka.source.partition",
+                  "value": {
+                    "stringValue": "0"
+                  }
+                },
+                {
+                  "key": "messaging.operation",
+                  "value": {
+                    "stringValue": "receive"
+                  }
+                },
+                {
+                  "key": "messaging.source.kind",
+                  "value": {
+                    "stringValue": "topic"
+                  }
+                },
+                {
+                  "key": "messaging.source.name",
+                  "value": {
+                    "stringValue": "polaris.orders.created"
+                  }
+                },
+                {
+                  "key": "messaging.system",
+                  "value": {
+                    "stringValue": "kafka"
+                  }
+                },
+                {
+                  "key": "peer.service",
+                  "value": {
+                    "stringValue": "Apache Kafka: MkU3OEVBNTcwNTJENDM2Qk"
+                  }
+                },
+                {
+                  "key": "spring.kafka.listener.id",
+                  "value": {
+                    "stringValue": "org.springframework.kafka.KafkaListenerEndpointContainer#0-0"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

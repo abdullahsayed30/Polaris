@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import io.polaris.inventory.adapter.out.observability.DurableTelemetry;
 import io.polaris.inventory.application.domain.model.InventoryReservation;
 import io.polaris.inventory.application.port.out.ReservationStore;
 
@@ -14,18 +15,23 @@ import io.polaris.inventory.application.port.out.ReservationStore;
 @Transactional(propagation = Propagation.MANDATORY)
 public class ReservationPersistenceAdapter implements ReservationStore {
     private final InventoryReservationRepository reservations;
-    public ReservationPersistenceAdapter(InventoryReservationRepository reservations) {
+    private final DurableTelemetry telemetry;
+    public ReservationPersistenceAdapter(InventoryReservationRepository reservations, DurableTelemetry telemetry) {
+        this.telemetry = telemetry;
         this.reservations = reservations;
     }
     public int insertIfAbsent(UUID orderId) {
-        return reservations.insertIfAbsent(orderId);
+        return telemetry.database("INSERT", "inventory_reservations", () -> reservations.insertIfAbsent(orderId));
     }
     public Optional<InventoryReservation> findForUpdate(UUID orderId) {
-        return reservations.findForUpdate(orderId).map(InventoryReservationMapper::toDomain);
+        return telemetry.database("SELECT", "inventory_reservations",
+                () -> reservations.findForUpdate(orderId).map(InventoryReservationMapper::toDomain));
     }
     public void update(InventoryReservation reservation) {
-        var managed = reservations.findById(reservation.getOrderId()).orElseThrow();
-        InventoryReservationMapper.update(reservation, managed);
-        reservations.flush();
+        telemetry.databaseWrite("UPDATE", "inventory_reservations", () -> {
+            var managed = reservations.findById(reservation.getOrderId()).orElseThrow();
+            InventoryReservationMapper.update(reservation, managed);
+            reservations.flush();
+        });
     }
 }

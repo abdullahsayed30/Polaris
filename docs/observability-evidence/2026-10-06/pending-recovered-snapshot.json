@@ -1,0 +1,915 @@
+{
+  "captured_epoch": 1791273755.579724,
+  "orders": [
+    {
+      "id": "cfaae1f9-e303-30bf-9c8c-e6d004a3e4dc",
+      "status": "CONFIRMED",
+      "recovery_trace_context": "{\"traceparent\":\"00-6cdc24a186e8756dcb70113f9a8f9c30-98d9224bc7bd1fbf-01\",\"captured_at\":\"2026-10-05T23:59:30.807154927Z\"}"
+    },
+    {
+      "id": "f946725a-b72b-3944-b49c-0249971dc353",
+      "status": "CONFIRMED",
+      "recovery_trace_context": "{\"traceparent\":\"00-bb692c07d6e4239a289a9be16fbfe6c1-122f8dba87b24770-01\",\"captured_at\":\"2026-10-06T00:00:29.852595635Z\"}"
+    },
+    {
+      "id": "b65881bb-1d43-3979-a13f-2a893f5f053e",
+      "status": "CONFIRMED",
+      "recovery_trace_context": "{\"traceparent\":\"00-23a493f3937a8538848b313091badb54-949e536f8bc7cb97-01\",\"captured_at\":\"2026-10-06T07:48:29.978470549Z\"}"
+    },
+    {
+      "id": "8e8c166d-87f2-3223-86f7-b5e8883c7886",
+      "status": "CONFIRMED",
+      "recovery_trace_context": "{\"traceparent\":\"00-ebf38d3ef21d44c716e5ab4f8dddd7fb-c525ac96ca0abcf2-01\",\"captured_at\":\"2026-10-06T07:49:27.794873173Z\"}"
+    },
+    {
+      "id": "81bbb12d-bb3f-3387-9cf9-2682110ba20e",
+      "status": "CONFIRMED",
+      "recovery_trace_context": "{\"traceparent\":\"00-b92a459192c74bf5094367d16bc9e182-776a64dba939c54b-01\",\"captured_at\":\"2026-10-06T07:52:29.370850465Z\"}"
+    }
+  ],
+  "order_outbox": [
+    {
+      "event_id": "cae00f5e-d11e-495a-8d53-92b2edb41b68",
+      "aggregate_id": "cfaae1f9-e303-30bf-9c8c-e6d004a3e4dc",
+      "status": "PUBLISHED",
+      "attempts": 1,
+      "trace_context": "{\"traceparent\":\"00-6cdc24a186e8756dcb70113f9a8f9c30-365c53e49aaaadbf-01\",\"captured_at\":\"2026-10-06T00:00:05.586933971Z\"}"
+    },
+    {
+      "event_id": "6cf055b2-1dd1-4890-9042-4c41228cd8d1",
+      "aggregate_id": "f946725a-b72b-3944-b49c-0249971dc353",
+      "status": "PUBLISHED",
+      "attempts": 1,
+      "trace_context": "{\"traceparent\":\"00-bb692c07d6e4239a289a9be16fbfe6c1-6348e3fecc7d40bc-01\",\"captured_at\":\"2026-10-06T00:00:30.058033760Z\"}"
+    },
+    {
+      "event_id": "28ab2beb-392f-47b6-b0fc-fbf9f5ba5da2",
+      "aggregate_id": "b65881bb-1d43-3979-a13f-2a893f5f053e",
+      "status": "PUBLISHED",
+      "attempts": 1,
+      "trace_context": "{\"traceparent\":\"00-23a493f3937a8538848b313091badb54-6c3d508c4f8ada4e-01\",\"captured_at\":\"2026-10-06T07:49:05.919945385Z\"}"
+    },
+    {
+      "event_id": "0e242371-a664-426b-9539-509a1014cd7d",
+      "aggregate_id": "8e8c166d-87f2-3223-86f7-b5e8883c7886",
+      "status": "PUBLISHED",
+      "attempts": 1,
+      "trace_context": "{\"traceparent\":\"00-ebf38d3ef21d44c716e5ab4f8dddd7fb-01e485fe7050ac57-01\",\"captured_at\":\"2026-10-06T07:49:28.045656340Z\"}"
+    },
+    {
+      "event_id": "cbbfb6b3-7307-4574-b6dd-78b8ec283736",
+      "aggregate_id": "81bbb12d-bb3f-3387-9cf9-2682110ba20e",
+      "status": "PUBLISHED",
+      "attempts": 1,
+      "trace_context": "{\"traceparent\":\"00-b92a459192c74bf5094367d16bc9e182-f9f31878c30ab252-01\",\"captured_at\":\"2026-10-06T08:02:30.923772924Z\"}"
+    }
+  ],
+  "inventory_outbox": [
+    {
+      "event_id": "52f550a5-bbea-4db2-a11b-af62ac9eb9b0",
+      "aggregate_id": "cfaae1f9-e303-30bf-9c8c-e6d004a3e4dc",
+      "status": "PUBLISHED",
+      "attempts": 1,
+      "trace_context": "{\"traceparent\":\"00-0bb8e5a7ea61df8b2674fa0b4a0c7958-b2b42006b5a657f0-01\",\"captured_at\":\"2026-10-06T00:00:05.329065346Z\"}"
+    },
+    {
+      "event_id": "97e9b9ff-d907-418f-be01-becafa801c74",
+      "aggregate_id": "f946725a-b72b-3944-b49c-0249971dc353",
+      "status": "PUBLISHED",
+      "attempts": 1,
+      "trace_context": "{\"traceparent\":\"00-bb692c07d6e4239a289a9be16fbfe6c1-bf835e8feaf1c82c-01\",\"captured_at\":\"2026-10-06T00:00:30.033375635Z\"}"
+    },
+    {
+      "event_id": "a597e264-85dd-4d18-acb2-f712f1038ca0",
+      "aggregate_id": "b65881bb-1d43-3979-a13f-2a893f5f053e",
+      "status": "PUBLISHED",
+      "attempts": 1,
+      "trace_context": "{\"traceparent\":\"00-23a493f3937a8538848b313091badb54-32000b2d35aaf955-01\",\"captured_at\":\"2026-10-06T07:48:33.024453592Z\"}"
+    },
+    {
+      "event_id": "44b8f441-9f0c-4567-9979-b3c172636913",
+      "aggregate_id": "8e8c166d-87f2-3223-86f7-b5e8883c7886",
+      "status": "PUBLISHED",
+      "attempts": 1,
+      "trace_context": "{\"traceparent\":\"00-ebf38d3ef21d44c716e5ab4f8dddd7fb-80b2376b1e00854e-01\",\"captured_at\":\"2026-10-06T07:49:27.973493048Z\"}"
+    },
+    {
+      "event_id": "7108e9b2-10f1-4a99-8f19-8a510ede845d",
+      "aggregate_id": "81bbb12d-bb3f-3387-9cf9-2682110ba20e",
+      "status": "PUBLISHED",
+      "attempts": 1,
+      "trace_context": "{\"traceparent\":\"00-b92a459192c74bf5094367d16bc9e182-3ebd081fcb32f331-01\",\"captured_at\":\"2026-10-06T08:02:30.255788507Z\"}"
+    }
+  ],
+  "notification_inbox": [
+    {
+      "event_id": "52f550a5-bbea-4db2-a11b-af62ac9eb9b0",
+      "event_type": "InventoryAdjusted",
+      "status": "PROCESSED",
+      "source_topic": "polaris.inventory.adjusted",
+      "source_offset": 0
+    },
+    {
+      "event_id": "cae00f5e-d11e-495a-8d53-92b2edb41b68",
+      "event_type": "OrderCreated",
+      "status": "PROCESSED",
+      "source_topic": "polaris.orders.created",
+      "source_offset": 0
+    },
+    {
+      "event_id": "97e9b9ff-d907-418f-be01-becafa801c74",
+      "event_type": "InventoryAdjusted",
+      "status": "PROCESSED",
+      "source_topic": "polaris.inventory.adjusted",
+      "source_offset": 1
+    },
+    {
+      "event_id": "6cf055b2-1dd1-4890-9042-4c41228cd8d1",
+      "event_type": "OrderCreated",
+      "status": "PROCESSED",
+      "source_topic": "polaris.orders.created",
+      "source_offset": 1
+    },
+    {
+      "event_id": "a597e264-85dd-4d18-acb2-f712f1038ca0",
+      "event_type": "InventoryAdjusted",
+      "status": "PROCESSED",
+      "source_topic": "polaris.inventory.adjusted",
+      "source_offset": 2
+    },
+    {
+      "event_id": "28ab2beb-392f-47b6-b0fc-fbf9f5ba5da2",
+      "event_type": "OrderCreated",
+      "status": "PROCESSED",
+      "source_topic": "polaris.orders.created",
+      "source_offset": 2
+    },
+    {
+      "event_id": "44b8f441-9f0c-4567-9979-b3c172636913",
+      "event_type": "InventoryAdjusted",
+      "status": "PROCESSED",
+      "source_topic": "polaris.inventory.adjusted",
+      "source_offset": 3
+    },
+    {
+      "event_id": "0e242371-a664-426b-9539-509a1014cd7d",
+      "event_type": "OrderCreated",
+      "status": "PROCESSED",
+      "source_topic": "polaris.orders.created",
+      "source_offset": 3
+    },
+    {
+      "event_id": "7108e9b2-10f1-4a99-8f19-8a510ede845d",
+      "event_type": "InventoryAdjusted",
+      "status": "PROCESSED",
+      "source_topic": "polaris.inventory.adjusted",
+      "source_offset": 4
+    },
+    {
+      "event_id": "cbbfb6b3-7307-4574-b6dd-78b8ec283736",
+      "event_type": "OrderCreated",
+      "status": "PROCESSED",
+      "source_topic": "polaris.orders.created",
+      "source_offset": 4
+    }
+  ],
+  "prometheus_targets": [
+    {
+      "discoveredLabels": {
+        "__address__": "gateway:8080",
+        "__metrics_path__": "/actuator/prometheus",
+        "__scheme__": "http",
+        "__scrape_interval__": "15s",
+        "__scrape_timeout__": "10s",
+        "job": "gateway"
+      },
+      "labels": {
+        "instance": "gateway:8080",
+        "job": "gateway"
+      },
+      "scrapePool": "gateway",
+      "scrapeUrl": "http://gateway:8080/actuator/prometheus",
+      "globalUrl": "http://gateway:8080/actuator/prometheus",
+      "lastError": "",
+      "lastScrape": "2026-10-06T08:02:22.758424254Z",
+      "lastScrapeDuration": 0.086507667,
+      "health": "up",
+      "scrapeInterval": "15s",
+      "scrapeTimeout": "10s"
+    },
+    {
+      "discoveredLabels": {
+        "__address__": "inventory-service:8082",
+        "__metrics_path__": "/actuator/prometheus",
+        "__scheme__": "http",
+        "__scrape_interval__": "15s",
+        "__scrape_timeout__": "10s",
+        "job": "inventory-service"
+      },
+      "labels": {
+        "instance": "inventory-service:8082",
+        "job": "inventory-service"
+      },
+      "scrapePool": "inventory-service",
+      "scrapeUrl": "http://inventory-service:8082/actuator/prometheus",
+      "globalUrl": "http://inventory-service:8082/actuator/prometheus",
+      "lastError": "",
+      "lastScrape": "2026-10-06T08:02:36.384860885Z",
+      "lastScrapeDuration": 0.173043333,
+      "health": "up",
+      "scrapeInterval": "15s",
+      "scrapeTimeout": "10s"
+    },
+    {
+      "discoveredLabels": {
+        "__address__": "notification-service:8083",
+        "__metrics_path__": "/actuator/prometheus",
+        "__scheme__": "http",
+        "__scrape_interval__": "15s",
+        "__scrape_timeout__": "10s",
+        "job": "notification-service"
+      },
+      "labels": {
+        "instance": "notification-service:8083",
+        "job": "notification-service"
+      },
+      "scrapePool": "notification-service",
+      "scrapeUrl": "http://notification-service:8083/actuator/prometheus",
+      "globalUrl": "http://notification-service:8083/actuator/prometheus",
+      "lastError": "",
+      "lastScrape": "2026-10-06T08:02:24.937379922Z",
+      "lastScrapeDuration": 0.184572167,
+      "health": "up",
+      "scrapeInterval": "15s",
+      "scrapeTimeout": "10s"
+    },
+    {
+      "discoveredLabels": {
+        "__address__": "order-service:8081",
+        "__metrics_path__": "/actuator/prometheus",
+        "__scheme__": "http",
+        "__scrape_interval__": "15s",
+        "__scrape_timeout__": "10s",
+        "job": "order-service"
+      },
+      "labels": {
+        "instance": "order-service:8081",
+        "job": "order-service"
+      },
+      "scrapePool": "order-service",
+      "scrapeUrl": "http://order-service:8081/actuator/prometheus",
+      "globalUrl": "http://order-service:8081/actuator/prometheus",
+      "lastError": "",
+      "lastScrape": "2026-10-06T08:02:34.842232218Z",
+      "lastScrapeDuration": 0.158478333,
+      "health": "up",
+      "scrapeInterval": "15s",
+      "scrapeTimeout": "10s"
+    },
+    {
+      "discoveredLabels": {
+        "__address__": "prometheus:9090",
+        "__metrics_path__": "/metrics",
+        "__scheme__": "http",
+        "__scrape_interval__": "15s",
+        "__scrape_timeout__": "10s",
+        "job": "prometheus"
+      },
+      "labels": {
+        "instance": "prometheus:9090",
+        "job": "prometheus"
+      },
+      "scrapePool": "prometheus",
+      "scrapeUrl": "http://prometheus:9090/metrics",
+      "globalUrl": "http://prometheus:9090/metrics",
+      "lastError": "",
+      "lastScrape": "2026-10-06T08:02:29.12230009Z",
+      "lastScrapeDuration": 0.010307458,
+      "health": "up",
+      "scrapeInterval": "15s",
+      "scrapeTimeout": "10s"
+    }
+  ],
+  "queries": {
+    "scrape": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": [
+          {
+            "metric": {
+              "__name__": "up",
+              "instance": "prometheus:9090",
+              "job": "prometheus"
+            },
+            "value": [
+              1791273756.602,
+              "1"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "up",
+              "instance": "order-service:8081",
+              "job": "order-service"
+            },
+            "value": [
+              1791273756.602,
+              "1"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "up",
+              "instance": "inventory-service:8082",
+              "job": "inventory-service"
+            },
+            "value": [
+              1791273756.602,
+              "1"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "up",
+              "instance": "gateway:8080",
+              "job": "gateway"
+            },
+            "value": [
+              1791273756.602,
+              "1"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "up",
+              "instance": "notification-service:8083",
+              "job": "notification-service"
+            },
+            "value": [
+              1791273756.602,
+              "1"
+            ]
+          }
+        ]
+      }
+    },
+    "pending": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": [
+          {
+            "metric": {
+              "__name__": "polaris_pending_orders",
+              "instance": "order-service:8081",
+              "job": "order-service"
+            },
+            "value": [
+              1791273756.606,
+              "1"
+            ]
+          }
+        ]
+      }
+    },
+    "outboxes": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": [
+          {
+            "metric": {
+              "__name__": "polaris_outbox_events",
+              "instance": "order-service:8081",
+              "job": "order-service",
+              "status": "FAILED"
+            },
+            "value": [
+              1791273756.608,
+              "0"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "polaris_outbox_events",
+              "instance": "order-service:8081",
+              "job": "order-service",
+              "status": "PENDING"
+            },
+            "value": [
+              1791273756.608,
+              "0"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "polaris_outbox_events",
+              "instance": "order-service:8081",
+              "job": "order-service",
+              "status": "PUBLISHED"
+            },
+            "value": [
+              1791273756.608,
+              "4"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "polaris_outbox_events",
+              "instance": "order-service:8081",
+              "job": "order-service",
+              "status": "RETRY"
+            },
+            "value": [
+              1791273756.608,
+              "0"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "polaris_outbox_events",
+              "instance": "inventory-service:8082",
+              "job": "inventory-service",
+              "status": "FAILED"
+            },
+            "value": [
+              1791273756.608,
+              "0"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "polaris_outbox_events",
+              "instance": "inventory-service:8082",
+              "job": "inventory-service",
+              "status": "PENDING"
+            },
+            "value": [
+              1791273756.608,
+              "0"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "polaris_outbox_events",
+              "instance": "inventory-service:8082",
+              "job": "inventory-service",
+              "status": "PUBLISHED"
+            },
+            "value": [
+              1791273756.608,
+              "5"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "polaris_outbox_events",
+              "instance": "inventory-service:8082",
+              "job": "inventory-service",
+              "status": "RETRY"
+            },
+            "value": [
+              1791273756.608,
+              "0"
+            ]
+          }
+        ]
+      }
+    },
+    "snapshot_health": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": [
+          {
+            "metric": {
+              "__name__": "polaris_observability_snapshot_success",
+              "instance": "order-service:8081",
+              "job": "order-service"
+            },
+            "value": [
+              1791273756.612,
+              "1"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "polaris_observability_snapshot_success",
+              "instance": "inventory-service:8082",
+              "job": "inventory-service"
+            },
+            "value": [
+              1791273756.612,
+              "1"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "polaris_observability_snapshot_success",
+              "instance": "notification-service:8083",
+              "job": "notification-service"
+            },
+            "value": [
+              1791273756.612,
+              "1"
+            ]
+          }
+        ]
+      }
+    },
+    "snapshot_age": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": [
+          {
+            "metric": {
+              "instance": "order-service:8081",
+              "job": "order-service"
+            },
+            "value": [
+              1791273756.614,
+              "7.521000146865845"
+            ]
+          },
+          {
+            "metric": {
+              "instance": "inventory-service:8082",
+              "job": "inventory-service"
+            },
+            "value": [
+              1791273756.614,
+              "2.814000129699707"
+            ]
+          },
+          {
+            "metric": {
+              "instance": "notification-service:8083",
+              "job": "notification-service"
+            },
+            "value": [
+              1791273756.614,
+              "15.171000003814697"
+            ]
+          }
+        ]
+      }
+    },
+    "notification_outcomes": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": [
+          {
+            "metric": {
+              "__name__": "polaris_notification_completions_total",
+              "event_type": "InventoryAdjusted",
+              "instance": "notification-service:8083",
+              "job": "notification-service",
+              "outcome": "dead_lettered"
+            },
+            "value": [
+              1791273756.617,
+              "0"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "polaris_notification_completions_total",
+              "event_type": "InventoryAdjusted",
+              "instance": "notification-service:8083",
+              "job": "notification-service",
+              "outcome": "processed"
+            },
+            "value": [
+              1791273756.617,
+              "2"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "polaris_notification_completions_total",
+              "event_type": "OrderCreated",
+              "instance": "notification-service:8083",
+              "job": "notification-service",
+              "outcome": "dead_lettered"
+            },
+            "value": [
+              1791273756.617,
+              "0"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "polaris_notification_completions_total",
+              "event_type": "OrderCreated",
+              "instance": "notification-service:8083",
+              "job": "notification-service",
+              "outcome": "processed"
+            },
+            "value": [
+              1791273756.617,
+              "2"
+            ]
+          }
+        ]
+      }
+    },
+    "duplicates": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": [
+          {
+            "metric": {
+              "__name__": "polaris_notification_duplicates_total",
+              "instance": "notification-service:8083",
+              "job": "notification-service"
+            },
+            "value": [
+              1791273756.619,
+              "0"
+            ]
+          }
+        ]
+      }
+    },
+    "retries": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": [
+          {
+            "metric": {
+              "__name__": "polaris_notification_retries_total",
+              "instance": "notification-service:8083",
+              "job": "notification-service"
+            },
+            "value": [
+              1791273756.621,
+              "0"
+            ]
+          }
+        ]
+      }
+    },
+    "dlq": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": [
+          {
+            "metric": {
+              "__name__": "polaris_notification_dlq_publications_total",
+              "instance": "notification-service:8083",
+              "job": "notification-service",
+              "outcome": "acknowledged"
+            },
+            "value": [
+              1791273756.623,
+              "0"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "polaris_notification_dlq_publications_total",
+              "instance": "notification-service:8083",
+              "job": "notification-service",
+              "outcome": "failed"
+            },
+            "value": [
+              1791273756.623,
+              "0"
+            ]
+          }
+        ]
+      }
+    },
+    "gateway_routes": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": [
+          {
+            "metric": {
+              "__name__": "spring_cloud_gateway_requests_seconds_count",
+              "httpMethod": "POST",
+              "httpStatusCode": "503",
+              "instance": "gateway:8080",
+              "job": "gateway",
+              "outcome": "SERVER_ERROR",
+              "routeId": "order-create",
+              "routeUri": "http://order-service:8081",
+              "status": "SERVICE_UNAVAILABLE"
+            },
+            "value": [
+              1791273756.625,
+              "2"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "spring_cloud_gateway_requests_seconds_count",
+              "httpMethod": "POST",
+              "httpStatusCode": "201",
+              "instance": "gateway:8080",
+              "job": "gateway",
+              "outcome": "SUCCESSFUL",
+              "routeId": "order-create",
+              "routeUri": "http://order-service:8081",
+              "status": "CREATED"
+            },
+            "value": [
+              1791273756.625,
+              "2"
+            ]
+          }
+        ]
+      }
+    },
+    "grpc_server": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": [
+          {
+            "metric": {
+              "__name__": "grpc_server_processing_duration_seconds_count",
+              "instance": "inventory-service:8082",
+              "job": "inventory-service",
+              "method": "Check",
+              "methodType": "UNARY",
+              "service": "grpc.health.v1.Health",
+              "statusCode": "OK"
+            },
+            "value": [
+              1791273756.628,
+              "0"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "grpc_server_processing_duration_seconds_count",
+              "instance": "inventory-service:8082",
+              "job": "inventory-service",
+              "method": "CheckStock",
+              "methodType": "UNARY",
+              "service": "polaris.inventory.v1.InventoryService",
+              "statusCode": "OK"
+            },
+            "value": [
+              1791273756.628,
+              "0"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "grpc_server_processing_duration_seconds_count",
+              "instance": "inventory-service:8082",
+              "job": "inventory-service",
+              "method": "ReleaseStock",
+              "methodType": "UNARY",
+              "service": "polaris.inventory.v1.InventoryService",
+              "statusCode": "OK"
+            },
+            "value": [
+              1791273756.628,
+              "0"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "grpc_server_processing_duration_seconds_count",
+              "instance": "inventory-service:8082",
+              "job": "inventory-service",
+              "method": "ReserveStock",
+              "methodType": "UNARY",
+              "service": "polaris.inventory.v1.InventoryService",
+              "statusCode": "OK"
+            },
+            "value": [
+              1791273756.628,
+              "1"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "grpc_server_processing_duration_seconds_count",
+              "instance": "inventory-service:8082",
+              "job": "inventory-service",
+              "method": "ServerReflectionInfo",
+              "methodType": "BIDI_STREAMING",
+              "service": "grpc.reflection.v1alpha.ServerReflection",
+              "statusCode": "OK"
+            },
+            "value": [
+              1791273756.628,
+              "0"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "grpc_server_processing_duration_seconds_count",
+              "instance": "inventory-service:8082",
+              "job": "inventory-service",
+              "method": "Watch",
+              "methodType": "SERVER_STREAMING",
+              "service": "grpc.health.v1.Health",
+              "statusCode": "OK"
+            },
+            "value": [
+              1791273756.628,
+              "0"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "grpc_server_processing_duration_seconds_count",
+              "instance": "inventory-service:8082",
+              "job": "inventory-service",
+              "method": "ReserveStock",
+              "methodType": "UNARY",
+              "service": "polaris.inventory.v1.InventoryService",
+              "statusCode": "CANCELLED"
+            },
+            "value": [
+              1791273756.628,
+              "1"
+            ]
+          }
+        ]
+      }
+    },
+    "grpc_client": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": [
+          {
+            "metric": {
+              "__name__": "grpc_client_processing_duration_seconds_count",
+              "instance": "order-service:8081",
+              "job": "order-service",
+              "method": "ReserveStock",
+              "methodType": "UNARY",
+              "service": "polaris.inventory.v1.InventoryService",
+              "statusCode": "DEADLINE_EXCEEDED"
+            },
+            "value": [
+              1791273756.631,
+              "1"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "grpc_client_processing_duration_seconds_count",
+              "instance": "order-service:8081",
+              "job": "order-service",
+              "method": "ReserveStock",
+              "methodType": "UNARY",
+              "service": "polaris.inventory.v1.InventoryService",
+              "statusCode": "OK"
+            },
+            "value": [
+              1791273756.631,
+              "1"
+            ]
+          }
+        ]
+      }
+    },
+    "freshness": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": [
+          {
+            "metric": {
+              "__name__": "polaris_notification_freshness_seconds_count",
+              "event_type": "InventoryAdjusted",
+              "instance": "notification-service:8083",
+              "job": "notification-service"
+            },
+            "value": [
+              1791273756.633,
+              "2"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "polaris_notification_freshness_seconds_count",
+              "event_type": "OrderCreated",
+              "instance": "notification-service:8083",
+              "job": "notification-service"
+            },
+            "value": [
+              1791273756.633,
+              "2"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

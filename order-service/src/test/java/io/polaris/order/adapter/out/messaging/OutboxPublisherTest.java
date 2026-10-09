@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 import io.polaris.order.OutboxPublisherProperties;
+import io.polaris.order.adapter.out.observability.DurableTelemetry;
 import io.polaris.order.adapter.out.persistence.OutboxEvent;
 import io.polaris.order.adapter.out.persistence.OutboxEventRepository;
 import io.polaris.order.adapter.out.persistence.OutboxStatus;
@@ -44,7 +45,7 @@ class OutboxPublisherTest {
             kafkaTemplate,
             objectMapper,
             properties,
-            new SimpleMeterRegistry());
+            new SimpleMeterRegistry(), DurableTelemetry.noop(new ObjectMapper()));
 
     @Test
     void retainsFailedSendForRetryThenMarksTheSameEventPublished() {
@@ -87,6 +88,29 @@ class OutboxPublisherTest {
     }
 
     @Test
+    void preservesExactDecimalPrecisionAndScaleForLegacyAndCurrentPayloads() {
+        String decimal = "0.1234567890123456789012345600";
+        List<OutboxEvent> events = java.util.stream.Stream.of("", "\"metadata\":{\"schemaVersion\":1},")
+                .map(metadata -> OutboxEvent.pending(UUID.randomUUID(), "order-decimal", "OrderCreated", 1,
+                        "polaris.orders.created", "order-decimal", "{" + metadata + "\"totalAmount\":" + decimal + "}",
+                        Instant.now().minusSeconds(1)))
+                .toList();
+        when(outboxEvents.findReady(any(), any())).thenReturn(events);
+        when(kafkaTemplate.send(eq("polaris.orders.created"), eq("order-decimal"), any(JsonNode.class)))
+                .thenReturn(CompletableFuture.completedFuture(mock(SendResult.class)));
+
+        publisher.publishReady();
+
+        ArgumentCaptor<JsonNode> payloads = ArgumentCaptor.forClass(JsonNode.class);
+        verify(kafkaTemplate, org.mockito.Mockito.times(2))
+                .send(eq("polaris.orders.created"), eq("order-decimal"), payloads.capture());
+        assertThat(payloads.getAllValues()).allSatisfy(payload -> {
+            assertThat(payload.get("totalAmount").decimalValue()).isEqualTo(new java.math.BigDecimal(decimal));
+            assertThat(payload.toString()).contains(decimal);
+        });
+    }
+
+    @Test
     void movesPoisonOutboxRecordToFailedAfterAttemptLimit() {
         OutboxEvent event = OutboxEvent.pending(
                 UUID.randomUUID(),
@@ -108,7 +132,7 @@ class OutboxPublisherTest {
                         Duration.ofMillis(1),
                         Duration.ofSeconds(1),
                         Duration.ofSeconds(1)),
-                new SimpleMeterRegistry());
+                new SimpleMeterRegistry(), DurableTelemetry.noop(new ObjectMapper()));
 
         oneAttemptPublisher.publishReady();
 

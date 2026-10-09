@@ -37,10 +37,12 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryConfig;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 import io.polaris.notification.adapter.out.messaging.DeadLetterPublicationException;
 import io.polaris.notification.adapter.out.messaging.NotificationDeadLetterEvent;
 import io.polaris.notification.adapter.out.messaging.NotificationDeadLetterPublisher;
+import io.polaris.notification.adapter.out.observability.DurableTelemetry;
 import io.polaris.notification.adapter.out.persistence.InboxEvent;
 import io.polaris.notification.adapter.out.persistence.InboxEventRepository;
 import io.polaris.notification.adapter.out.persistence.InboxStatus;
@@ -53,11 +55,13 @@ import io.polaris.shared.events.InventoryAdjustedEvent;
 import io.polaris.shared.events.OrderCreatedEvent;
 
 class NotificationKafkaListenerTest {
+    private final SimpleMeterRegistry metrics = new SimpleMeterRegistry();
+    private final DurableTelemetry telemetry = DurableTelemetry.noop(new ObjectMapper());
     private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
     private final NotificationHandler notificationHandler = mock(NotificationHandler.class);
     private final KafkaTemplate<String, NotificationDeadLetterEvent> kafkaTemplate = mock(KafkaTemplate.class);
     private final NotificationDeadLetterPublisher deadLetterPublisher = spy(new NotificationDeadLetterPublisher(
-            kafkaTemplate, "polaris.notifications.dlq", Duration.ofSeconds(1)));
+            kafkaTemplate, "polaris.notifications.dlq", Duration.ofSeconds(1), telemetry, metrics));
     private final InboxEventRepository inboxEvents = mock(InboxEventRepository.class);
     private NotificationKafkaListener listener;
 
@@ -74,8 +78,8 @@ class NotificationKafkaListenerTest {
                 .thenReturn(CompletableFuture.completedFuture(null));
         when(inboxEvents.saveAndFlush(any(InboxEvent.class))).thenAnswer(invocation -> invocation.getArgument(0));
         listener = new NotificationKafkaListener(objectMapper,
-                new NotificationApplicationService(notificationHandler, new ResilienceNotificationRetry(retry),
-                        deadLetterPublisher, new NotificationInboxAdapter(inboxEvents)));
+                new NotificationApplicationService(notificationHandler, new ResilienceNotificationRetry(retry, telemetry, metrics),
+                        deadLetterPublisher, new NotificationInboxAdapter(inboxEvents, telemetry, metrics)));
     }
 
     @Test

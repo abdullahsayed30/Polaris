@@ -1,0 +1,179 @@
+{
+  "isolated_fixture_only": true,
+  "application_source_sha": "fcd4a8efe48f797091297dba531d0958400e48eb",
+  "project": "polaris-observability",
+  "effective_configuration_sha256": "834b25c200cfceb5d65e119c6fb2c4cb82add93b4a8b00e28a00ed164bee8e0d",
+  "default_configuration_sha256": "3bb001604f2d8e23914714437cb7d0ac2b875890dcb32bbc257c83a979e87a82",
+  "ports": {
+    "gateway": [
+      {
+        "target": 8080,
+        "published": "18080"
+      }
+    ],
+    "grafana": [
+      {
+        "target": 3000,
+        "published": "13000"
+      }
+    ],
+    "inventory-postgres": [
+      {
+        "target": 5432,
+        "published": "15433"
+      }
+    ],
+    "inventory-service": [
+      {
+        "target": 8082,
+        "published": "18082"
+      },
+      {
+        "target": 9090,
+        "published": "29090"
+      }
+    ],
+    "kafka": [
+      {
+        "target": 9094,
+        "published": "19092"
+      }
+    ],
+    "keycloak": [
+      {
+        "target": 8080,
+        "published": "18089"
+      }
+    ],
+    "notification-postgres": [
+      {
+        "target": 5432,
+        "published": "15434"
+      }
+    ],
+    "notification-service": [
+      {
+        "target": 8083,
+        "published": "18083"
+      }
+    ],
+    "order-postgres": [
+      {
+        "target": 5432,
+        "published": "15432"
+      }
+    ],
+    "order-service": [
+      {
+        "target": 8081,
+        "published": "18081"
+      }
+    ],
+    "prometheus": [
+      {
+        "target": 9090,
+        "published": "19090"
+      }
+    ],
+    "redis": [
+      {
+        "target": 6379,
+        "published": "16379"
+      }
+    ],
+    "tempo": [
+      {
+        "target": 3200,
+        "published": "13200"
+      },
+      {
+        "target": 4317,
+        "published": "14317"
+      },
+      {
+        "target": 4318,
+        "published": "14318"
+      }
+    ]
+  },
+  "deviations": {
+    "apps": "Cached Java25 production runtime images with current executable JARs mounted read-only; not a new local-runtime image build or stock Compose clean-clone proof.",
+    "broker": "Cached Confluent7.7.1 matching Testcontainers instead of tracked Bitnami image.",
+    "postgres18": "All3 named volume targets changed from /var/lib/postgresql/data to /var/lib/postgresql; default targets caused actual fresh container exit1.",
+    "health": "wget HTTP readiness replaces missing local-only wait-for-it in cached production images; default Dockerfiles local-runtime copies that script.",
+    "identity": "Isolated Keycloak hostname18089 and explicit oidc-sub-mapper on polaris-cli; default imported token lacked sub. See fixture-identity.json.",
+    "capacity": "JAVA_TOOL_OPTIONS=-Xmx384m -XX:ActiveProcessorCount=2 for this fixture only."
+  },
+  "database_volumes": {
+    "inventory-postgres": {
+      "before": [
+        {
+          "type": "volume",
+          "source": "inventory-postgres-data",
+          "target": "/var/lib/postgresql/data",
+          "volume": {}
+        }
+      ],
+      "after": [
+        {
+          "type": "volume",
+          "source": "inventory-postgres-data",
+          "target": "/var/lib/postgresql",
+          "volume": {}
+        }
+      ]
+    },
+    "notification-postgres": {
+      "before": [
+        {
+          "type": "volume",
+          "source": "notification-postgres-data",
+          "target": "/var/lib/postgresql/data",
+          "volume": {}
+        }
+      ],
+      "after": [
+        {
+          "type": "volume",
+          "source": "notification-postgres-data",
+          "target": "/var/lib/postgresql",
+          "volume": {}
+        }
+      ]
+    },
+    "order-postgres": {
+      "before": [
+        {
+          "type": "volume",
+          "source": "order-postgres-data",
+          "target": "/var/lib/postgresql/data",
+          "volume": {}
+        }
+      ],
+      "after": [
+        {
+          "type": "volume",
+          "source": "order-postgres-data",
+          "target": "/var/lib/postgresql",
+          "volume": {}
+        }
+      ]
+    }
+  },
+  "images": {
+    "gateway": "polaris/gateway:ci-local-20261006",
+    "grafana": "grafana/grafana:11.3.1",
+    "inventory-postgres": "postgres:18",
+    "inventory-service": "polaris/inventory-service:ci-local-20261006",
+    "kafka": "confluentinc/cp-kafka:7.7.1",
+    "keycloak": "quay.io/keycloak/keycloak:26.0.7",
+    "notification-postgres": "postgres:18",
+    "notification-service": "polaris/notification-service:ci-local-20261006",
+    "order-postgres": "postgres:18",
+    "order-service": "polaris/order-service:ci-local-20261006",
+    "prometheus": "prom/prometheus:v2.55.1",
+    "redis": "redis:7.4-alpine",
+    "tempo": "grafana/tempo:2.6.1"
+  },
+  "dashboard_pr_source_sha": "2a747dbc3430099ca6800d69497bb9a9c524c1e5"
+}

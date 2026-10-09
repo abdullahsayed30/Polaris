@@ -196,6 +196,15 @@ class ServiceArchitectureTest {
     }
 
     @Test
+    void rejectsTracingFrameworkTypesInModelsPortsAndApplicationServices() throws IOException {
+        for (String layer : List.of("application.domain.model", "application.port.out", "application.domain.service")) {
+            assertThat(violations("package io.polaris.order." + layer
+                    + "; class Bad { io.opentelemetry.api.trace.Span span; }"))
+                    .anyMatch(message -> message.contains("io.opentelemetry.api.trace.Span"));
+        }
+    }
+
+    @Test
     void allowsPurePortsAndGatewayExistingStructure() throws IOException {
         for (String source : List.of(
                 """

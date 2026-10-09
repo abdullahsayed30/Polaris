@@ -94,6 +94,9 @@ class NotificationServiceIntegrationTest {
     @Autowired
     NotificationKafkaListener listener;
 
+    @Autowired
+    io.micrometer.core.instrument.MeterRegistry metrics;
+
     @MockitoSpyBean
     NotificationDeadLetterPublisher deadLetterPublisher;
 
@@ -154,6 +157,7 @@ class NotificationServiceIntegrationTest {
     @Test
     void duplicateDeliveryIsHandledOnlyOnce() throws Exception {
         OrderCreatedEvent orderEvent = orderCreatedEvent();
+        double before = completed("processed");
 
         kafkaTemplate.send(ORDER_CREATED_TOPIC, orderEvent.orderId().toString(), orderEvent)
                 .get(10, TimeUnit.SECONDS);
@@ -163,12 +167,14 @@ class NotificationServiceIntegrationTest {
         assertThat(notificationHandler.awaitOrderAttempts(1)).isTrue();
         Thread.sleep(500);
         assertThat(notificationHandler.orderAttempts()).isOne();
+        assertThat(completed("processed") - before).isEqualTo(1.0);
         assertThat(awaitInboxStatus(orderEvent.metadata().eventId(), InboxStatus.PROCESSED)).isTrue();
     }
 
     @Test
     void failedDeadLetterRollsBackInboxAndAllowsRedelivery() throws Exception {
         OrderCreatedEvent event = orderCreatedEvent();
+        double before = completed("dead_lettered");
         ConsumerRecord<String, String> record = new ConsumerRecord<>(ORDER_CREATED_TOPIC, 0, 500L,
                 event.orderId().toString(), objectMapper.writeValueAsString(event));
         notificationHandler.failOrderNotifications();
@@ -177,6 +183,7 @@ class NotificationServiceIntegrationTest {
 
         assertThatThrownBy(() -> listener.onOrderCreated(record)).isInstanceOf(DeadLetterPublicationException.class);
         assertThat(inboxEvents.findById(event.metadata().eventId())).isEmpty();
+        assertThat(completed("dead_lettered")).isEqualTo(before);
 
         doCallRealMethod().when(deadLetterPublisher)
                 .publish(any(NotificationDelivery.class), any(EventMetadata.class), any());
@@ -185,7 +192,31 @@ class NotificationServiceIntegrationTest {
         assertThat(inboxEvents.findById(event.metadata().eventId())).isPresent()
                 .get().extracting(inbox -> inbox.getStatus()).isEqualTo(InboxStatus.DEAD_LETTERED);
         assertThat(notificationHandler.orderAttempts()).isEqualTo(6);
+        assertThat(completed("dead_lettered") - before).isEqualTo(1.0);
         assertThat(awaitDeadLetterEvent(event.orderId()).sourceEventId()).isEqualTo(event.metadata().eventId());
+    }
+
+    @Test
+    void brokerRecordIsRedeliveredWhenFirstDeadLetterPublicationFails() throws Exception {
+        OrderCreatedEvent event = orderCreatedEvent();
+        double before = completed("dead_lettered");
+        notificationHandler.failOrderNotifications();
+        doThrow(new DeadLetterPublicationException(UUID.randomUUID(), new IllegalStateException("first send failed")))
+                .doCallRealMethod().when(deadLetterPublisher).publish(any(NotificationDeadLetterEvent.class));
+
+        kafkaTemplate.send(ORDER_CREATED_TOPIC, event.orderId().toString(), event).get(10, TimeUnit.SECONDS);
+
+        assertThat(awaitDeadLetterEvent(event.orderId()).sourceEventId()).isEqualTo(event.metadata().eventId());
+        assertThat(awaitInboxStatus(event.metadata().eventId(), InboxStatus.DEAD_LETTERED)).isTrue();
+        // No manual replay: if the first failed delivery were acknowledged, this second attempt would never run.
+        assertThat(notificationHandler.orderAttempts()).isEqualTo(6);
+        assertThat(completed("dead_lettered") - before).isEqualTo(1.0);
+    }
+
+    private double completed(String outcome) {
+        var counter = metrics.find("polaris.notification.completions")
+                .tags("event_type", "OrderCreated", "outcome", outcome).counter();
+        return counter == null ? 0.0 : counter.count();
     }
 
     private boolean awaitInboxStatus(UUID eventId, InboxStatus expected) throws InterruptedException {

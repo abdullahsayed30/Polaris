@@ -1,0 +1,54 @@
+{
+  "source": "1b9a4dc4b0d0c066e7ab99866925531410b6ef0c",
+  "fast_command": "./mvnw -B -ntp spotless:check checkstyle:check test",
+  "fast_result": "BUILD SUCCESS: final mandatory commit hook 35.082s; preceding fast gate41.978s",
+  "full_command": "./mvnw -B -ntp spotless:check checkstyle:check verify",
+  "full_result": "BUILD SUCCESS 3m07s finished 2026-10-06T11:11:51+03:00",
+  "integration_suites": [
+    {
+      "name": "io.polaris.order.OrderServiceIntegrationTest",
+      "tests": "15",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "21.275"
+    },
+    {
+      "name": "io.polaris.order.adapter.out.observability.DurableRecoveryIntegrationTest",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "9.262"
+    },
+    {
+      "name": "io.polaris.inventory.InventoryServiceIntegrationTest",
+      "tests": "12",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "15.797"
+    },
+    {
+      "name": "io.polaris.notification.NotificationServiceIntegrationTest",
+      "tests": "5",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "17.872"
+    },
+    {
+      "name": "io.polaris.contracts.OrderLifecycleSystemIntegrationTest",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "23.043"
+    }
+  ],
+  "fidelity_regression": "Old sampled carrier original trace and exact parent; old unsampled context unchanged; real DB old pending/outbox carriers through fresh Spring context and observed Kafka sender under scheduler",
+  "failure_history": [
+    "First verify stopped on malformed escaping in newly added test; corrected before successful full rerun"
+  ],
+  "live_provenance": "Initial retained images fcd4a8e app/dash2a747db; final-source fixture provenance separate"
+}

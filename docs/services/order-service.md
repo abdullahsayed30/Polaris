@@ -57,6 +57,8 @@ The event name is intentionally `OrderCreatedEvent` even when the status is `CAN
 
 JPA validates the schema at startup with `hibernate.ddl-auto=validate`. The service does not read or write inventory tables.
 
+Nullable trace-context columns on the pending order and outbox retain the original bounded propagation carrier in the same local transaction as intent/event creation. Later HTTP retries and recovery preserve that carrier. The persistence adapter restores it for resolution, and the messaging publisher restores it for each outbox publish attempt; business models and event payloads do not contain tracing framework types. See [observability](../observability.md) for parentage, aggregate database spans and committed snapshot metrics.
+
 ## Outbound Dependencies
 
 | Dependency | Use |
@@ -94,3 +96,5 @@ See [ADR 0021](../adr/0021-adopt-hombergs-hexagonal-service-structure.md) and th
 The integration test starts PostgreSQL and Kafka with Testcontainers and uses a fake gRPC inventory server. It verifies confirmed and cancelled orders, duplicate and concurrent idempotent requests, payload conflicts, recovery after a lost reservation response, order lookup, validation, and Kafka publication. A database mapping test also verifies explicit persistence, stable item IDs, exact decimal scale, timestamps and optimistic versions. Focused unit tests cover gRPC request ID metadata propagation and MDC cleanup.
 
 `InventoryDiscoveryRecoveryIntegrationTest` in `contract-tests` starts Order while Inventory's hostname is unresolvable, verifies the committed customer-bound pending intent after an authenticated HTTP failure, then makes the real Inventory service resolvable. An isolated JVM hosts file controls name availability without changing the developer's DNS or the other tests. The production target configuration, generated stub, managed server/channel and scheduled recovery must confirm the original order without restarting Order. Committed reservation, stock, request binding and outbox assertions verify one business outcome, including an exact reservation retry.
+
+Durable telemetry regressions cover parentage, sampling, tracestate, scope restoration, invalid carriers and the Micrometer scheduler bridge. A separate Docker-backed recovery test reopens the Spring application context and verifies the saved old carrier reaches an actual observed Kafka send. Synthetic capture dates test age semantics without claiming elapsed years of runtime.

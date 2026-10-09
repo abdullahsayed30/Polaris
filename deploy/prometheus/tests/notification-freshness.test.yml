@@ -1,0 +1,172 @@
+# Expressions copied exactly from the provisioned dashboard; verify parity when editing either file.
+rule_files: []
+evaluation_interval: 1m
+tests:
+  - name: "36-hour occurrence age is not capped at one hour"
+    interval: 1m
+    input_series:
+      - series: "polaris_notification_freshness_seconds_bucket{event_type=\"OrderCreated\",instance=\"new\",job=\"notification-service\",le=\"3600.0\"}"
+        values: "0+0x5"
+      - series: "polaris_notification_freshness_seconds_bucket{event_type=\"OrderCreated\",instance=\"new\",job=\"notification-service\",le=\"86400.0\"}"
+        values: "0+0x5"
+      - series: "polaris_notification_freshness_seconds_bucket{event_type=\"OrderCreated\",instance=\"new\",job=\"notification-service\",le=\"259200.0\"}"
+        values: "0+1x5"
+      - series: "polaris_notification_freshness_seconds_bucket{event_type=\"OrderCreated\",instance=\"new\",job=\"notification-service\",le=\"604800.0\"}"
+        values: "0+1x5"
+      - series: "polaris_notification_freshness_seconds_bucket{event_type=\"OrderCreated\",instance=\"new\",job=\"notification-service\",le=\"+Inf\"}"
+        values: "0+1x5"
+      - series: "polaris_notification_freshness_seconds_count{event_type=\"OrderCreated\",instance=\"new\",job=\"notification-service\"}"
+        values: "0+1x5"
+      - series: "polaris_notification_freshness_overflow_total{event_type=\"OrderCreated\",instance=\"new\",job=\"notification-service\"}"
+        values: "0+0x5"
+    promql_expr_test:
+      - expr: "histogram_quantile(0.95,sum by(le,event_type) (rate(polaris_notification_freshness_seconds_bucket[5m]) and on(job,instance,event_type) rate(polaris_notification_freshness_seconds_bucket{le=\"604800.0\"}[5m]))) and on(event_type) (sum by(event_type) (rate(polaris_notification_freshness_seconds_bucket{le=\"604800.0\"}[5m])) >= 0.95 * (sum by(event_type) (rate(polaris_notification_freshness_seconds_count[5m]) and on(job,instance,event_type) rate(polaris_notification_freshness_seconds_bucket{le=\"604800.0\"}[5m])) > 0))"
+        eval_time: 5m
+        exp_samples:
+          - labels: "{event_type=\"OrderCreated\"}"
+            value: 250559.99999999997
+      - expr: "sum by(event_type) (increase(polaris_notification_freshness_overflow_total[5m]))"
+        eval_time: 5m
+        exp_samples:
+          - labels: "{event_type=\"OrderCreated\"}"
+            value: 0
+  - name: "10-day occurrence age suppresses infinite-bucket p95 and exposes overflow"
+    interval: 1m
+    input_series:
+      - series: "polaris_notification_freshness_seconds_bucket{event_type=\"OrderCreated\",instance=\"new\",job=\"notification-service\",le=\"3600.0\"}"
+        values: "0+0x5"
+      - series: "polaris_notification_freshness_seconds_bucket{event_type=\"OrderCreated\",instance=\"new\",job=\"notification-service\",le=\"86400.0\"}"
+        values: "0+0x5"
+      - series: "polaris_notification_freshness_seconds_bucket{event_type=\"OrderCreated\",instance=\"new\",job=\"notification-service\",le=\"259200.0\"}"
+        values: "0+0x5"
+      - series: "polaris_notification_freshness_seconds_bucket{event_type=\"OrderCreated\",instance=\"new\",job=\"notification-service\",le=\"604800.0\"}"
+        values: "0+0x5"
+      - series: "polaris_notification_freshness_seconds_bucket{event_type=\"OrderCreated\",instance=\"new\",job=\"notification-service\",le=\"+Inf\"}"
+        values: "0+1x5"
+      - series: "polaris_notification_freshness_seconds_count{event_type=\"OrderCreated\",instance=\"new\",job=\"notification-service\"}"
+        values: "0+1x5"
+      - series: "polaris_notification_freshness_overflow_total{event_type=\"OrderCreated\",instance=\"new\",job=\"notification-service\"}"
+        values: "0+1x5"
+    promql_expr_test:
+      - expr: "histogram_quantile(0.95,sum by(le,event_type) (rate(polaris_notification_freshness_seconds_bucket[5m]) and on(job,instance,event_type) rate(polaris_notification_freshness_seconds_bucket{le=\"604800.0\"}[5m]))) and on(event_type) (sum by(event_type) (rate(polaris_notification_freshness_seconds_bucket{le=\"604800.0\"}[5m])) >= 0.95 * (sum by(event_type) (rate(polaris_notification_freshness_seconds_count[5m]) and on(job,instance,event_type) rate(polaris_notification_freshness_seconds_bucket{le=\"604800.0\"}[5m])) > 0))"
+        eval_time: 5m
+        exp_samples: []
+      - expr: "sum by(event_type) (increase(polaris_notification_freshness_overflow_total[5m]))"
+        eval_time: 5m
+        exp_samples:
+          - labels: "{event_type=\"OrderCreated\"}"
+            value: 5
+  - name: "exactly five percent overflow keeps the finite-boundary p95"
+    interval: 1m
+    input_series:
+      - series: "polaris_notification_freshness_seconds_bucket{event_type=\"OrderCreated\",instance=\"new\",job=\"notification-service\",le=\"3600.0\"}"
+        values: "0+0x5"
+      - series: "polaris_notification_freshness_seconds_bucket{event_type=\"OrderCreated\",instance=\"new\",job=\"notification-service\",le=\"86400.0\"}"
+        values: "0+0x5"
+      - series: "polaris_notification_freshness_seconds_bucket{event_type=\"OrderCreated\",instance=\"new\",job=\"notification-service\",le=\"259200.0\"}"
+        values: "0+0x5"
+      - series: "polaris_notification_freshness_seconds_bucket{event_type=\"OrderCreated\",instance=\"new\",job=\"notification-service\",le=\"604800.0\"}"
+        values: "0+19x5"
+      - series: "polaris_notification_freshness_seconds_bucket{event_type=\"OrderCreated\",instance=\"new\",job=\"notification-service\",le=\"+Inf\"}"
+        values: "0+20x5"
+      - series: "polaris_notification_freshness_seconds_count{event_type=\"OrderCreated\",instance=\"new\",job=\"notification-service\"}"
+        values: "0+20x5"
+      - series: "polaris_notification_freshness_overflow_total{event_type=\"OrderCreated\",instance=\"new\",job=\"notification-service\"}"
+        values: "0+1x5"
+    promql_expr_test:
+      - expr: "histogram_quantile(0.95,sum by(le,event_type) (rate(polaris_notification_freshness_seconds_bucket[5m]) and on(job,instance,event_type) rate(polaris_notification_freshness_seconds_bucket{le=\"604800.0\"}[5m]))) and on(event_type) (sum by(event_type) (rate(polaris_notification_freshness_seconds_bucket{le=\"604800.0\"}[5m])) >= 0.95 * (sum by(event_type) (rate(polaris_notification_freshness_seconds_count[5m]) and on(job,instance,event_type) rate(polaris_notification_freshness_seconds_bucket{le=\"604800.0\"}[5m])) > 0))"
+        eval_time: 5m
+        exp_samples:
+          - labels: "{event_type=\"OrderCreated\"}"
+            value: 604800
+      - expr: "sum by(event_type) (increase(polaris_notification_freshness_overflow_total[5m]))"
+        eval_time: 5m
+        exp_samples:
+          - labels: "{event_type=\"OrderCreated\"}"
+            value: 5
+  - name: "more than five percent overflow suppresses p95"
+    interval: 1m
+    input_series:
+      - series: "polaris_notification_freshness_seconds_bucket{event_type=\"OrderCreated\",instance=\"new\",job=\"notification-service\",le=\"3600.0\"}"
+        values: "0+0x5"
+      - series: "polaris_notification_freshness_seconds_bucket{event_type=\"OrderCreated\",instance=\"new\",job=\"notification-service\",le=\"86400.0\"}"
+        values: "0+0x5"
+      - series: "polaris_notification_freshness_seconds_bucket{event_type=\"OrderCreated\",instance=\"new\",job=\"notification-service\",le=\"259200.0\"}"
+        values: "0+0x5"
+      - series: "polaris_notification_freshness_seconds_bucket{event_type=\"OrderCreated\",instance=\"new\",job=\"notification-service\",le=\"604800.0\"}"
+        values: "0+9x5"
+      - series: "polaris_notification_freshness_seconds_bucket{event_type=\"OrderCreated\",instance=\"new\",job=\"notification-service\",le=\"+Inf\"}"
+        values: "0+10x5"
+      - series: "polaris_notification_freshness_seconds_count{event_type=\"OrderCreated\",instance=\"new\",job=\"notification-service\"}"
+        values: "0+10x5"
+      - series: "polaris_notification_freshness_overflow_total{event_type=\"OrderCreated\",instance=\"new\",job=\"notification-service\"}"
+        values: "0+1x5"
+    promql_expr_test:
+      - expr: "histogram_quantile(0.95,sum by(le,event_type) (rate(polaris_notification_freshness_seconds_bucket[5m]) and on(job,instance,event_type) rate(polaris_notification_freshness_seconds_bucket{le=\"604800.0\"}[5m]))) and on(event_type) (sum by(event_type) (rate(polaris_notification_freshness_seconds_bucket{le=\"604800.0\"}[5m])) >= 0.95 * (sum by(event_type) (rate(polaris_notification_freshness_seconds_count[5m]) and on(job,instance,event_type) rate(polaris_notification_freshness_seconds_bucket{le=\"604800.0\"}[5m])) > 0))"
+        eval_time: 5m
+        exp_samples: []
+      - expr: "sum by(event_type) (increase(polaris_notification_freshness_overflow_total[5m]))"
+        eval_time: 5m
+        exp_samples:
+          - labels: "{event_type=\"OrderCreated\"}"
+            value: 5
+  - name: "rolling upgrade excludes old replicas without the seven-day bucket"
+    interval: 1m
+    input_series:
+      - series: "polaris_notification_freshness_seconds_bucket{event_type=\"OrderCreated\",instance=\"new\",job=\"notification-service\",le=\"3600.0\"}"
+        values: "0+0x5"
+      - series: "polaris_notification_freshness_seconds_bucket{event_type=\"OrderCreated\",instance=\"new\",job=\"notification-service\",le=\"86400.0\"}"
+        values: "0+0x5"
+      - series: "polaris_notification_freshness_seconds_bucket{event_type=\"OrderCreated\",instance=\"new\",job=\"notification-service\",le=\"259200.0\"}"
+        values: "0+1x5"
+      - series: "polaris_notification_freshness_seconds_bucket{event_type=\"OrderCreated\",instance=\"new\",job=\"notification-service\",le=\"604800.0\"}"
+        values: "0+1x5"
+      - series: "polaris_notification_freshness_seconds_bucket{event_type=\"OrderCreated\",instance=\"new\",job=\"notification-service\",le=\"+Inf\"}"
+        values: "0+1x5"
+      - series: "polaris_notification_freshness_seconds_count{event_type=\"OrderCreated\",instance=\"new\",job=\"notification-service\"}"
+        values: "0+1x5"
+      - series: "polaris_notification_freshness_overflow_total{event_type=\"OrderCreated\",instance=\"new\",job=\"notification-service\"}"
+        values: "0+0x5"
+      - series: "polaris_notification_freshness_seconds_bucket{event_type=\"OrderCreated\",instance=\"old\",job=\"notification-service\",le=\"3600.0\"}"
+        values: "0+0x5"
+      - series: "polaris_notification_freshness_seconds_bucket{event_type=\"OrderCreated\",instance=\"old\",job=\"notification-service\",le=\"+Inf\"}"
+        values: "0+20x5"
+      - series: "polaris_notification_freshness_seconds_count{event_type=\"OrderCreated\",instance=\"old\",job=\"notification-service\"}"
+        values: "0+20x5"
+    promql_expr_test:
+      - expr: "histogram_quantile(0.95,sum by(le,event_type) (rate(polaris_notification_freshness_seconds_bucket[5m]) and on(job,instance,event_type) rate(polaris_notification_freshness_seconds_bucket{le=\"604800.0\"}[5m]))) and on(event_type) (sum by(event_type) (rate(polaris_notification_freshness_seconds_bucket{le=\"604800.0\"}[5m])) >= 0.95 * (sum by(event_type) (rate(polaris_notification_freshness_seconds_count[5m]) and on(job,instance,event_type) rate(polaris_notification_freshness_seconds_bucket{le=\"604800.0\"}[5m])) > 0))"
+        eval_time: 5m
+        exp_samples:
+          - labels: "{event_type=\"OrderCreated\"}"
+            value: 250559.99999999997
+      - expr: "sum by(event_type) (increase(polaris_notification_freshness_overflow_total[5m]))"
+        eval_time: 5m
+        exp_samples:
+          - labels: "{event_type=\"OrderCreated\"}"
+            value: 0
+  - name: "no completed observations produce no p95 instead of zero freshness"
+    interval: 1m
+    input_series:
+      - series: "polaris_notification_freshness_seconds_bucket{event_type=\"OrderCreated\",instance=\"new\",job=\"notification-service\",le=\"3600.0\"}"
+        values: "0+0x5"
+      - series: "polaris_notification_freshness_seconds_bucket{event_type=\"OrderCreated\",instance=\"new\",job=\"notification-service\",le=\"86400.0\"}"
+        values: "0+0x5"
+      - series: "polaris_notification_freshness_seconds_bucket{event_type=\"OrderCreated\",instance=\"new\",job=\"notification-service\",le=\"259200.0\"}"
+        values: "0+0x5"
+      - series: "polaris_notification_freshness_seconds_bucket{event_type=\"OrderCreated\",instance=\"new\",job=\"notification-service\",le=\"604800.0\"}"
+        values: "0+0x5"
+      - series: "polaris_notification_freshness_seconds_bucket{event_type=\"OrderCreated\",instance=\"new\",job=\"notification-service\",le=\"+Inf\"}"
+        values: "0+0x5"
+      - series: "polaris_notification_freshness_seconds_count{event_type=\"OrderCreated\",instance=\"new\",job=\"notification-service\"}"
+        values: "0+0x5"
+      - series: "polaris_notification_freshness_overflow_total{event_type=\"OrderCreated\",instance=\"new\",job=\"notification-service\"}"
+        values: "0+0x5"
+    promql_expr_test:
+      - expr: "histogram_quantile(0.95,sum by(le,event_type) (rate(polaris_notification_freshness_seconds_bucket[5m]) and on(job,instance,event_type) rate(polaris_notification_freshness_seconds_bucket{le=\"604800.0\"}[5m]))) and on(event_type) (sum by(event_type) (rate(polaris_notification_freshness_seconds_bucket{le=\"604800.0\"}[5m])) >= 0.95 * (sum by(event_type) (rate(polaris_notification_freshness_seconds_count[5m]) and on(job,instance,event_type) rate(polaris_notification_freshness_seconds_bucket{le=\"604800.0\"}[5m])) > 0))"
+        eval_time: 5m
+        exp_samples: []
+      - expr: "sum by(event_type) (increase(polaris_notification_freshness_overflow_total[5m]))"
+        eval_time: 5m
+        exp_samples:
+          - labels: "{event_type=\"OrderCreated\"}"
+            value: 0

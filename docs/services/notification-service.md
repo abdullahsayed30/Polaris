@@ -46,6 +46,10 @@ When retries are exhausted, the service publishes a dead-letter event containing
 
 The listener waits for Kafka to acknowledge the dead-letter record. If publication fails or times out, the exception escapes and the container retries the source record indefinitely with `polaris.notifications.dlq.redelivery-backoff`; it does not acknowledge and lose the source message. Kafka record acknowledgement is explicit.
 
+## Observability
+
+The inbox persistence adapter traces processing and committed duplicate suppression; retry and dead-letter adapters expose separate attempts. Completion counters and occurrence-to-processing freshness are recorded after inbox commit, excluding rollback and duplicates. Freshness uses finite buckets through seven days plus an overflow counter; the Business Flow dashboard hides p95 when it lies beyond the finite range. Dead-lettered outcomes and future occurrence timestamps do not create freshness samples. See [observability](../observability.md) for bounded labels, snapshot freshness and trace/log navigation. Delivery remains simulated; no log-storage backend or automatic DLQ redrive consumer is provided.
+
 ## Package Shape
 
 See [ADR 0021](../adr/0021-adopt-hombergs-hexagonal-service-structure.md) and the [service standard](../service-architecture-standard.md) for dependency rules.
@@ -57,8 +61,11 @@ See [ADR 0021](../adr/0021-adopt-hombergs-hexagonal-service-structure.md) and th
 | `adapter.in.messaging` | Kafka decoding, legacy compatibility, acknowledgement and use-case delegation |
 | `adapter.out.persistence` | Inbox entity/repository and managed receipt implementation |
 | `adapter.out.messaging` / `.retry` / `.logging` | Confirmed dead-letter delivery, Resilience4j and simulated notification handler |
+| `adapter.out.observability` | Service-owned trace scopes and cached inbox snapshot metrics |
 | Service root | Retry/topic/error-handler wiring and typed configuration records |
 
 ## Tests
 
 The integration test starts PostgreSQL and Kafka with Testcontainers, produces order and inventory events, verifies inbox-backed duplicate suppression, simulates a notification outage, and asserts that a dead-letter event is published after configured retry exhaustion. Focused unit tests cover transient retry, poison payloads, duplicate delivery, and failed dead-letter broker acknowledgement.
+
+Committed freshness regressions use the actual Prometheus registry for long occurrence ages, overflow, rollback, duplicates, future timestamps and dead-letter exclusion. Separate PromQL fixtures verify the exact dashboard expressions, including overflow censoring and mixed replicas during a rolling upgrade.

@@ -1,0 +1,31 @@
+{
+  "order_id": "e644e780-f3fd-3ab8-8f92-7d879ec3770a",
+  "synthetic_fixture_only": true,
+  "elapsed_hours_observed": false,
+  "observations": {
+    "order-postgres": {
+      "before": {
+        "event_id": "9e9b3e25-9df6-4b99-b64d-d034e631f623",
+        "status": "RETRY",
+        "attempts": 3,
+        "trace_context": "{\"traceparent\":\"00-656faf060af37c6cd645d85fa6d2ccf7-ba08b5986f35ea18-01\",\"captured_at\":\"2026-10-06T08:15:30.735770758Z\"}"
+      },
+      "synthetically_aged_carrier": {
+        "captured_at": "2020-01-01T00:00:00Z",
+        "traceparent": "00-656faf060af37c6cd645d85fa6d2ccf7-ba08b5986f35ea18-01"
+      }
+    },
+    "inventory-postgres": {
+      "before": {
+        "event_id": "30c12159-d3ef-402d-b8bd-5a9a0a69db08",
+        "status": "RETRY",
+        "attempts": 1,
+        "trace_context": "{\"traceparent\":\"00-656faf060af37c6cd645d85fa6d2ccf7-fc8923408bdcc578-01\",\"captured_at\":\"2026-10-06T08:15:30.567085716Z\"}"
+      },
+      "synthetically_aged_carrier": {
+        "captured_at": "2020-01-01T00:00:00Z",
+        "traceparent": "00-656faf060af37c6cd645d85fa6d2ccf7-fc8923408bdcc578-01"
+      }
+    }
+  }
+}

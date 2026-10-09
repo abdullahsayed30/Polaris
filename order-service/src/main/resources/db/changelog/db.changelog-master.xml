@@ -11,4 +11,6 @@
     <include file="db/changelog/changes/0004-create-order-requests.sql"/>
     <include file="db/changelog/changes/0005-durable-reservation-recovery.sql"/>
     <include file="db/changelog/changes/0006-bind-processing-order-requests.sql"/>
+    <include file="db/changelog/changes/0007-durable-recovery-trace-context.sql"/>
+    <include file="db/changelog/changes/0008-durable-outbox-trace-context.sql"/>
 </databaseChangeLog>

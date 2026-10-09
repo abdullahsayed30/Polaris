@@ -1,0 +1,25 @@
+{
+  "base_source_sha": "2a747dbc3430099ca6800d69497bb9a9c524c1e5",
+  "correction_tracked_diff_sha256": "412d8721e2a871dab35afa3a1ff0542b0856aeadb0e6bb7dadfae376e4fd8dc7",
+  "jars": {
+    "gateway": {
+      "sha256": "103f582f4713b51e2319f76878a68b72b6a25a2112b8a53166cbc701ff22c1ee",
+      "size_bytes": 59494750
+    },
+    "order-service": {
+      "sha256": "b0b4be441f97bf87394d4c5950144d84607513cc37906addb45ca4ba28c5e17f",
+      "size_bytes": 115561056
+    },
+    "inventory-service": {
+      "sha256": "a3fe745feef333d7a9560298252b177ec0a815ef042f98c9120cd6c07e4d478d",
+      "size_bytes": 110198903
+    },
+    "notification-service": {
+      "sha256": "96c57ad23e4caaf26abff9f8a25034f33b73210439290a438f422b9899193b96",
+      "size_bytes": 88840326
+    }
+  },
+  "app_source_sha": "1b9a4dc4b0d0c066e7ab99866925531410b6ef0c",
+  "dashboard_source_sha": "2a747dbc3430099ca6800d69497bb9a9c524c1e5",
+  "cached_images_are_base_only": true
+}
