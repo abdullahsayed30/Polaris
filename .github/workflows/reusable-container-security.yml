@@ -55,6 +55,7 @@ jobs:
             | grep -Fx application
 
       - name: Scan production image once
+        id: image
         if: ${{ !cancelled() && !failure() }}
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         env:
@@ -115,6 +116,7 @@ jobs:
         env:
           SERVICE: ${{ matrix.service }}
           CI_ARTIFACT_PREFIX: ${{ inputs.artifact-name }}
+          CI_SCAN_SUCCEEDED: ${{ steps.image.outcome == 'success' }}
         run: python3 .github/scripts/trivy_summary.py "$SERVICE" "trivy-$SERVICE.json"
 
       - name: Enforce HIGH and CRITICAL image findings

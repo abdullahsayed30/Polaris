@@ -125,6 +125,8 @@ def main(arguments):
         if len(arguments) != 2 or arguments[0] not in TARGETS:
             raise ValueError("Usage: trivy_summary.py TARGET NATIVE_REPORT_JSON")
         target, report_path = arguments
+        if os.environ.get("CI_SCAN_SUCCEEDED", "true") != "true":
+            raise ValueError("Scan did not complete successfully; any remaining report may be partial")
         report = trivy_gate.read_json(report_path)
         try:
             policy = trivy_gate.read_json(trivy_gate.POLICY)
