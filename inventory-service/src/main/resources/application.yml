@@ -43,7 +43,24 @@ management:
     health:
       probes:
         enabled: true
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+        spring.cloud.gateway.requests: true
+        grpc.server.processing.duration: true
+        grpc.client.processing.duration: true
+      minimum-expected-value:
+        http.server.requests: 1ms
+        grpc.server.processing.duration: 1ms
+        grpc.client.processing.duration: 1ms
+      maximum-expected-value:
+        http.server.requests: 10s
+        grpc.server.processing.duration: 10s
+        grpc.client.processing.duration: 10s
   tracing:
+    propagation:
+      type: w3c
     sampling:
       probability: ${POLARIS_TRACING_SAMPLING_PROBABILITY:1.0}
   otlp:

@@ -12,6 +12,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
+import io.micrometer.core.instrument.MeterRegistry;
+
+import io.polaris.notification.adapter.out.observability.DurableTelemetry;
 import io.polaris.notification.application.port.in.NotificationDelivery;
 import io.polaris.notification.application.port.out.NotificationDeadLetters;
 import io.polaris.shared.events.EventMetadata;
@@ -22,11 +25,18 @@ public class NotificationDeadLetterPublisher implements NotificationDeadLetters 
     private final KafkaTemplate<String, NotificationDeadLetterEvent> kafkaTemplate;
     private final String topic;
     private final Duration sendTimeout;
+    private final MeterRegistry metrics;
+    private final DurableTelemetry telemetry;
 
     public NotificationDeadLetterPublisher(
             KafkaTemplate<String, NotificationDeadLetterEvent> kafkaTemplate,
             @Value("${polaris.kafka.topics.notifications-dlq}") String topic,
-            @Value("${polaris.notifications.dlq.send-timeout:10s}") Duration sendTimeout) {
+            @Value("${polaris.notifications.dlq.send-timeout:10s}") Duration sendTimeout, DurableTelemetry telemetry,
+            MeterRegistry metrics) {
+        this.telemetry = telemetry;
+        this.metrics = metrics;
+        metrics.counter("polaris.notification.dlq.publications", "outcome", "acknowledged");
+        metrics.counter("polaris.notification.dlq.publications", "outcome", "failed");
         this.kafkaTemplate = kafkaTemplate;
         this.topic = topic;
         this.sendTimeout = sendTimeout;
@@ -54,14 +64,24 @@ public class NotificationDeadLetterPublisher implements NotificationDeadLetters 
     }
 
     public void publish(NotificationDeadLetterEvent event) {
-        try {
-            kafkaTemplate.send(topic, event.sourceKey(), event)
-                    .get(sendTimeout.toMillis(), TimeUnit.MILLISECONDS);
-        } catch (InterruptedException ex) {
-            Thread.currentThread().interrupt();
-            throw new DeadLetterPublicationException(event.metadata().eventId(), ex);
-        } catch (Exception ex) {
-            throw new DeadLetterPublicationException(event.metadata().eventId(), ex);
+        try (var session = telemetry.attempt("notification.dlq.publish.attempt", event.metadata().eventId().toString())) {
+            try {
+                kafkaTemplate.send(topic, event.sourceKey(), event)
+                        .get(sendTimeout.toMillis(), TimeUnit.MILLISECONDS);
+                metrics.counter("polaris.notification.dlq.publications", "outcome", "acknowledged").increment();
+                session.outcome("broker_acknowledged");
+            } catch (InterruptedException ex) {
+                session.error(ex);
+                session.outcome("interrupted");
+                metrics.counter("polaris.notification.dlq.publications", "outcome", "failed").increment();
+                Thread.currentThread().interrupt();
+                throw new DeadLetterPublicationException(event.metadata().eventId(), ex);
+            } catch (Exception ex) {
+                session.error(ex);
+                session.outcome("failed");
+                metrics.counter("polaris.notification.dlq.publications", "outcome", "failed").increment();
+                throw new DeadLetterPublicationException(event.metadata().eventId(), ex);
+            }
         }
     }
 

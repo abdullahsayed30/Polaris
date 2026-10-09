@@ -67,7 +67,7 @@ The Helm chart owns application Deployments, Services, configuration, Secret ref
 
 Services expose actuator health and Prometheus metrics. Docker Compose enables OTLP trace export to Tempo, while direct local JVM runs keep trace export disabled unless explicitly enabled. Console logs use ECS JSON and include trace identifiers plus `request.id` when request context exists.
 
-Grafana provisions Prometheus and Tempo datasources, the Polaris overview dashboard, and a dedicated Polaris gRPC dashboard. See [Observability](observability.md) for runtime conventions.
+Grafana provisions Prometheus and Tempo datasources plus the Polaris Overview, gRPC and Business Flow dashboards. Durable pending-order and outbox carriers preserve original trace parentage across recovery, delay and publication retries. Service-owned adapters expose database persistence blocks, transaction outcomes and committed backlog snapshots; database spans can contain several SQL statements, and notification delivery remains simulated. See [Observability](observability.md) for metric contracts, source-specific evidence and runtime limitations.
 
 ## Gateway Edge Policy
 
@@ -117,6 +117,7 @@ Order, inventory, and notification each own a PostgreSQL database and apply Liqu
 - [0020 - Recover Pending Orders Durably](adr/0020-recover-pending-orders-durably.md)
 
 - [0021 - Adopt Hombergs Hexagonal Service Structure](adr/0021-adopt-hombergs-hexagonal-service-structure.md)
+- [0022 - Preserve Durable Business Trace Context](adr/0022-preserve-durable-business-trace-context.md)
 
 ## Service Documentation
 

@@ -25,7 +25,9 @@ class NotificationDeadLetterPublisherTest {
         NotificationDeadLetterPublisher publisher = new NotificationDeadLetterPublisher(
                 kafkaTemplate,
                 "polaris.notifications.dlq",
-                Duration.ofSeconds(1));
+                Duration.ofSeconds(1), io.polaris.notification.adapter.out.observability.DurableTelemetry.noop(
+                        new com.fasterxml.jackson.databind.ObjectMapper()),
+                new io.micrometer.core.instrument.simple.SimpleMeterRegistry());
 
         assertThatThrownBy(() -> publisher.publish(event))
                 .isInstanceOf(DeadLetterPublicationException.class)

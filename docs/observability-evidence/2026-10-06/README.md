@@ -1,0 +1,35 @@
+# Local observability evidence — 2026-10-06
+
+These are retained observations from an isolated development fixture, not a stock clean-clone launch or production readiness measurement. Demo identities and business IDs are synthetic. No bearer tokens, credentials, baggage, SQL statements or bind values are included.
+
+## Provenance
+
+The initial live run used application source `fcd4a8efe48f797091297dba531d0958400e48eb`, with the four executable JAR SHA-256 values in [jar-provenance.json](jar-provenance.json), and dashboards from `2a747dbc3430099ca6800d69497bb9a9c524c1e5`. Cached production runtime images loaded those JARs through read-only mounts. See [fixture-summary.json](fixture-summary.json) for images, isolated ports, configuration hashes and fixture deviations.
+
+The final correction preserves valid sampled and unsampled trace identity regardless of age. Initial screenshots below exercised the preceding source with delays measured in minutes. They do not prove an hours-long run. The corrected source, `1b9a4dc4b0d0c066e7ab99866925531410b6ef0c`, passed [final full verification](final-validation-summary.json), including old-carrier SDK regressions and the real PostgreSQL/Kafka fresh-Spring-context recovery test using explicit synthetic old timestamps. It also passed a separate actual fixture run: [running JAR hashes](final-running-jar-hashes.json) match [final build provenance](final-jar-provenance.json), and [final live proof](final-live-proof.json) establishes all four services, exact original publisher parent IDs, and committed inbox rows after both retrying outboxes were given [synthetic old capture timestamps](final-synthetic-aged-carriers.json). Only the timestamp was changed in this controlled fixture; traceparent/event identity remained intact. This is an age-semantics injection, not elapsed years. Final live PromQL [queries/results](final-dashboard-query-results.json), [actual Kafka headers](final-kafka-records.txt) and [matching ECS records](final-matching-ecs-logs.json) are retained separately. The final trace spans about 66 seconds of workflow waiting/retry history; its original gateway HTTP span is about 575 milliseconds, not a 66-second HTTP request. The [actual final Tempo overview](tempo-final-source-overview.jpg) and [delivery waterfall](tempo-final-source-delivery.jpg) show that original trace.
+
+The fixture needed PostgreSQL 18 mount targets, a Keycloak subject mapper, and production-image readiness commands corrected locally. It used the cached ARM Confluent broker rather than the tracked Bitnami image. These observations are not proof that default Compose works. [fixture-identity.json](fixture-identity.json) contains only safe mapper metadata and selected demo claims.
+
+## Observed cases
+
+| Case | Evidence and result |
+| --- | --- |
+| Warm authenticated HTTP and idempotency | [request](bridge-warm-request.json), [committed state](bridge-warm-snapshot.json), [trace](warm-final-trace.json): no client traceparent; same order ID on HTTP retry; gateway, order, inventory, notification, DB blocks, both outboxes and actual Kafka send/receive spans share the original trace. |
+| Pending order and application restart | [before](pending-before-restart-snapshot.json), [after restart](pending-after-app-restart-snapshot.json): same ID and immutable carrier while inventory is unavailable. |
+| Recovery limitation and additional restart | A single order restart while inventory was offline left the existing static gRPC target unresolved after inventory returned. This automatic dependency-return case **failed**. An **additional manual order restart** with inventory online recovered the same order/carrier; [state](pending-recovered-snapshot.json), [trace](pending-final-trace.json), [logs](matching-ecs-logs.json). Do not describe that additional restart as automatic dependency recovery. |
+| Outbox outage, retry and restart | [before](outbox-before-restart-snapshot.json), [after restart](outbox-after-restart-snapshot.json), [recovered](retry-replay-final-snapshot.json), [trace](outbox-final-trace.json): both event IDs/carriers retained in RETRY; Kafka return produced PUBLISHED after order/inventory attempts 3/2 and matching committed inbox rows. |
+| Committed-record replay | [original record with header/key](replayed-record.txt), [stable before](duplicate-stable-before-snapshot.json), [after](duplicate-stable-after-snapshot.json): duplicate counter +1, completion counters unchanged, committed inbox unchanged; `notification.duplicate` is suppressed in the original trace. |
+| Handler retry and DLQ | [controlled synthetic record](controlled-handler-failure-record.txt) uses valid metadata and null items to trigger the simulated handler failure. Three handler attempts, two retry observations, one acknowledged publication and committed DEAD_LETTERED row; [actual DLQ record](actual-dlq-record.txt) preserves the event ID and trace headers. |
+| Metrics | All 24 provisioned PromQL expressions were executed against the actual scrapes: [expressions/results](dashboard-query-results.json). All four application scrape targets were UP at the final snapshot. Gauges are committed DB snapshots, counters are process-local, and DLQ attempts are not queue depth. |
+| Logs | [Selected business ECS records](matching-ecs-logs.json) correlate actual `traceId`/`spanId`. There is no log-storage datasource or one-click logs view. |
+
+Failed/interrupted DLQ publication, automatic source redelivery after failed DLQ, DB rollback, and snapshot refresh/acquisition failure have automated test coverage. Those are separate from the live handler-failure/replay cases and are not claimed as live outage injections. Notification delivery is simulated; no provider or automatic DLQ redrive consumer was added.
+
+## Actual UI captures
+
+- [Tempo original-request overview](tempo-full-flow.jpg) and [inventory DB → outbox → Kafka → notification waterfall](tempo-flow-waterfall.jpg). These are Grafana UI screenshots, not generated diagrams or JSON screenshots. The original trace's four-service membership is established in the raw trace; no single viewport shows every span.
+- [Service overview](grafana-overview.jpg), [gRPC server/client measurements and errors](grafana-grpc.jpg), [pending orders/outbox history](grafana-business-flow.jpg), and [DLQ/duplicate panels](grafana-dlq-and-duplicates.jpg).
+
+The dashboard Tempo link was opened and its provisioned datasource/query was verified in Explore. Screenshots preserve observed fixture history, including unavailable dependencies and application restarts; the charts are not a throughput benchmark or measured SLO.
+
+See [live-validation-summary.json](live-validation-summary.json) and [validation-summary.json](validation-summary.json) for initial-source validation and sequencing failures, and [final-validation-summary.json](final-validation-summary.json) for corrected-source checks. [All 13 fixture containers were stopped](fixture-stop-proof.json) after retaining evidence, with their volumes preserved.

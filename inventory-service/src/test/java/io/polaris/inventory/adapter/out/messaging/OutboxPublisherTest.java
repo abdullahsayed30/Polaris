@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 import io.polaris.inventory.OutboxPublisherProperties;
+import io.polaris.inventory.adapter.out.observability.DurableTelemetry;
 import io.polaris.inventory.adapter.out.persistence.OutboxEvent;
 import io.polaris.inventory.adapter.out.persistence.OutboxEventRepository;
 import io.polaris.inventory.adapter.out.persistence.OutboxStatus;
@@ -55,7 +56,7 @@ class OutboxPublisherTest {
                         Duration.ofMillis(1),
                         Duration.ofSeconds(1),
                         Duration.ofSeconds(1)),
-                new SimpleMeterRegistry());
+                new SimpleMeterRegistry(), DurableTelemetry.noop(new ObjectMapper()));
 
         publisher.publishReady();
         assertThat(event.getStatus()).isEqualTo(OutboxStatus.RETRY);

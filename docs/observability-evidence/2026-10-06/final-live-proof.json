@@ -1,0 +1,37 @@
+{
+  "app_source": "1b9a4dc4b0d0c066e7ab99866925531410b6ef0c",
+  "trace_id": "656faf060af37c6cd645d85fa6d2ccf7",
+  "order_id": "e644e780-f3fd-3ab8-8f92-7d879ec3770a",
+  "synthetic_old_timestamps_only": true,
+  "elapsed_hours_observed": false,
+  "service_span_counts": {
+    "gateway": 6,
+    "order-service": 40,
+    "inventory-service": 25,
+    "notification-service": 24
+  },
+  "exact_publisher_parent_proof": [
+    {
+      "service": "order-service",
+      "event_id": "9e9b3e25-9df6-4b99-b64d-d034e631f623",
+      "original_parent_span_id": "ba08b5986f35ea18",
+      "broker_acknowledged_span_ids": [
+        "5917849f9cd28a17"
+      ],
+      "attempts": 7
+    },
+    {
+      "service": "inventory-service",
+      "event_id": "30c12159-d3ef-402d-b8bd-5a9a0a69db08",
+      "original_parent_span_id": "fc8923408bdcc578",
+      "broker_acknowledged_span_ids": [
+        "43d62775a2302d77"
+      ],
+      "attempts": 5
+    }
+  ],
+  "matching_committed_notification_inbox": true,
+  "notes": [
+    "Initial assertion used incorrect outcome name published; actual span contract broker_acknowledged inspected, corrected in evidence checker without source changes"
+  ]
+}

@@ -17,6 +17,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.MeterRegistry;
 
 import io.polaris.inventory.OutboxPublisherProperties;
+import io.polaris.inventory.adapter.out.observability.DurableTelemetry;
 import io.polaris.inventory.adapter.out.persistence.OutboxEvent;
 import io.polaris.inventory.adapter.out.persistence.OutboxEventRepository;
 import io.polaris.inventory.adapter.out.persistence.OutboxStatus;
@@ -30,45 +31,56 @@ public class OutboxPublisher {
     private final ObjectMapper objectMapper;
     private final OutboxPublisherProperties properties;
     private final MeterRegistry meterRegistry;
+    private final DurableTelemetry telemetry;
 
     public OutboxPublisher(
             OutboxEventRepository outboxEvents,
             KafkaTemplate<String, Object> kafkaTemplate,
             ObjectMapper objectMapper,
             OutboxPublisherProperties properties,
-            MeterRegistry meterRegistry) {
+            MeterRegistry meterRegistry, DurableTelemetry telemetry) {
+        this.telemetry = telemetry;
         this.outboxEvents = outboxEvents;
         this.kafkaTemplate = kafkaTemplate;
-        this.objectMapper = objectMapper;
+        this.objectMapper = objectMapper.copy()
+                .enable(com.fasterxml.jackson.databind.DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
+                .setNodeFactory(com.fasterxml.jackson.databind.node.JsonNodeFactory.withExactBigDecimals(true));
         this.properties = properties;
         this.meterRegistry = meterRegistry;
+        for (String outcome : new String[]{"published", "retry", "failed"}) {
+            meterRegistry.counter("polaris.outbox.publications", "outcome", outcome);
+        }
     }
 
     @Transactional
     public void publishReady() {
         Instant now = Instant.now();
-        for (OutboxEvent event : outboxEvents.findReady(now, PageRequest.of(0, properties.batchSize()))) {
+        for (OutboxEvent event : telemetry.database("SELECT", "outbox_events",
+                () -> outboxEvents.findReady(now, PageRequest.of(0, properties.batchSize())))) {
             publish(event, now);
         }
     }
 
     private void publish(OutboxEvent event, Instant now) {
-        try {
-            JsonNode payload = objectMapper.readTree(event.getPayload());
-            kafkaTemplate.send(event.getTopic(), event.getMessageKey(), payload)
-                    .get(properties.sendTimeout().toMillis(), TimeUnit.MILLISECONDS);
-            event.markPublished(Instant.now());
-            meterRegistry.counter("polaris.outbox.publications", "outcome", "published").increment();
-            log.info(
-                    "Outbox event published eventId={} eventType={} attempts={}",
-                    event.getEventId(),
-                    event.getEventType(),
-                    event.getAttempts());
-        } catch (InterruptedException ex) {
-            Thread.currentThread().interrupt();
-            recordFailure(event, now, ex);
-        } catch (Exception ex) {
-            recordFailure(event, now, ex);
+        try (var session = telemetry.resume("outbox.publish.attempt", event.getTraceContext(), event.getEventId().toString())) {
+            try {
+                JsonNode payload = objectMapper.readTree(event.getPayload());
+                kafkaTemplate.send(event.getTopic(), event.getMessageKey(), payload)
+                        .get(properties.sendTimeout().toMillis(), TimeUnit.MILLISECONDS);
+                event.markPublished(Instant.now());
+                session.outcome("broker_acknowledged");
+                meterRegistry.counter("polaris.outbox.publications", "outcome", "published").increment();
+                log.info("Outbox event published eventId={} eventType={} attempts={}",
+                        event.getEventId(), event.getEventType(), event.getAttempts());
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+                session.error(ex);
+                recordFailure(event, now, ex);
+            } catch (Exception ex) {
+                session.error(ex);
+                recordFailure(event, now, ex);
+            }
+            telemetry.databaseWrite("UPDATE", "outbox_events", outboxEvents::flush);
         }
     }
 

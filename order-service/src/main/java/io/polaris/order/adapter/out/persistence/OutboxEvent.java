@@ -38,6 +38,16 @@ public class OutboxEvent {
     @Column(name = "occurred_at", nullable = false, updatable = false)
     private Instant occurredAt;
 
+    @Column(name = "trace_context", updatable = false, columnDefinition = "TEXT")
+    private String traceContext;
+
+    public String getTraceContext() {
+        return traceContext;
+    }
+    public void setTraceContext(String context) {
+        this.traceContext = context;
+    }
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private OutboxStatus status;

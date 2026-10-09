@@ -28,6 +28,13 @@
         <disallow pkg="io.polaris.gateway"/>
         <disallow pkg="io.polaris.notification"/>
         <disallow pkg="io.polaris.order"/>
+        <subpackage name="adapter">
+            <subpackage name="out">
+                <subpackage name="observability">
+                    <allow pkg="io.opentelemetry"/>
+                </subpackage>
+            </subpackage>
+        </subpackage>
     </subpackage>
 
     <subpackage name="notification">
@@ -36,6 +43,13 @@
         <allow pkg="io.polaris.inventory.grpc"/>
         <disallow pkg="io.polaris.inventory"/>
         <disallow pkg="io.polaris.order"/>
+        <subpackage name="adapter">
+            <subpackage name="out">
+                <subpackage name="observability">
+                    <allow pkg="io.opentelemetry"/>
+                </subpackage>
+            </subpackage>
+        </subpackage>
     </subpackage>
 
     <subpackage name="order">
@@ -44,6 +58,13 @@
         <allow pkg="io.polaris.inventory.grpc"/>
         <disallow pkg="io.polaris.inventory"/>
         <disallow pkg="io.polaris.notification"/>
+        <subpackage name="adapter">
+            <subpackage name="out">
+                <subpackage name="observability">
+                    <allow pkg="io.opentelemetry"/>
+                </subpackage>
+            </subpackage>
+        </subpackage>
     </subpackage>
 
     <subpackage name="shared">

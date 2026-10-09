@@ -1,0 +1,872 @@
+[
+  {
+    "@timestamp": "2026-10-06T07:49:28.028112923Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "grpc client call method=polaris.inventory.v1.InventoryService/ReserveStock status=OK durationMs=189 requestId=be3bd8dd-17",
+    "traceId": "ebf38d3ef21d44c716e5ab4f8dddd7fb",
+    "spanId": "5dded8c4254df51b"
+  },
+  {
+    "@timestamp": "2026-10-06T07:49:28.609126007Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "Outbox event published eventId=0e242371-a664-426b-9539-509a1014cd7d eventType=OrderCreated attempts=1",
+    "traceId": "ebf38d3ef21d44c716e5ab4f8dddd7fb",
+    "spanId": "e73f8c76aff9e082"
+  },
+  {
+    "@timestamp": "2026-10-06T07:52:29.461241590Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "grpc client call method=polaris.inventory.v1.InventoryService/ReserveStock status=UNAVAILABLE durationMs=40 requestId=f2cf0556-49",
+    "traceId": "b92a459192c74bf5094367d16bc9e182",
+    "spanId": "8d65c91331ab6586"
+  },
+  {
+    "@timestamp": "2026-10-06T07:49:28.010137590Z",
+    "service": {
+      "name": "inventory-service",
+      "node": {}
+    },
+    "message": "grpc server call method=polaris.inventory.v1.InventoryService/ReserveStock status=OK durationMs=142 requestId=be3bd8dd-17",
+    "traceId": "ebf38d3ef21d44c716e5ab4f8dddd7fb",
+    "spanId": "5f78f99f36aa8380"
+  },
+  {
+    "@timestamp": "2026-10-06T07:49:28.065317631Z",
+    "service": {
+      "name": "inventory-service",
+      "node": {}
+    },
+    "message": "Outbox event published eventId=44b8f441-9f0c-4567-9979-b3c172636913 eventType=InventoryAdjusted attempts=1",
+    "traceId": "ebf38d3ef21d44c716e5ab4f8dddd7fb",
+    "spanId": "521b8a8f85119ad1"
+  },
+  {
+    "@timestamp": "2026-10-06T07:49:28.618352465Z",
+    "service": {
+      "name": "inventory-service",
+      "node": {}
+    },
+    "message": "Observed order event orderId=8e8c166d-87f2-3223-86f7-b5e8883c7886 status=CONFIRMED itemCount=1",
+    "traceId": "ebf38d3ef21d44c716e5ab4f8dddd7fb",
+    "spanId": "b05613000f9b0571"
+  },
+  {
+    "@timestamp": "2026-10-06T07:54:01.272470716Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "grpc client call method=polaris.inventory.v1.InventoryService/ReserveStock status=UNAVAILABLE durationMs=695 requestId=none",
+    "traceId": "b92a459192c74bf5094367d16bc9e182",
+    "spanId": "d9231a290bde6c4e"
+  },
+  {
+    "@timestamp": "2026-10-06T07:54:31.525927966Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "grpc client call method=polaris.inventory.v1.InventoryService/ReserveStock status=UNAVAILABLE durationMs=18 requestId=none",
+    "traceId": "b92a459192c74bf5094367d16bc9e182",
+    "spanId": "daa8e10b7cc6a657"
+  },
+  {
+    "@timestamp": "2026-10-06T07:55:01.728065675Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "grpc client call method=polaris.inventory.v1.InventoryService/ReserveStock status=UNAVAILABLE durationMs=10 requestId=none",
+    "traceId": "b92a459192c74bf5094367d16bc9e182",
+    "spanId": "253d94fe9e1eba65"
+  },
+  {
+    "@timestamp": "2026-10-06T07:55:31.857937092Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "grpc client call method=polaris.inventory.v1.InventoryService/ReserveStock status=UNAVAILABLE durationMs=15 requestId=none",
+    "traceId": "b92a459192c74bf5094367d16bc9e182",
+    "spanId": "7b18fb8ba704d1ea"
+  },
+  {
+    "@timestamp": "2026-10-06T07:56:02.003347133Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "grpc client call method=polaris.inventory.v1.InventoryService/ReserveStock status=UNAVAILABLE durationMs=7 requestId=none",
+    "traceId": "b92a459192c74bf5094367d16bc9e182",
+    "spanId": "72cde3108727fa29"
+  },
+  {
+    "@timestamp": "2026-10-06T07:56:32.171377383Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "grpc client call method=polaris.inventory.v1.InventoryService/ReserveStock status=UNAVAILABLE durationMs=7 requestId=none",
+    "traceId": "b92a459192c74bf5094367d16bc9e182",
+    "spanId": "a2cc0e3402f5d9f4"
+  },
+  {
+    "@timestamp": "2026-10-06T07:57:02.269243633Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "grpc client call method=polaris.inventory.v1.InventoryService/ReserveStock status=UNAVAILABLE durationMs=7 requestId=none",
+    "traceId": "b92a459192c74bf5094367d16bc9e182",
+    "spanId": "a394e9411e095774"
+  },
+  {
+    "@timestamp": "2026-10-06T07:57:32.385362508Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "grpc client call method=polaris.inventory.v1.InventoryService/ReserveStock status=UNAVAILABLE durationMs=12 requestId=none",
+    "traceId": "b92a459192c74bf5094367d16bc9e182",
+    "spanId": "30d1c965ebfdf253"
+  },
+  {
+    "@timestamp": "2026-10-06T07:58:02.473521717Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "grpc client call method=polaris.inventory.v1.InventoryService/ReserveStock status=UNAVAILABLE durationMs=6 requestId=none",
+    "traceId": "b92a459192c74bf5094367d16bc9e182",
+    "spanId": "6303c9c7ffe3c659"
+  },
+  {
+    "@timestamp": "2026-10-06T07:58:32.689462967Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "grpc client call method=polaris.inventory.v1.InventoryService/ReserveStock status=UNAVAILABLE durationMs=8 requestId=none",
+    "traceId": "b92a459192c74bf5094367d16bc9e182",
+    "spanId": "3b45b941687dc3ee"
+  },
+  {
+    "@timestamp": "2026-10-06T07:59:02.799986384Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "grpc client call method=polaris.inventory.v1.InventoryService/ReserveStock status=UNAVAILABLE durationMs=13 requestId=none",
+    "traceId": "b92a459192c74bf5094367d16bc9e182",
+    "spanId": "718bbbe3114c3bc6"
+  },
+  {
+    "@timestamp": "2026-10-06T07:59:33.058507550Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "grpc client call method=polaris.inventory.v1.InventoryService/ReserveStock status=UNAVAILABLE durationMs=19 requestId=none",
+    "traceId": "b92a459192c74bf5094367d16bc9e182",
+    "spanId": "3941acda3c0227d0"
+  },
+  {
+    "@timestamp": "2026-10-06T08:00:03.189928051Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "grpc client call method=polaris.inventory.v1.InventoryService/ReserveStock status=UNAVAILABLE durationMs=14 requestId=none",
+    "traceId": "b92a459192c74bf5094367d16bc9e182",
+    "spanId": "6b602442468572a4"
+  },
+  {
+    "@timestamp": "2026-10-06T08:00:33.339709801Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "grpc client call method=polaris.inventory.v1.InventoryService/ReserveStock status=UNAVAILABLE durationMs=20 requestId=none",
+    "traceId": "b92a459192c74bf5094367d16bc9e182",
+    "spanId": "52205b052d865da9"
+  },
+  {
+    "@timestamp": "2026-10-06T08:01:58.818608507Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "grpc client call method=polaris.inventory.v1.InventoryService/ReserveStock status=DEADLINE_EXCEEDED durationMs=2089 requestId=none",
+    "traceId": "b92a459192c74bf5094367d16bc9e182",
+    "spanId": "0094d1d0bd39b062"
+  },
+  {
+    "@timestamp": "2026-10-06T08:02:30.525806091Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "grpc client call method=polaris.inventory.v1.InventoryService/ReserveStock status=OK durationMs=1162 requestId=none",
+    "traceId": "b92a459192c74bf5094367d16bc9e182",
+    "spanId": "31f58a5ed849a66b"
+  },
+  {
+    "@timestamp": "2026-10-06T08:02:31.831140883Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "initializing Kafka metrics collector",
+    "traceId": "b92a459192c74bf5094367d16bc9e182",
+    "spanId": "79ee443d1c18cead"
+  },
+  {
+    "@timestamp": "2026-10-06T08:02:31.882600842Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "[Producer clientId=order-service-producer-1] Instantiated an idempotent producer.",
+    "traceId": "b92a459192c74bf5094367d16bc9e182",
+    "spanId": "79ee443d1c18cead"
+  },
+  {
+    "@timestamp": "2026-10-06T08:02:31.950524967Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "Kafka version: 3.9.2",
+    "traceId": "b92a459192c74bf5094367d16bc9e182",
+    "spanId": "79ee443d1c18cead"
+  },
+  {
+    "@timestamp": "2026-10-06T08:02:31.951346967Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "Kafka commitId: 5e9866f43ab8e7e4",
+    "traceId": "b92a459192c74bf5094367d16bc9e182",
+    "spanId": "79ee443d1c18cead"
+  },
+  {
+    "@timestamp": "2026-10-06T08:02:31.951453342Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "Kafka startTimeMs: 1791273751950",
+    "traceId": "b92a459192c74bf5094367d16bc9e182",
+    "spanId": "79ee443d1c18cead"
+  },
+  {
+    "@timestamp": "2026-10-06T08:02:32.127488175Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "Outbox event published eventId=cbbfb6b3-7307-4574-b6dd-78b8ec283736 eventType=OrderCreated attempts=1",
+    "traceId": "b92a459192c74bf5094367d16bc9e182",
+    "spanId": "00d2ecd8d58d00a0"
+  },
+  {
+    "@timestamp": "2026-10-06T08:02:48.256304085Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "grpc client call method=polaris.inventory.v1.InventoryService/ReserveStock status=OK durationMs=81 requestId=c16bf93a-152",
+    "traceId": "da594ed76e8a430c10071828a10aa869",
+    "spanId": "63ca615d0eb76950"
+  },
+  {
+    "@timestamp": "2026-10-06T08:02:58.360899548Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "Outbox publication failed eventId=67f59a19-739f-4bf0-b943-a60cb0838e81 eventType=OrderCreated attempts=1 status=RETRY nextAttemptAt=2026-10-06T08:02:49.335943252Z",
+    "traceId": "da594ed76e8a430c10071828a10aa869",
+    "spanId": "b9548d468d43bda1"
+  },
+  {
+    "@timestamp": "2026-10-06T08:03:08.934354887Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "Outbox publication failed eventId=67f59a19-739f-4bf0-b943-a60cb0838e81 eventType=OrderCreated attempts=2 status=RETRY nextAttemptAt=2026-10-06T08:03:00.896622173Z",
+    "traceId": "da594ed76e8a430c10071828a10aa869",
+    "spanId": "e7f435dec1d9097c"
+  },
+  {
+    "@timestamp": "2026-10-06T08:03:48.663433169Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "initializing Kafka metrics collector",
+    "traceId": "da594ed76e8a430c10071828a10aa869",
+    "spanId": "a72810a271183375"
+  },
+  {
+    "@timestamp": "2026-10-06T08:03:48.754861210Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "[Producer clientId=order-service-producer-1] Instantiated an idempotent producer.",
+    "traceId": "da594ed76e8a430c10071828a10aa869",
+    "spanId": "a72810a271183375"
+  },
+  {
+    "@timestamp": "2026-10-06T08:03:48.929240585Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "Kafka version: 3.9.2",
+    "traceId": "da594ed76e8a430c10071828a10aa869",
+    "spanId": "a72810a271183375"
+  },
+  {
+    "@timestamp": "2026-10-06T08:03:48.930324002Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "Kafka commitId: 5e9866f43ab8e7e4",
+    "traceId": "da594ed76e8a430c10071828a10aa869",
+    "spanId": "a72810a271183375"
+  },
+  {
+    "@timestamp": "2026-10-06T08:03:48.931097460Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "Kafka startTimeMs: 1791273828928",
+    "traceId": "da594ed76e8a430c10071828a10aa869",
+    "spanId": "a72810a271183375"
+  },
+  {
+    "@timestamp": "2026-10-06T08:03:49.153789377Z",
+    "service": {
+      "name": "order-service",
+      "node": {}
+    },
+    "message": "Outbox event published eventId=67f59a19-739f-4bf0-b943-a60cb0838e81 eventType=OrderCreated attempts=3",
+    "traceId": "da594ed76e8a430c10071828a10aa869",
+    "spanId": "99978e3b2e4c1dc5"
+  },
+  {
+    "@timestamp": "2026-10-06T07:49:28.171401798Z",
+    "service": {
+      "name": "notification-service",
+      "node": {}
+    },
+    "message": "inventory adjustment notification processed orderId=8e8c166d-87f2-3223-86f7-b5e8883c7886 itemCount=1",
+    "traceId": "ebf38d3ef21d44c716e5ab4f8dddd7fb",
+    "spanId": "c0cf5db2c3f90f47"
+  },
+  {
+    "@timestamp": "2026-10-06T07:49:28.632928298Z",
+    "service": {
+      "name": "notification-service",
+      "node": {}
+    },
+    "message": "simulated confirmation notification orderId=8e8c166d-87f2-3223-86f7-b5e8883c7886 customerId=11111111-1111-4111-8111-111111111111 status=CONFIRMED itemCount=1",
+    "traceId": "ebf38d3ef21d44c716e5ab4f8dddd7fb",
+    "spanId": "82873a9874ff36a6"
+  },
+  {
+    "@timestamp": "2026-10-06T08:02:30.338367216Z",
+    "service": {
+      "name": "inventory-service",
+      "node": {}
+    },
+    "message": "grpc server call method=polaris.inventory.v1.InventoryService/ReserveStock status=OK durationMs=944 requestId=2bfc098a-391f-49e5-86d2-cdc0f384d531",
+    "traceId": "b92a459192c74bf5094367d16bc9e182",
+    "spanId": "43c05f5924cba40d"
+  },
+  {
+    "@timestamp": "2026-10-06T08:02:30.850301799Z",
+    "service": {
+      "name": "inventory-service",
+      "node": {}
+    },
+    "message": "initializing Kafka metrics collector",
+    "traceId": "b92a459192c74bf5094367d16bc9e182",
+    "spanId": "d01f24b5724302de"
+  },
+  {
+    "@timestamp": "2026-10-06T08:02:30.954952549Z",
+    "service": {
+      "name": "inventory-service",
+      "node": {}
+    },
+    "message": "[Producer clientId=inventory-service-producer-1] Instantiated an idempotent producer.",
+    "traceId": "b92a459192c74bf5094367d16bc9e182",
+    "spanId": "d01f24b5724302de"
+  },
+  {
+    "@timestamp": "2026-10-06T08:02:31.021564466Z",
+    "service": {
+      "name": "inventory-service",
+      "node": {}
+    },
+    "message": "Kafka version: 3.9.2",
+    "traceId": "b92a459192c74bf5094367d16bc9e182",
+    "spanId": "d01f24b5724302de"
+  },
+  {
+    "@timestamp": "2026-10-06T08:02:31.022215841Z",
+    "service": {
+      "name": "inventory-service",
+      "node": {}
+    },
+    "message": "Kafka commitId: 5e9866f43ab8e7e4",
+    "traceId": "b92a459192c74bf5094367d16bc9e182",
+    "spanId": "d01f24b5724302de"
+  },
+  {
+    "@timestamp": "2026-10-06T08:02:31.022363174Z",
+    "service": {
+      "name": "inventory-service",
+      "node": {}
+    },
+    "message": "Kafka startTimeMs: 1791273751021",
+    "traceId": "b92a459192c74bf5094367d16bc9e182",
+    "spanId": "d01f24b5724302de"
+  },
+  {
+    "@timestamp": "2026-10-06T08:02:31.332036925Z",
+    "service": {
+      "name": "inventory-service",
+      "node": {}
+    },
+    "message": "Outbox event published eventId=7108e9b2-10f1-4a99-8f19-8a510ede845d eventType=InventoryAdjusted attempts=1",
+    "traceId": "b92a459192c74bf5094367d16bc9e182",
+    "spanId": "5e7e06b9c473fbf0"
+  },
+  {
+    "@timestamp": "2026-10-06T08:02:32.266320008Z",
+    "service": {
+      "name": "inventory-service",
+      "node": {}
+    },
+    "message": "Observed order event orderId=81bbb12d-bb3f-3387-9cf9-2682110ba20e status=CONFIRMED itemCount=1",
+    "traceId": "b92a459192c74bf5094367d16bc9e182",
+    "spanId": "9eceecb615f384fa"
+  },
+  {
+    "@timestamp": "2026-10-06T08:02:48.251080252Z",
+    "service": {
+      "name": "inventory-service",
+      "node": {}
+    },
+    "message": "grpc server call method=polaris.inventory.v1.InventoryService/ReserveStock status=OK durationMs=55 requestId=c16bf93a-152",
+    "traceId": "da594ed76e8a430c10071828a10aa869",
+    "spanId": "f966959e259add6e"
+  },
+  {
+    "@timestamp": "2026-10-06T08:02:58.850372923Z",
+    "service": {
+      "name": "inventory-service",
+      "node": {}
+    },
+    "message": "Outbox publication failed eventId=54489fef-0452-4aea-b1e8-4e4112ad94ed eventType=InventoryAdjusted attempts=1 status=RETRY nextAttemptAt=2026-10-06T08:02:49.746251460Z",
+    "traceId": "da594ed76e8a430c10071828a10aa869",
+    "spanId": "36b962fe10f64e02"
+  },
+  {
+    "@timestamp": "2026-10-06T08:03:46.183698001Z",
+    "service": {
+      "name": "inventory-service",
+      "node": {}
+    },
+    "message": "initializing Kafka metrics collector",
+    "traceId": "da594ed76e8a430c10071828a10aa869",
+    "spanId": "6a5eaca6f6e17d91"
+  },
+  {
+    "@timestamp": "2026-10-06T08:03:46.315380834Z",
+    "service": {
+      "name": "inventory-service",
+      "node": {}
+    },
+    "message": "[Producer clientId=inventory-service-producer-1] Instantiated an idempotent producer.",
+    "traceId": "da594ed76e8a430c10071828a10aa869",
+    "spanId": "6a5eaca6f6e17d91"
+  },
+  {
+    "@timestamp": "2026-10-06T08:03:46.542456334Z",
+    "service": {
+      "name": "inventory-service",
+      "node": {}
+    },
+    "message": "Kafka version: 3.9.2",
+    "traceId": "da594ed76e8a430c10071828a10aa869",
+    "spanId": "6a5eaca6f6e17d91"
+  },
+  {
+    "@timestamp": "2026-10-06T08:03:46.545697126Z",
+    "service": {
+      "name": "inventory-service",
+      "node": {}
+    },
+    "message": "Kafka commitId: 5e9866f43ab8e7e4",
+    "traceId": "da594ed76e8a430c10071828a10aa869",
+    "spanId": "6a5eaca6f6e17d91"
+  },
+  {
+    "@timestamp": "2026-10-06T08:03:46.551349251Z",
+    "service": {
+      "name": "inventory-service",
+      "node": {}
+    },
+    "message": "Kafka startTimeMs: 1791273826541",
+    "traceId": "da594ed76e8a430c10071828a10aa869",
+    "spanId": "6a5eaca6f6e17d91"
+  },
+  {
+    "@timestamp": "2026-10-06T08:03:46.758706751Z",
+    "service": {
+      "name": "inventory-service",
+      "node": {}
+    },
+    "message": "Outbox event published eventId=54489fef-0452-4aea-b1e8-4e4112ad94ed eventType=InventoryAdjusted attempts=2",
+    "traceId": "da594ed76e8a430c10071828a10aa869",
+    "spanId": "15a45d733e9f5ee5"
+  },
+  {
+    "@timestamp": "2026-10-06T08:04:11.365316429Z",
+    "service": {
+      "name": "inventory-service",
+      "node": {}
+    },
+    "message": "Observed order event orderId=8e8c166d-87f2-3223-86f7-b5e8883c7886 status=CONFIRMED itemCount=1",
+    "traceId": "ebf38d3ef21d44c716e5ab4f8dddd7fb",
+    "spanId": "0ee7a0e8807c7310"
+  },
+  {
+    "@timestamp": "2026-10-06T08:04:11.373501179Z",
+    "service": {
+      "name": "inventory-service",
+      "node": {}
+    },
+    "message": "Observed order event orderId=91a916d1-8bd7-308c-9810-f0df9a3e9871 status=CONFIRMED itemCount=1",
+    "traceId": "da594ed76e8a430c10071828a10aa869",
+    "spanId": "800fdb79b5ce5453"
+  },
+  {
+    "@timestamp": "2026-10-06T08:04:11.420702638Z",
+    "service": {
+      "name": "inventory-service",
+      "node": {}
+    },
+    "message": "[Consumer clientId=consumer-inventory-service-1, groupId=inventory-service] Seeking to offset 7 for partition polaris.orders.created-0",
+    "traceId": "ebf38d3ef21d44c716e5ab4f8dddd7fb",
+    "spanId": "b4736c9ad1437906"
+  },
+  {
+    "@timestamp": "2026-10-06T08:04:11.421282929Z",
+    "service": {
+      "name": "inventory-service",
+      "node": {}
+    },
+    "message": "Record in retry and not yet recovered",
+    "traceId": "ebf38d3ef21d44c716e5ab4f8dddd7fb",
+    "spanId": "b4736c9ad1437906"
+  },
+  {
+    "@timestamp": "2026-10-06T08:04:11.732055971Z",
+    "service": {
+      "name": "inventory-service",
+      "node": {}
+    },
+    "message": "[Consumer clientId=consumer-inventory-service-1, groupId=inventory-service] Seeking to offset 7 for partition polaris.orders.created-0",
+    "traceId": "ebf38d3ef21d44c716e5ab4f8dddd7fb",
+    "spanId": "7a448bd3dc969aaf"
+  },
+  {
+    "@timestamp": "2026-10-06T08:04:11.732694888Z",
+    "service": {
+      "name": "inventory-service",
+      "node": {}
+    },
+    "message": "Record in retry and not yet recovered",
+    "traceId": "ebf38d3ef21d44c716e5ab4f8dddd7fb",
+    "spanId": "7a448bd3dc969aaf"
+  },
+  {
+    "@timestamp": "2026-10-06T08:04:12.231982763Z",
+    "service": {
+      "name": "inventory-service",
+      "node": {}
+    },
+    "message": "[Consumer clientId=consumer-inventory-service-1, groupId=inventory-service] Seeking to offset 7 for partition polaris.orders.created-0",
+    "traceId": "ebf38d3ef21d44c716e5ab4f8dddd7fb",
+    "spanId": "d4780600f5e700da"
+  },
+  {
+    "@timestamp": "2026-10-06T08:04:12.232581596Z",
+    "service": {
+      "name": "inventory-service",
+      "node": {}
+    },
+    "message": "Record in retry and not yet recovered",
+    "traceId": "ebf38d3ef21d44c716e5ab4f8dddd7fb",
+    "spanId": "d4780600f5e700da"
+  },
+  {
+    "@timestamp": "2026-10-06T08:04:12.741264513Z",
+    "service": {
+      "name": "inventory-service",
+      "node": {}
+    },
+    "message": "[Consumer clientId=consumer-inventory-service-1, groupId=inventory-service] Seeking to offset 7 for partition polaris.orders.created-0",
+    "traceId": "ebf38d3ef21d44c716e5ab4f8dddd7fb",
+    "spanId": "980ae3fadb848c0e"
+  },
+  {
+    "@timestamp": "2026-10-06T08:04:12.741792680Z",
+    "service": {
+      "name": "inventory-service",
+      "node": {}
+    },
+    "message": "Record in retry and not yet recovered",
+    "traceId": "ebf38d3ef21d44c716e5ab4f8dddd7fb",
+    "spanId": "980ae3fadb848c0e"
+  },
+  {
+    "@timestamp": "2026-10-06T08:04:13.258971430Z",
+    "service": {
+      "name": "inventory-service",
+      "node": {}
+    },
+    "message": "[Consumer clientId=consumer-inventory-service-1, groupId=inventory-service] Seeking to offset 7 for partition polaris.orders.created-0",
+    "traceId": "ebf38d3ef21d44c716e5ab4f8dddd7fb",
+    "spanId": "787503356c23682b"
+  },
+  {
+    "@timestamp": "2026-10-06T08:04:13.259950139Z",
+    "service": {
+      "name": "inventory-service",
+      "node": {}
+    },
+    "message": "Record in retry and not yet recovered",
+    "traceId": "ebf38d3ef21d44c716e5ab4f8dddd7fb",
+    "spanId": "787503356c23682b"
+  },
+  {
+    "@timestamp": "2026-10-06T08:04:13.768893708Z",
+    "service": {
+      "name": "inventory-service",
+      "node": {}
+    },
+    "message": "[Consumer clientId=consumer-inventory-service-1, groupId=inventory-service] Seeking to offset 7 for partition polaris.orders.created-0",
+    "traceId": "ebf38d3ef21d44c716e5ab4f8dddd7fb",
+    "spanId": "bf3c9d0731c2670d"
+  },
+  {
+    "@timestamp": "2026-10-06T08:04:13.769877041Z",
+    "service": {
+      "name": "inventory-service",
+      "node": {}
+    },
+    "message": "Record in retry and not yet recovered",
+    "traceId": "ebf38d3ef21d44c716e5ab4f8dddd7fb",
+    "spanId": "bf3c9d0731c2670d"
+  },
+  {
+    "@timestamp": "2026-10-06T08:04:14.279070708Z",
+    "service": {
+      "name": "inventory-service",
+      "node": {}
+    },
+    "message": "[Consumer clientId=consumer-inventory-service-1, groupId=inventory-service] Seeking to offset 7 for partition polaris.orders.created-0",
+    "traceId": "ebf38d3ef21d44c716e5ab4f8dddd7fb",
+    "spanId": "ec17abda2fd80909"
+  },
+  {
+    "@timestamp": "2026-10-06T08:04:14.280016625Z",
+    "service": {
+      "name": "inventory-service",
+      "node": {}
+    },
+    "message": "Record in retry and not yet recovered",
+    "traceId": "ebf38d3ef21d44c716e5ab4f8dddd7fb",
+    "spanId": "ec17abda2fd80909"
+  },
+  {
+    "@timestamp": "2026-10-06T08:04:14.802596125Z",
+    "service": {
+      "name": "inventory-service",
+      "node": {}
+    },
+    "message": "[Consumer clientId=consumer-inventory-service-1, groupId=inventory-service] Seeking to offset 7 for partition polaris.orders.created-0",
+    "traceId": "ebf38d3ef21d44c716e5ab4f8dddd7fb",
+    "spanId": "b701221add94d0aa"
+  },
+  {
+    "@timestamp": "2026-10-06T08:04:14.803959875Z",
+    "service": {
+      "name": "inventory-service",
+      "node": {}
+    },
+    "message": "Record in retry and not yet recovered",
+    "traceId": "ebf38d3ef21d44c716e5ab4f8dddd7fb",
+    "spanId": "b701221add94d0aa"
+  },
+  {
+    "@timestamp": "2026-10-06T08:04:15.310200542Z",
+    "service": {
+      "name": "inventory-service",
+      "node": {}
+    },
+    "message": "[Consumer clientId=consumer-inventory-service-1, groupId=inventory-service] Seeking to offset 7 for partition polaris.orders.created-0",
+    "traceId": "ebf38d3ef21d44c716e5ab4f8dddd7fb",
+    "spanId": "8882e717a0fbace9"
+  },
+  {
+    "@timestamp": "2026-10-06T08:04:15.311876792Z",
+    "service": {
+      "name": "inventory-service",
+      "node": {}
+    },
+    "message": "Record in retry and not yet recovered",
+    "traceId": "ebf38d3ef21d44c716e5ab4f8dddd7fb",
+    "spanId": "8882e717a0fbace9"
+  },
+  {
+    "@timestamp": "2026-10-06T08:04:15.836314001Z",
+    "service": {
+      "name": "inventory-service",
+      "node": {}
+    },
+    "message": "Backoff FixedBackOff{interval=0, currentAttempts=10, maxAttempts=9} exhausted for polaris.orders.created-0@7",
+    "traceId": "ebf38d3ef21d44c716e5ab4f8dddd7fb",
+    "spanId": "e1051a1fa0694975"
+  },
+  {
+    "@timestamp": "2026-10-06T08:02:31.683524258Z",
+    "service": {
+      "name": "notification-service",
+      "node": {}
+    },
+    "message": "inventory adjustment notification processed orderId=81bbb12d-bb3f-3387-9cf9-2682110ba20e itemCount=1",
+    "traceId": "b92a459192c74bf5094367d16bc9e182",
+    "spanId": "c6c435fe515cfb1b"
+  },
+  {
+    "@timestamp": "2026-10-06T08:02:32.142940425Z",
+    "service": {
+      "name": "notification-service",
+      "node": {}
+    },
+    "message": "simulated confirmation notification orderId=81bbb12d-bb3f-3387-9cf9-2682110ba20e customerId=11111111-1111-4111-8111-111111111111 status=CONFIRMED itemCount=1",
+    "traceId": "b92a459192c74bf5094367d16bc9e182",
+    "spanId": "ac232c02af60e2f3"
+  },
+  {
+    "@timestamp": "2026-10-06T08:03:38.579595720Z",
+    "service": {
+      "name": "notification-service",
+      "node": {}
+    },
+    "message": "Duplicate notification event skipped eventId=0e242371-a664-426b-9539-509a1014cd7d eventType=OrderCreated",
+    "traceId": "ebf38d3ef21d44c716e5ab4f8dddd7fb",
+    "spanId": "170c3b0e1161dd64"
+  },
+  {
+    "@timestamp": "2026-10-06T08:03:46.797184834Z",
+    "service": {
+      "name": "notification-service",
+      "node": {}
+    },
+    "message": "inventory adjustment notification processed orderId=91a916d1-8bd7-308c-9810-f0df9a3e9871 itemCount=1",
+    "traceId": "da594ed76e8a430c10071828a10aa869",
+    "spanId": "952801b974e2f933"
+  },
+  {
+    "@timestamp": "2026-10-06T08:03:49.159947460Z",
+    "service": {
+      "name": "notification-service",
+      "node": {}
+    },
+    "message": "simulated confirmation notification orderId=91a916d1-8bd7-308c-9810-f0df9a3e9871 customerId=11111111-1111-4111-8111-111111111111 status=CONFIRMED itemCount=1",
+    "traceId": "da594ed76e8a430c10071828a10aa869",
+    "spanId": "e276bff690b91b15"
+  },
+  {
+    "@timestamp": "2026-10-06T08:03:50.785049378Z",
+    "service": {
+      "name": "notification-service",
+      "node": {}
+    },
+    "message": "initializing Kafka metrics collector",
+    "traceId": "ebf38d3ef21d44c716e5ab4f8dddd7fb",
+    "spanId": "6b21803d010334ca"
+  },
+  {
+    "@timestamp": "2026-10-06T08:03:51.035387086Z",
+    "service": {
+      "name": "notification-service",
+      "node": {}
+    },
+    "message": "[Producer clientId=notification-service-producer-1] Instantiated an idempotent producer.",
+    "traceId": "ebf38d3ef21d44c716e5ab4f8dddd7fb",
+    "spanId": "6b21803d010334ca"
+  },
+  {
+    "@timestamp": "2026-10-06T08:03:51.200441795Z",
+    "service": {
+      "name": "notification-service",
+      "node": {}
+    },
+    "message": "Kafka version: 3.9.2",
+    "traceId": "ebf38d3ef21d44c716e5ab4f8dddd7fb",
+    "spanId": "6b21803d010334ca"
+  },
+  {
+    "@timestamp": "2026-10-06T08:03:51.205782545Z",
+    "service": {
+      "name": "notification-service",
+      "node": {}
+    },
+    "message": "Kafka commitId: 5e9866f43ab8e7e4",
+    "traceId": "ebf38d3ef21d44c716e5ab4f8dddd7fb",
+    "spanId": "6b21803d010334ca"
+  },
+  {
+    "@timestamp": "2026-10-06T08:03:51.209848086Z",
+    "service": {
+      "name": "notification-service",
+      "node": {}
+    },
+    "message": "Kafka startTimeMs: 1791273831193",
+    "traceId": "ebf38d3ef21d44c716e5ab4f8dddd7fb",
+    "spanId": "6b21803d010334ca"
+  },
+  {
+    "@timestamp": "2026-10-06T08:03:52.156995879Z",
+    "service": {
+      "name": "notification-service",
+      "node": {}
+    },
+    "message": "Notification event dead-lettered eventId=a5d62848-f88e-422b-a7c9-26f6d369a15b eventType=OrderCreated sourceTopic=polaris.orders.created sourceOffset=7 dlqTopic=polaris.notifications.dlq",
+    "traceId": "ebf38d3ef21d44c716e5ab4f8dddd7fb",
+    "spanId": "e584cbf653e329b3"
+  }
+]

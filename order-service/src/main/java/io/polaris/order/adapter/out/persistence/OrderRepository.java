@@ -16,6 +16,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface OrderRepository extends JpaRepository<OrderJpaEntity, UUID> {
+    @Query("select o.recoveryTraceContext from Order o where o.id = :id")
+    Optional<String> findRecoveryTraceContext(@Param("id") UUID id);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select o from Order o where o.id = :id")
     Optional<OrderJpaEntity> findForUpdate(@Param("id") UUID id);

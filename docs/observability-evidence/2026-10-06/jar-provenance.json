@@ -1,0 +1,21 @@
+{
+  "app_source_sha": "fcd4a8efe48f797091297dba531d0958400e48eb",
+  "jars": {
+    "gateway": {
+      "sha256": "daf54b67499240d409620ecc7ca3dc88e0e446f051e531498eb176820d43180a",
+      "size_bytes": 59494750
+    },
+    "order-service": {
+      "sha256": "b692628b74243ac073213d82a960b15014fa4bc8ee18b985bde563b24a72552f",
+      "size_bytes": 115561257
+    },
+    "inventory-service": {
+      "sha256": "276e3429b9ae22af626d49e5186ce961b7b620b08faa674f798c2748c603bd9a",
+      "size_bytes": 110199104
+    },
+    "notification-service": {
+      "sha256": "f535b445a2567d1ade9664523143cbc0ac7f85349bc06d3f89da9b76e1ee9e98",
+      "size_bytes": 88840524
+    }
+  }
+}

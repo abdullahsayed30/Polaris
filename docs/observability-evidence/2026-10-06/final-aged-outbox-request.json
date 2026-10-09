@@ -1,0 +1,22 @@
+{
+  "scenario": "final-aged-outbox",
+  "status": 201,
+  "idempotency_key": "observability-final-aged-outbox-1409bbcb-8872-47f6-ad88-3d6fc33dd3b7",
+  "request_id": "4178fe0e-8",
+  "body": {
+    "id": "e644e780-f3fd-3ab8-8f92-7d879ec3770a",
+    "customerId": "11111111-1111-4111-8111-111111111111",
+    "status": "CONFIRMED",
+    "items": [
+      {
+        "id": "a2500544-22ed-46dd-af4a-7743af77f99c",
+        "sku": "SKU-COFFEE-001",
+        "quantity": 1,
+        "unitPrice": 19.99
+      }
+    ],
+    "createdAt": "2026-10-06T08:15:30.429122Z",
+    "updatedAt": "2026-10-06T08:15:30.694160258Z"
+  },
+  "client_traceparent_supplied": false
+}

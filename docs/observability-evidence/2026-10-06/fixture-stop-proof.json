@@ -1,0 +1,84 @@
+{
+  "project": "polaris-observability",
+  "volumes_preserved": true,
+  "containers": [
+    {
+      "name": "polaris-observability-gateway-1",
+      "status": "exited",
+      "started_at": "2026-10-06T08:14:38.590400011Z",
+      "finished_at": "2026-10-06T08:19:30.286339174Z"
+    },
+    {
+      "name": "polaris-observability-grafana-1",
+      "status": "exited",
+      "started_at": "2026-10-06T08:15:05.392087301Z",
+      "finished_at": "2026-10-06T08:19:26.443436964Z"
+    },
+    {
+      "name": "polaris-observability-inventory-postgres-1",
+      "status": "exited",
+      "started_at": "2026-10-06T08:12:54.235893921Z",
+      "finished_at": "2026-10-06T08:19:35.48611101Z"
+    },
+    {
+      "name": "polaris-observability-inventory-service-1",
+      "status": "exited",
+      "started_at": "2026-10-06T08:13:15.218226959Z",
+      "finished_at": "2026-10-06T08:19:34.559710509Z"
+    },
+    {
+      "name": "polaris-observability-kafka-1",
+      "status": "exited",
+      "started_at": "2026-10-06T08:16:12.899823513Z",
+      "finished_at": "2026-10-06T08:19:36.307831385Z"
+    },
+    {
+      "name": "polaris-observability-keycloak-1",
+      "status": "exited",
+      "started_at": "2026-10-06T08:12:54.220318504Z",
+      "finished_at": "2026-10-06T08:19:32.920236133Z"
+    },
+    {
+      "name": "polaris-observability-notification-postgres-1",
+      "status": "exited",
+      "started_at": "2026-10-06T08:12:54.239625879Z",
+      "finished_at": "2026-10-06T08:19:28.716608881Z"
+    },
+    {
+      "name": "polaris-observability-notification-service-1",
+      "status": "exited",
+      "started_at": "2026-10-06T08:13:15.264795625Z",
+      "finished_at": "2026-10-06T08:19:28.329368923Z"
+    },
+    {
+      "name": "polaris-observability-order-postgres-1",
+      "status": "exited",
+      "started_at": "2026-10-06T08:12:54.237846546Z",
+      "finished_at": "2026-10-06T08:19:32.652080633Z"
+    },
+    {
+      "name": "polaris-observability-order-service-1",
+      "status": "exited",
+      "started_at": "2026-10-06T08:13:56.902629964Z",
+      "finished_at": "2026-10-06T08:19:32.339618175Z"
+    },
+    {
+      "name": "polaris-observability-prometheus-1",
+      "status": "exited",
+      "started_at": "2026-10-06T08:14:59.744397882Z",
+      "finished_at": "2026-10-06T08:19:27.004079631Z"
+    },
+    {
+      "name": "polaris-observability-redis-1",
+      "status": "exited",
+      "started_at": "2026-10-06T08:12:54.235080213Z",
+      "finished_at": "2026-10-06T08:19:30.889778132Z"
+    },
+    {
+      "name": "polaris-observability-tempo-1",
+      "status": "exited",
+      "started_at": "2026-10-06T08:12:54.238600713Z",
+      "finished_at": "2026-10-06T08:19:36.577865885Z"
+    }
+  ]
+}

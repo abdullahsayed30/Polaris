@@ -40,6 +40,7 @@ flowchart LR
 - Application services may use Spring `@Service`/`@Component`, transaction annotations and SLF4J logging. These are deliberate BuckPal-style conveniences. They must not use Spring Data, JPA, transport types, concrete adapters, Micrometer, Resilience4j or bound configuration records.
 - Models depend on their own model types, JDK types and stable shared contracts only. Ports may also refer to other ports. Neither imports application services or infrastructure.
 - Root configuration translates Spring-bound properties into plain application policy where needed. Generated gRPC types stay at adapter/wiring boundaries; order's inventory port exposes its own plain decision enum.
+- Service-owned persistence, messaging and retry adapters may use `adapter.out.observability` to capture/restore durable context and instrument their execution. Direct OpenTelemetry imports are restricted to that observability package in the three business services; application services, models and ports remain tracing-framework independent.
 - Runtime services remain independent deployables and database owners. Generated `io.polaris.inventory.grpc` contracts are the only inventory namespace permitted in another service. `shared` stays framework-free contracts and small value types.
 
 ## Persistence and Transactions

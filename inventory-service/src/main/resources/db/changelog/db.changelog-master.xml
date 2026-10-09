@@ -8,4 +8,5 @@
     <include file="db/changelog/changes/0002-create-inventory-reservations.sql"/>
     <include file="db/changelog/changes/0003-seed-demo-inventory.sql"/>
     <include file="db/changelog/changes/0004-create-outbox-events.sql"/>
+    <include file="db/changelog/changes/0005-durable-outbox-trace-context.sql"/>
 </databaseChangeLog>

@@ -1,0 +1,909 @@
+[
+  {
+    "dashboard": "polaris-business-flow.json",
+    "panel": "Pending orders (committed snapshot)",
+    "expression": "max by(job) (polaris_pending_orders and on(job,instance) (polaris_observability_snapshot_success == 1) and on(job,instance) (time() - polaris_observability_snapshot_timestamp_seconds < 45))",
+    "response": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": [
+          {
+            "metric": {
+              "job": "order-service"
+            },
+            "value": [
+              1791273894.857,
+              "0"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "dashboard": "polaris-business-flow.json",
+    "panel": "Oldest pending order age",
+    "expression": "max by(job) (polaris_pending_order_oldest_age_seconds and on(job,instance) (polaris_observability_snapshot_success == 1) and on(job,instance) (time() - polaris_observability_snapshot_timestamp_seconds < 45))",
+    "response": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": [
+          {
+            "metric": {
+              "job": "order-service"
+            },
+            "value": [
+              1791273894.864,
+              "0"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "dashboard": "polaris-business-flow.json",
+    "panel": "Outbox retained rows by status",
+    "expression": "max by(job,status) (polaris_outbox_events and on(job,instance) (polaris_observability_snapshot_success == 1) and on(job,instance) (time() - polaris_observability_snapshot_timestamp_seconds < 45))",
+    "response": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": [
+          {
+            "metric": {
+              "job": "order-service",
+              "status": "FAILED"
+            },
+            "value": [
+              1791273894.867,
+              "0"
+            ]
+          },
+          {
+            "metric": {
+              "job": "order-service",
+              "status": "PENDING"
+            },
+            "value": [
+              1791273894.867,
+              "0"
+            ]
+          },
+          {
+            "metric": {
+              "job": "order-service",
+              "status": "PUBLISHED"
+            },
+            "value": [
+              1791273894.867,
+              "6"
+            ]
+          },
+          {
+            "metric": {
+              "job": "order-service",
+              "status": "RETRY"
+            },
+            "value": [
+              1791273894.867,
+              "0"
+            ]
+          },
+          {
+            "metric": {
+              "job": "inventory-service",
+              "status": "FAILED"
+            },
+            "value": [
+              1791273894.867,
+              "0"
+            ]
+          },
+          {
+            "metric": {
+              "job": "inventory-service",
+              "status": "PENDING"
+            },
+            "value": [
+              1791273894.867,
+              "0"
+            ]
+          },
+          {
+            "metric": {
+              "job": "inventory-service",
+              "status": "PUBLISHED"
+            },
+            "value": [
+              1791273894.867,
+              "6"
+            ]
+          },
+          {
+            "metric": {
+              "job": "inventory-service",
+              "status": "RETRY"
+            },
+            "value": [
+              1791273894.867,
+              "0"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "dashboard": "polaris-business-flow.json",
+    "panel": "Oldest undelivered outbox row age",
+    "expression": "max by(job) (polaris_outbox_oldest_age_seconds and on(job,instance) (polaris_observability_snapshot_success == 1) and on(job,instance) (time() - polaris_observability_snapshot_timestamp_seconds < 45))",
+    "response": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": [
+          {
+            "metric": {
+              "job": "order-service"
+            },
+            "value": [
+              1791273894.871,
+              "0"
+            ]
+          },
+          {
+            "metric": {
+              "job": "inventory-service"
+            },
+            "value": [
+              1791273894.871,
+              "0"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "dashboard": "polaris-business-flow.json",
+    "panel": "Outbox publication attempts",
+    "expression": "sum by(job,outcome) (rate(polaris_outbox_publications_total[5m]))",
+    "response": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": [
+          {
+            "metric": {
+              "job": "order-service",
+              "outcome": "failed"
+            },
+            "value": [
+              1791273894.878,
+              "0"
+            ]
+          },
+          {
+            "metric": {
+              "job": "order-service",
+              "outcome": "published"
+            },
+            "value": [
+              1791273894.878,
+              "0.0033923034728289407"
+            ]
+          },
+          {
+            "metric": {
+              "job": "order-service",
+              "outcome": "retry"
+            },
+            "value": [
+              1791273894.878,
+              "0.0033923034728289407"
+            ]
+          },
+          {
+            "metric": {
+              "job": "inventory-service",
+              "outcome": "failed"
+            },
+            "value": [
+              1791273894.878,
+              "0"
+            ]
+          },
+          {
+            "metric": {
+              "job": "inventory-service",
+              "outcome": "published"
+            },
+            "value": [
+              1791273894.878,
+              "0.0033742935474212143"
+            ]
+          },
+          {
+            "metric": {
+              "job": "inventory-service",
+              "outcome": "retry"
+            },
+            "value": [
+              1791273894.878,
+              "0.0033742935474212143"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "dashboard": "polaris-business-flow.json",
+    "panel": "Notification committed observations (simulated)",
+    "expression": "sum by(event_type,outcome) (increase(polaris_notification_completions_total[5m]))",
+    "response": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": [
+          {
+            "metric": {
+              "event_type": "InventoryAdjusted",
+              "outcome": "dead_lettered"
+            },
+            "value": [
+              1791273894.882,
+              "0"
+            ]
+          },
+          {
+            "metric": {
+              "event_type": "InventoryAdjusted",
+              "outcome": "processed"
+            },
+            "value": [
+              1791273894.882,
+              "2.1052336107563403"
+            ]
+          },
+          {
+            "metric": {
+              "event_type": "OrderCreated",
+              "outcome": "dead_lettered"
+            },
+            "value": [
+              1791273894.882,
+              "1.052462421580048"
+            ]
+          },
+          {
+            "metric": {
+              "event_type": "OrderCreated",
+              "outcome": "processed"
+            },
+            "value": [
+              1791273894.882,
+              "2.1052336107563403"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "dashboard": "polaris-business-flow.json",
+    "panel": "Notification processing freshness p95 (completed only)",
+    "expression": "histogram_quantile(0.95,sum by(le,event_type) (rate(polaris_notification_freshness_seconds_bucket[5m])))",
+    "response": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": [
+          {
+            "metric": {
+              "event_type": "InventoryAdjusted"
+            },
+            "value": [
+              1791273894.885,
+              "62.4201913659"
+            ]
+          },
+          {
+            "metric": {
+              "event_type": "OrderCreated"
+            },
+            "value": [
+              1791273894.885,
+              "62.4201913659"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "dashboard": "polaris-business-flow.json",
+    "panel": "Notification handler retry attempts",
+    "expression": "sum(rate(polaris_notification_retries_total[5m]))",
+    "response": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": [
+          {
+            "metric": {},
+            "value": [
+              1791273894.89,
+              "0.007016603275743498"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "dashboard": "polaris-business-flow.json",
+    "panel": "DLQ publication attempts (not queue depth)",
+    "expression": "sum by(outcome) (rate(polaris_notification_dlq_publications_total[5m]))",
+    "response": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": [
+          {
+            "metric": {
+              "outcome": "acknowledged"
+            },
+            "value": [
+              1791273894.893,
+              "0.0035083367250985952"
+            ]
+          },
+          {
+            "metric": {
+              "outcome": "failed"
+            },
+            "value": [
+              1791273894.893,
+              "0"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "dashboard": "polaris-business-flow.json",
+    "panel": "Suppressed duplicate deliveries",
+    "expression": "sum(increase(polaris_notification_duplicates_total[5m]))",
+    "response": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": [
+          {
+            "metric": {},
+            "value": [
+              1791273894.895,
+              "1.0525080349749476"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "dashboard": "polaris-business-flow.json",
+    "panel": "Snapshot refresh success by replica",
+    "expression": "polaris_observability_snapshot_success",
+    "response": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": [
+          {
+            "metric": {
+              "__name__": "polaris_observability_snapshot_success",
+              "instance": "order-service:8081",
+              "job": "order-service"
+            },
+            "value": [
+              1791273894.897,
+              "1"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "polaris_observability_snapshot_success",
+              "instance": "inventory-service:8082",
+              "job": "inventory-service"
+            },
+            "value": [
+              1791273894.897,
+              "1"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "polaris_observability_snapshot_success",
+              "instance": "notification-service:8083",
+              "job": "notification-service"
+            },
+            "value": [
+              1791273894.897,
+              "1"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "dashboard": "polaris-business-flow.json",
+    "panel": "Snapshot age by replica (missing until first success)",
+    "expression": "time() - polaris_observability_snapshot_timestamp_seconds",
+    "response": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": [
+          {
+            "metric": {
+              "instance": "order-service:8081",
+              "job": "order-service"
+            },
+            "value": [
+              1791273894.901,
+              "5.351000070571899"
+            ]
+          },
+          {
+            "metric": {
+              "instance": "inventory-service:8082",
+              "job": "inventory-service"
+            },
+            "value": [
+              1791273894.901,
+              "6.633000135421753"
+            ]
+          },
+          {
+            "metric": {
+              "instance": "notification-service:8083",
+              "job": "notification-service"
+            },
+            "value": [
+              1791273894.901,
+              "18.276999950408936"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "dashboard": "polaris-business-flow.json",
+    "panel": "Retained committed notification inbox rows",
+    "expression": "max by(job,status) (polaris_notification_inbox_events and on(job,instance) (polaris_observability_snapshot_success == 1) and on(job,instance) (time() - polaris_observability_snapshot_timestamp_seconds < 45))",
+    "response": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": [
+          {
+            "metric": {
+              "job": "notification-service",
+              "status": "DEAD_LETTERED"
+            },
+            "value": [
+              1791273894.903,
+              "1"
+            ]
+          },
+          {
+            "metric": {
+              "job": "notification-service",
+              "status": "PROCESSED"
+            },
+            "value": [
+              1791273894.903,
+              "12"
+            ]
+          },
+          {
+            "metric": {
+              "job": "notification-service",
+              "status": "PROCESSING"
+            },
+            "value": [
+              1791273894.903,
+              "0"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "dashboard": "polaris-grpc.json",
+    "panel": "Inventory RPC server request rate",
+    "expression": "sum by(method,statusCode) (rate(grpc_server_processing_duration_seconds_count{service=\"polaris.inventory.v1.InventoryService\"}[5m]))",
+    "response": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": [
+          {
+            "metric": {
+              "method": "CheckStock",
+              "statusCode": "OK"
+            },
+            "value": [
+              1791273894.909,
+              "0"
+            ]
+          },
+          {
+            "metric": {
+              "method": "ReleaseStock",
+              "statusCode": "OK"
+            },
+            "value": [
+              1791273894.909,
+              "0"
+            ]
+          },
+          {
+            "metric": {
+              "method": "ReserveStock",
+              "statusCode": "OK"
+            },
+            "value": [
+              1791273894.909,
+              "0.006749312261396812"
+            ]
+          },
+          {
+            "metric": {
+              "method": "ReserveStock",
+              "statusCode": "CANCELLED"
+            },
+            "value": [
+              1791273894.909,
+              "0"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "dashboard": "polaris-grpc.json",
+    "panel": "Inventory RPC client request rate",
+    "expression": "sum by(method,statusCode) (rate(grpc_client_processing_duration_seconds_count{service=\"polaris.inventory.v1.InventoryService\"}[5m]))",
+    "response": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": [
+          {
+            "metric": {
+              "method": "ReserveStock",
+              "statusCode": "DEADLINE_EXCEEDED"
+            },
+            "value": [
+              1791273894.913,
+              "0"
+            ]
+          },
+          {
+            "metric": {
+              "method": "ReserveStock",
+              "statusCode": "OK"
+            },
+            "value": [
+              1791273894.913,
+              "0.007142857142857143"
+            ]
+          },
+          {
+            "metric": {
+              "method": "ReserveStock",
+              "statusCode": "UNAVAILABLE"
+            },
+            "value": [
+              1791273894.913,
+              "0.005269035871449527"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "dashboard": "polaris-grpc.json",
+    "panel": "Inventory RPC p95 latency",
+    "expression": "histogram_quantile(0.95, sum by(le,method) (rate(grpc_server_processing_duration_seconds_bucket{service=\"polaris.inventory.v1.InventoryService\"}[5m])))",
+    "response": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": [
+          {
+            "metric": {
+              "method": "CheckStock"
+            },
+            "value": [
+              1791273894.915,
+              "NaN"
+            ]
+          },
+          {
+            "metric": {
+              "method": "ReleaseStock"
+            },
+            "value": [
+              1791273894.915,
+              "NaN"
+            ]
+          },
+          {
+            "metric": {
+              "method": "ReserveStock"
+            },
+            "value": [
+              1791273894.915,
+              "1.0647939752"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "dashboard": "polaris-grpc.json",
+    "panel": "Inventory RPC system errors",
+    "expression": "sum by(method,statusCode) (rate(grpc_server_processing_duration_seconds_count{service=\"polaris.inventory.v1.InventoryService\",statusCode=~\"UNKNOWN|INTERNAL|UNAVAILABLE|DEADLINE_EXCEEDED|DATA_LOSS|RESOURCE_EXHAUSTED\"}[5m]))",
+    "response": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": []
+      }
+    }
+  },
+  {
+    "dashboard": "polaris-grpc.json",
+    "panel": "Inventory RPC system errors",
+    "expression": "sum by(method,statusCode) (rate(grpc_client_processing_duration_seconds_count{service=\"polaris.inventory.v1.InventoryService\",statusCode=~\"UNKNOWN|INTERNAL|UNAVAILABLE|DEADLINE_EXCEEDED|DATA_LOSS|RESOURCE_EXHAUSTED\"}[5m]))",
+    "response": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": [
+          {
+            "metric": {
+              "method": "ReserveStock",
+              "statusCode": "DEADLINE_EXCEEDED"
+            },
+            "value": [
+              1791273894.925,
+              "0"
+            ]
+          },
+          {
+            "metric": {
+              "method": "ReserveStock",
+              "statusCode": "UNAVAILABLE"
+            },
+            "value": [
+              1791273894.925,
+              "0.005267702360314709"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "dashboard": "polaris-overview.json",
+    "panel": "Gateway order request rate",
+    "expression": "sum by (routeId,httpMethod,status) (rate(spring_cloud_gateway_requests_seconds_count{routeId=~\"order-create|order-read\"}[5m]))",
+    "response": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": [
+          {
+            "metric": {
+              "httpMethod": "POST",
+              "routeId": "order-create",
+              "status": "SERVICE_UNAVAILABLE"
+            },
+            "value": [
+              1791273894.928,
+              "0"
+            ]
+          },
+          {
+            "metric": {
+              "httpMethod": "POST",
+              "routeId": "order-create",
+              "status": "CREATED"
+            },
+            "value": [
+              1791273894.928,
+              "0.007017026815567976"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "dashboard": "polaris-overview.json",
+    "panel": "Gateway p95 order latency",
+    "expression": "histogram_quantile(0.95, sum by(le,routeId) (rate(spring_cloud_gateway_requests_seconds_bucket{routeId=~\"order-create|order-read\"}[5m])))",
+    "response": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": [
+          {
+            "metric": {
+              "routeId": "order-create"
+            },
+            "value": [
+              1791273894.932,
+              "2.1116922529"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "dashboard": "polaris-overview.json",
+    "panel": "Order HTTP p95 latency",
+    "expression": "histogram_quantile(0.95, sum by(le,uri,method) (rate(http_server_requests_seconds_bucket{job=\"order-service\",uri=~\"/api/v1/orders.*\"}[5m])))",
+    "response": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": [
+          {
+            "metric": {
+              "method": "POST",
+              "uri": "/api/v1/orders"
+            },
+            "value": [
+              1791273894.937,
+              "NaN"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "dashboard": "polaris-overview.json",
+    "panel": "Order HTTP system errors",
+    "expression": "sum by(job,status) (rate(http_server_requests_seconds_count{job=\"order-service\",uri=~\"/api/v1/orders.*\",status=~\"5..\"}[5m]))",
+    "response": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": []
+      }
+    }
+  },
+  {
+    "dashboard": "polaris-overview.json",
+    "panel": "Service scrape health",
+    "expression": "up{job=~\"gateway|order-service|inventory-service|notification-service\"}",
+    "response": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": [
+          {
+            "metric": {
+              "__name__": "up",
+              "instance": "order-service:8081",
+              "job": "order-service"
+            },
+            "value": [
+              1791273894.948,
+              "1"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "up",
+              "instance": "inventory-service:8082",
+              "job": "inventory-service"
+            },
+            "value": [
+              1791273894.948,
+              "1"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "up",
+              "instance": "gateway:8080",
+              "job": "gateway"
+            },
+            "value": [
+              1791273894.948,
+              "1"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "up",
+              "instance": "notification-service:8083",
+              "job": "notification-service"
+            },
+            "value": [
+              1791273894.948,
+              "1"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "dashboard": "polaris-overview.json",
+    "panel": "JVM heap used",
+    "expression": "sum by(job) (jvm_memory_used_bytes{area=\"heap\"})",
+    "response": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": [
+          {
+            "metric": {
+              "job": "order-service"
+            },
+            "value": [
+              1791273894.958,
+              "55438976"
+            ]
+          },
+          {
+            "metric": {
+              "job": "inventory-service"
+            },
+            "value": [
+              1791273894.958,
+              "62927248"
+            ]
+          },
+          {
+            "metric": {
+              "job": "gateway"
+            },
+            "value": [
+              1791273894.958,
+              "50310696"
+            ]
+          },
+          {
+            "metric": {
+              "job": "notification-service"
+            },
+            "value": [
+              1791273894.958,
+              "46219440"
+            ]
+          }
+        ]
+      }
+    }
+  }
+]

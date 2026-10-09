@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.polaris.inventory.adapter.out.observability.DurableTelemetry;
 import io.polaris.inventory.application.port.out.InventoryEventRecorder;
 import io.polaris.shared.events.InventoryAdjustedEvent;
 
@@ -19,11 +20,13 @@ public class InventoryEventOutbox implements InventoryEventRecorder {
     private final OutboxEventRepository outboxEvents;
     private final ObjectMapper objectMapper;
     private final String topic;
+    private final DurableTelemetry telemetry;
 
     public InventoryEventOutbox(
             OutboxEventRepository outboxEvents,
             ObjectMapper objectMapper,
-            @Value("${polaris.kafka.topics.inventory-adjusted}") String topic) {
+            @Value("${polaris.kafka.topics.inventory-adjusted}") String topic, DurableTelemetry telemetry) {
+        this.telemetry = telemetry;
         this.outboxEvents = outboxEvents;
         this.objectMapper = objectMapper;
         this.topic = topic;
@@ -31,8 +34,8 @@ public class InventoryEventOutbox implements InventoryEventRecorder {
 
     @Override
     public void enqueue(InventoryAdjustedEvent event) {
-        try {
-            outboxEvents.save(OutboxEvent.pending(
+        try (var session = telemetry.child("outbox.event.create", event.metadata().eventId().toString())) {
+            OutboxEvent row = OutboxEvent.pending(
                     event.metadata().eventId(),
                     event.orderId().toString(),
                     EVENT_TYPE,
@@ -40,7 +43,9 @@ public class InventoryEventOutbox implements InventoryEventRecorder {
                     topic,
                     event.orderId().toString(),
                     objectMapper.writeValueAsString(event),
-                    event.metadata().occurredAt()));
+                    event.metadata().occurredAt());
+            row.setTraceContext(telemetry.capture());
+            telemetry.databaseWrite("INSERT", "outbox_events", () -> outboxEvents.saveAndFlush(row));
         } catch (JsonProcessingException ex) {
             throw new IllegalStateException("Cannot serialize inventory event for the outbox", ex);
         }
