@@ -94,6 +94,20 @@ class TrivySummaryTest(unittest.TestCase):
             self.assertEqual(1, result.returncode)
             self.assertIn("No zero findings or passing gate", summary.read_text())
 
+    def test_failed_scan_with_remaining_report_does_not_publish_false_zero(self):
+        with tempfile.TemporaryDirectory() as directory:
+            summary = Path(directory) / "summary.md"
+            report = Path(directory) / "partial.json"
+            report.write_text(__import__("json").dumps(self.report))
+            result = subprocess.run(
+                [sys.executable, str(Path(trivy_summary.__file__)), "repository", str(report)],
+                env={**os.environ, "GITHUB_STEP_SUMMARY": str(summary), "CI_SCAN_SUCCEEDED": "false"},
+                capture_output=True, text=True,
+            )
+            self.assertEqual(1, result.returncode)
+            self.assertIn("Scan did not complete successfully", summary.read_text())
+            self.assertNotIn("| 0 | 0 | 0 | 0 | 0 |", summary.read_text())
+
     def test_unusual_text_and_advisories_are_safely_bounded(self):
         finding = {"VulnerabilityID": "CVE|[bad]`\n<script>", "PkgName": "package" * 100,
                    "InstalledVersion": "1", "Severity": "HIGH", "PrimaryURL": "javascript:alert(1)"}

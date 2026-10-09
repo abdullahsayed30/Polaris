@@ -35,6 +35,7 @@ jobs:
         run: python3 .github/scripts/ci_source.py verify target
 
       - name: Scan resolved dependency SBOM once
+        id: dependencies
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         env:
           TRIVY_IGNOREFILE: /dev/null
@@ -50,12 +51,14 @@ jobs:
           exit-code: '0'
 
       - name: Scan source secrets and misconfigurations once
+        id: source
         run: |
           trivy --cache-dir .cache/trivy fs --ignorefile /dev/null --scanners secret,misconfig --pkg-types os --offline-scan \
             --format json --list-all-pkgs --exit-code 0 \
             --output trivy-source.json .
 
       - name: Combine native source and dependency finding records
+        id: combined
         run: python3 .github/scripts/merge_trivy_results.py trivy-source.json trivy-dependencies.json trivy-repository.json
 
       - name: Verify Trivy conversion severity policy
@@ -90,6 +93,7 @@ jobs:
         if: ${{ !cancelled() }}
         env:
           CI_ARTIFACT_PREFIX: ${{ inputs.artifact-name }}
+          CI_SCAN_SUCCEEDED: ${{ steps.dependencies.outcome == 'success' && steps.source.outcome == 'success' && steps.combined.outcome == 'success' }}
         run: python3 .github/scripts/trivy_summary.py repository trivy-repository.json
 
       - name: Enforce HIGH and CRITICAL repository findings
