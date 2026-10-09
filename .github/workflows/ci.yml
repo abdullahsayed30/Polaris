@@ -10,24 +10,66 @@ on:
   workflow_dispatch:
     inputs:
       run-integration-tests:
-        description: Run Testcontainers-backed integration tests.
+        description: Run Testcontainers-backed integration tests (false cannot pass CI required).
         required: false
         default: true
         type: boolean
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 permissions:
-  actions: read
   contents: read
-  security-events: write
 
 jobs:
-  ci:
+  quality:
     uses: ./.github/workflows/reusable-ci.yml
     with:
       artifact-name: polaris
-      java-version: '25'
       run-integration-tests: ${{ github.event_name != 'workflow_dispatch' || inputs.run-integration-tests }}
+
+  repository-security:
+    needs: quality
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    uses: ./.github/workflows/reusable-repository-security.yml
+    with:
+      artifact-name: polaris
+
+  container-security:
+    needs: quality
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    uses: ./.github/workflows/reusable-container-security.yml
+    with:
+      artifact-name: polaris
+
+  static-analysis:
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    uses: ./.github/workflows/codeql.yml
+
+  required:
+    name: CI required
+    if: ${{ always() }}
+    needs: [quality, repository-security, container-security, static-analysis]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Require every gate to succeed
+        env:
+          CI_RESULTS: ${{ toJSON(needs) }}
+          CI_INTEGRATION_ENABLED: ${{ github.event_name != 'workflow_dispatch' || inputs.run-integration-tests }}
+        run: python3 .github/scripts/check_ci_results.py

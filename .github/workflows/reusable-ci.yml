@@ -1,4 +1,4 @@
-name: Reusable CI
+name: Reusable quality and tests
 
 on:
   workflow_call:
@@ -8,16 +8,6 @@ on:
         required: false
         type: string
         default: polaris
-      java-version:
-        description: Exact Java version used for the build.
-        required: false
-        type: string
-        default: '25'
-      maven-args:
-        description: Additional Maven arguments appended to Maven commands.
-        required: false
-        type: string
-        default: ''
       run-integration-tests:
         description: Run Testcontainers-backed integration tests with Maven verify.
         required: false
@@ -25,25 +15,25 @@ on:
         default: true
 
 permissions:
-  actions: read
   contents: read
-  security-events: write
 
 jobs:
   quality-gates:
-    name: Quality gates
+    name: Quality and tests
     runs-on: ubuntu-24.04
     timeout-minutes: 45
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Set up Java
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
           distribution: temurin
-          java-version: ${{ inputs.java-version }}
+          java-version: '25'
           cache: maven
           cache-dependency-path: |
             pom.xml
@@ -54,29 +44,32 @@ jobs:
           java -version
           ./mvnw --version
 
-      - name: Run formatting and style checks
-        run: ./mvnw -B -ntp spotless:check checkstyle:check ${{ inputs.maven-args }}
+      - name: Test CI failure handling and artifact provenance
+        run: python3 -m unittest discover -s .github/scripts -p 'test_ci.py' -v
 
-      - name: Run unit tests
-        run: ./mvnw -B -ntp test ${{ inputs.maven-args }}
-
-      - name: Run integration tests
+      - name: Run quality checks, all tests and packaging
         if: ${{ inputs.run-integration-tests }}
-        run: ./mvnw -B -ntp test-compile failsafe:integration-test failsafe:verify ${{ inputs.maven-args }}
+        run: |
+          docker info > /dev/null
+          ./mvnw -B -ntp spotless:check checkstyle:check verify
 
-      - name: Package application
-        run: ./mvnw -B -ntp -DskipTests package ${{ inputs.maven-args }}
+      - name: Run fast gate and packaging for a manual fast run
+        if: ${{ !inputs.run-integration-tests }}
+        run: |
+          ./mvnw -B -ntp spotless:check checkstyle:check test
+          ./mvnw -B -ntp -DskipTests package
 
-      - name: Generate aggregate SBOM
-        run: ./mvnw -B -ntp -DskipTests cyclonedx:makeAggregateBom ${{ inputs.maven-args }}
+      - name: Generate aggregate SBOM and source provenance
+        run: |
+          ./mvnw -B -ntp -DskipTests -DincludeTestScope=true cyclonedx:makeAggregateBom
+          python3 .github/scripts/ci_source.py write target
 
-      - name: Generate coverage reports
-        if: ${{ always() }}
-        continue-on-error: true
-        run: ./mvnw -B -ntp -DskipTests jacoco:report ${{ inputs.maven-args }}
+      - name: Generate coverage reports after a failed build
+        if: ${{ failure() }}
+        run: ./mvnw -B -ntp -DskipTests jacoco:report
 
       - name: Publish test and coverage summary
-        if: ${{ always() }}
+        if: ${{ !cancelled() }}
         shell: python
         run: |
           import glob
@@ -115,30 +108,9 @@ jobs:
           with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as summary_file:
               summary_file.write(summary)
 
-      - name: Run Trivy repository report scan
-        if: ${{ always() }}
-        uses: aquasecurity/trivy-action@v0.36.0
-        with:
-          version: v0.74.0
-          scan-type: fs
-          scan-ref: .
-          scanners: vuln,secret,misconfig
-          severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
-          format: sarif
-          output: trivy-repository.sarif
-          exit-code: '0'
-
-      - name: Upload Trivy repository SARIF
-        if: ${{ always() && hashFiles('trivy-repository.sarif') != '' }}
-        uses: github/codeql-action/upload-sarif@v4
-        continue-on-error: true
-        with:
-          sarif_file: trivy-repository.sarif
-          category: trivy-repository
-
       - name: Upload test reports
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: ${{ inputs.artifact-name }}-test-reports
           path: |
@@ -148,8 +120,8 @@ jobs:
           retention-days: 14
 
       - name: Upload coverage reports
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: ${{ inputs.artifact-name }}-coverage-reports
           path: '**/target/site/jacoco/**'
@@ -157,119 +129,12 @@ jobs:
           retention-days: 14
 
       - name: Upload aggregate SBOM
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: ${{ inputs.artifact-name }}-dependency-sbom
-          path: target/polaris-sbom.json
-          if-no-files-found: warn
+          path: |
+            target/polaris-sbom.json
+            target/ci-source.json
+          if-no-files-found: error
           retention-days: 30
-
-      - name: Enforce Trivy repository severity gate
-        if: ${{ always() }}
-        uses: aquasecurity/trivy-action@v0.36.0
-        with:
-          version: v0.74.0
-          skip-setup-trivy: true
-          scan-type: fs
-          scan-ref: .
-          scanners: vuln,secret,misconfig
-          severity: HIGH,CRITICAL
-          format: table
-          exit-code: '1'
-
-  container-images:
-    name: Container image (${{ matrix.service }})
-    needs: quality-gates
-    runs-on: ubuntu-24.04
-    timeout-minutes: 45
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - service: gateway
-            jar: /app/gateway.jar
-          - service: order-service
-            jar: /app/order-service.jar
-          - service: inventory-service
-            jar: /app/inventory-service.jar
-          - service: notification-service
-            jar: /app/notification-service.jar
-
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v6
-
-      - name: Build production image
-        env:
-          IMAGE_REF: polaris/${{ matrix.service }}:${{ github.sha }}
-        run: |
-          docker build \
-            --file "${{ matrix.service }}/Dockerfile" \
-            --target production \
-            --tag "$IMAGE_REF" \
-            .
-
-      - name: Smoke-test image runtime and application archive
-        env:
-          IMAGE_REF: polaris/${{ matrix.service }}:${{ github.sha }}
-        run: |
-          set -euo pipefail
-          docker run --rm --entrypoint java "$IMAGE_REF" -version
-          docker run --rm --entrypoint java "$IMAGE_REF" \
-            -Djarmode=tools -jar "${{ matrix.jar }}" list-layers \
-            | grep -Fx application
-
-      - name: Run Trivy image report scan
-        uses: aquasecurity/trivy-action@v0.36.0
-        with:
-          version: v0.74.0
-          scan-type: image
-          image-ref: polaris/${{ matrix.service }}:${{ github.sha }}
-          scanners: vuln,secret,misconfig
-          severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
-          format: sarif
-          output: trivy-${{ matrix.service }}.sarif
-          exit-code: '0'
-
-      - name: Upload Trivy image SARIF
-        if: ${{ always() && hashFiles(format('trivy-{0}.sarif', matrix.service)) != '' }}
-        uses: github/codeql-action/upload-sarif@v4
-        continue-on-error: true
-        with:
-          sarif_file: trivy-${{ matrix.service }}.sarif
-          category: trivy-image-${{ matrix.service }}
-
-      - name: Generate image SBOM
-        if: ${{ always() }}
-        uses: aquasecurity/trivy-action@v0.36.0
-        with:
-          version: v0.74.0
-          skip-setup-trivy: true
-          scan-type: image
-          image-ref: polaris/${{ matrix.service }}:${{ github.sha }}
-          format: cyclonedx
-          output: ${{ matrix.service }}.cdx.json
-          exit-code: '0'
-
-      - name: Upload image SBOM
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v7
-        with:
-          name: ${{ inputs.artifact-name }}-${{ matrix.service }}-sbom
-          path: ${{ matrix.service }}.cdx.json
-          if-no-files-found: warn
-          retention-days: 30
-
-      - name: Enforce Trivy image severity gate
-        if: ${{ always() }}
-        uses: aquasecurity/trivy-action@v0.36.0
-        with:
-          version: v0.74.0
-          skip-setup-trivy: true
-          scan-type: image
-          image-ref: polaris/${{ matrix.service }}:${{ github.sha }}
-          scanners: vuln,secret,misconfig
-          severity: HIGH,CRITICAL
-          format: table
-          exit-code: '1'
