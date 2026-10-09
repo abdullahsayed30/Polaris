@@ -61,9 +61,11 @@ ADR 0021 applies to **order-service, inventory-service and notification-service 
 
 ## Git identity and attribution
 
+- Name new branches by purpose: `feature/`, `fix/` or `bugfix/`, `chore/`, `docs/`, or `refactor/`, followed by a short descriptive name. Do not use an assistant or tool name as a branch prefix. This convention does not authorize renaming existing published branches, rewriting history, or force-pushing.
+- Keep repository-facing content free of coding-assistant or assistant-vendor branding and attribution, including branch names, commit messages, pull request titles/descriptions, documentation, and release notes. Use the user's identity and describe the project change directly.
 - Commit and push only using the user's GitHub account, `abdullahsayed30`, and their Git identity. Verify the authenticated account and commit author/committer before pushing; if authentication is missing or belongs to another account, stop and ask the user to sign in with their account.
 - Use the user's existing repository identity (`abdullahsayed30 <abdullahsayed30@users.noreply.github.com>`) unless they explicitly request another identity. Keep any necessary Git identity configuration local to this repository, not global.
-- Do not add Codex, OpenAI, an assistant, or a delegated agent as author, committer, or co-author. Do not add `Co-authored-by` trailers or automated assistant attribution to commit messages.
+- Do not add an assistant, delegated agent, or vendor as author, committer, or co-author. Do not add `Co-authored-by` trailers or automated assistant attribution to commit messages.
 - Inspect the final commit metadata and message to confirm these rules. Do not rewrite existing history or force-push merely to change attribution without explicit authorization.
 
 ## Verification and handoff
