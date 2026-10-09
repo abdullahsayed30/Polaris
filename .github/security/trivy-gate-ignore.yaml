@@ -1,0 +1,11 @@
+{
+  "vulnerabilities": [
+    {
+      "id": "CVE-2026-47884",
+      "purls": ["pkg:maven/org.springframework/spring-webmvc@6.2.19"],
+      "expired_at": "2027-07-01T00:00:00Z",
+      "owner": "abdullahsayed30",
+      "statement": "Owner-approved accepted risk through June 30 2027 UTC while a compatible fix or reviewed platform migration is prepared. Runtime applicability is not yet proven. This gate-only exception is not a patch or VEX non-applicability assertion; full reports retain the finding. Remove earlier when a reviewed compatible fix lands. No automatic renewal. Advisory: https://spring.io/security/cve-2026-47884/"
+    }
+  ]
+}

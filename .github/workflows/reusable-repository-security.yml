@@ -36,6 +36,8 @@ jobs:
 
       - name: Scan resolved dependency SBOM once
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        env:
+          TRIVY_IGNOREFILE: /dev/null
         with:
           version: v0.74.0
           scan-type: sbom
@@ -49,7 +51,7 @@ jobs:
 
       - name: Scan source secrets and misconfigurations once
         run: |
-          trivy --cache-dir .cache/trivy fs --scanners secret,misconfig --pkg-types os --offline-scan \
+          trivy --cache-dir .cache/trivy fs --ignorefile /dev/null --scanners secret,misconfig --pkg-types os --offline-scan \
             --format json --list-all-pkgs --exit-code 0 \
             --output trivy-source.json .
 
@@ -61,7 +63,7 @@ jobs:
 
       - name: Convert full repository results to SARIF
         if: ${{ !cancelled() && hashFiles('trivy-repository.json') != '' }}
-        run: trivy convert --format sarif --output trivy-repository.sarif trivy-repository.json
+        run: trivy convert --ignorefile /dev/null --format sarif --output trivy-repository.sarif trivy-repository.json
 
       - name: Upload Trivy repository SARIF
         if: ${{ !cancelled() && hashFiles('trivy-repository.sarif') != '' }}
@@ -84,6 +86,12 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+      - name: Publish unsuppressed repository findings to run summary
+        if: ${{ !cancelled() }}
+        env:
+          CI_ARTIFACT_PREFIX: ${{ inputs.artifact-name }}
+        run: python3 .github/scripts/trivy_summary.py repository trivy-repository.json
+
       - name: Enforce HIGH and CRITICAL repository findings
         if: ${{ !cancelled() }}
-        run: trivy convert --format table --scanners vuln,secret,misconfig --severity HIGH,CRITICAL --exit-code 1 trivy-repository.json
+        run: python3 .github/scripts/trivy_gate.py trivy-repository.json
