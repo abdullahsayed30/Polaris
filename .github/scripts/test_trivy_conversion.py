@@ -130,7 +130,8 @@ class TrivyConversionTest(unittest.TestCase):
         self.policy.unlink()
         native = self.convert("--ignorefile", str(self.policy), "--format", "table",
                               "--severity", "HIGH,CRITICAL", "--exit-code", "1")
-        self.assertEqual(0, native.returncode, native.stderr)  # Native missing file is optional.
+        self.assertEqual(1, native.returncode, native.stderr)  # CLI rejects an explicitly missing file.
+        self.assertIn("ignore file not found", native.stderr)
         self.assertEqual(1, self.gate().returncode)
 
     def test_secrets_misconfigurations_and_other_vulnerabilities_still_fail(self):
