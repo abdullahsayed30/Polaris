@@ -10,6 +10,20 @@ Polaris is a production-oriented reference implementation of a small e-commerce 
 
 Order, inventory and notification use a [Hombergs-style hexagonal architecture](docs/service-architecture-standard.md): inbound/outbound ports, pure business models and separate JPA persistence adapters. Gateway and contract modules retain their existing structure.
 
+## Reviewer tour
+
+Start with the [three-minute demo story](docs/portfolio-demo.md), then inspect the [release evidence index](docs/release-evidence.md) for exact commits, checks and remaining proof. The [Quick Start](#quick-start) runs the local stack; [draft release notes](docs/releases/unreleased.md) collect the proposed release scope.
+
+| Capability | Design and implementation | Evidence to inspect |
+| --- | --- | --- |
+| Service and code boundaries | [Architecture](docs/architecture.md), [hexagonal standard](docs/service-architecture-standard.md) and [ADR 0021](docs/adr/0021-adopt-hombergs-hexagonal-service-structure.md) | Architecture guards, pure-model tests and database mapping tests |
+| Authenticated customer isolation | [Gateway policy](docs/services/gateway.md) and [order API](docs/services/order-service.md) | [Local demo](demo/README.md), HTTP authorization and contract tests |
+| Safe reservation and recovery | [Durable pending intent](docs/adr/0020-recover-pending-orders-durably.md) and [atomic stock decisions](docs/services/inventory-service.md) | Lost-response, concurrent retry and rollback integration tests |
+| Durable event delivery | [Transactional outbox and consumer inbox](docs/adr/0019-use-transactional-outbox-and-consumer-inbox.md), [wire compatibility](contracts/README.md) | Committed outbox/inbox state, exact-decimal compatibility and failed-DLQ acknowledgement tests |
+| Operational visibility | [Metrics and tracing](docs/observability.md), [operating guidance](docs/operations.md) and [Helm contract](docs/deployment.md) | Commit-linked runtime captures and checks in the evidence index |
+
+The business scenario is a demo; notification delivery is simulated. Local Keycloak credentials and plaintext infrastructure are development fixtures. Published evidence supports only the recorded environment and commit; this repository makes no claim of a production deployment, measured SLO or benchmark result.
+
 ## Architecture
 
 ```mermaid
@@ -172,7 +186,7 @@ Next operational increments:
 
 - Publish immutable image digests and packaged charts from a release workflow.
 - Add rendered-manifest policy/security validation to CI without coupling cluster credentials to pull requests.
-- Add measured business metrics for order acceptance, reservation outcomes, notification age, and DLQ growth before formalizing business SLOs.
+- Define and measure acceptance/recovery SLOs, and add broker consumer-lag and DLQ-depth signals.
 - Rehearse database restore, Kafka replay, schema-compatible rollback, and zone-failure behavior in a target environment.
 
 ## License
