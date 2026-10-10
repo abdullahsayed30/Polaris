@@ -1,0 +1,4670 @@
+# Scenario-driven tests of the deployed rules, including all-alert negative assertions.
+rule_files:
+- ../polaris-alerts.yml
+evaluation_interval: 15s
+tests:
+- name: healthy snapshots and no requests do not manufacture failures
+  interval: 15s
+  external_labels:
+    environment: alert-test
+  input_series:
+  - series: up{job="gateway",instance="one"}
+    values: 1x80
+  - series: up{job="order-service",instance="one"}
+    values: 1x80
+  - series: up{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: up{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_success{job="order-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="order-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_orders{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_order_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="inventory-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="inventory-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="notification-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSING"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSED"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="DEAD_LETTERED"}
+    values: '0x80'
+  alert_rule_test:
+  - eval_time: 8m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+- name: all services scraped but absent snapshot is telemetry failure
+  interval: 15s
+  external_labels:
+    environment: alert-test
+  input_series:
+  - series: up{job="gateway",instance="one"}
+    values: 1x80
+  - series: up{job="order-service",instance="one"}
+    values: 1x80
+  - series: up{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: up{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_success{job="order-service",instance="one"}
+    values: 1x80
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_orders{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_order_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="inventory-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="inventory-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="notification-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSING"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSED"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="DEAD_LETTERED"}
+    values: '0x80'
+  alert_rule_test:
+  - eval_time: 1m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 1m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 1m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 1m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 1m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 1m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 1m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 1m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 1m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+  - eval_time: 2m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 2m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts:
+    - exp_labels:
+        job: order-service
+        severity: warning
+        service: order-service
+        environment: alert-test
+        owner: order-service-owner
+      exp_annotations:
+        summary: order-service business telemetry is unavailable
+        description: No complete successful business snapshot younger than 45 seconds with a non-future timestamp,
+          or a notification freshness bucket is missing. Backlog silence is not recovery.
+        dashboard_url: http://localhost:3000/d/polaris-business-flow
+        runbook_url: https://github.com/abdullahsayed30/Polaris/blob/main/docs/runbooks/business-telemetry.md
+  - eval_time: 2m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 2m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 2m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 2m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 2m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 2m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 2m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+- name: failed refresh retains backlog but is not interpreted as valid stalled work
+  interval: 15s
+  external_labels:
+    environment: alert-test
+  input_series:
+  - series: up{job="gateway",instance="one"}
+    values: 1x80
+  - series: up{job="order-service",instance="one"}
+    values: 1x80
+  - series: up{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: up{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_success{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_timestamp_seconds{job="order-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_orders{job="order-service",instance="one"}
+    values: 1x80
+  - series: polaris_pending_order_oldest_age_seconds{job="order-service",instance="one"}
+    values: 300x80
+  - series: polaris_observability_snapshot_success{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="inventory-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="inventory-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="notification-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSING"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSED"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="DEAD_LETTERED"}
+    values: '0x80'
+  alert_rule_test:
+  - eval_time: 3m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts:
+    - exp_labels:
+        job: order-service
+        severity: warning
+        service: order-service
+        environment: alert-test
+        owner: order-service-owner
+      exp_annotations:
+        summary: order-service business telemetry is unavailable
+        description: No complete successful business snapshot younger than 45 seconds with a non-future timestamp,
+          or a notification freshness bucket is missing. Backlog silence is not recovery.
+        dashboard_url: http://localhost:3000/d/polaris-business-flow
+        runbook_url: https://github.com/abdullahsayed30/Polaris/blob/main/docs/runbooks/business-telemetry.md
+  - eval_time: 3m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+- name: successful refresh with old timestamp becomes telemetry failure
+  interval: 15s
+  external_labels:
+    environment: alert-test
+  input_series:
+  - series: up{job="gateway",instance="one"}
+    values: 1x80
+  - series: up{job="order-service",instance="one"}
+    values: 1x80
+  - series: up{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: up{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_success{job="order-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_orders{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_order_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="inventory-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="inventory-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="notification-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSING"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSED"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="DEAD_LETTERED"}
+    values: '0x80'
+  alert_rule_test:
+  - eval_time: 3m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts:
+    - exp_labels:
+        job: order-service
+        severity: warning
+        service: order-service
+        environment: alert-test
+        owner: order-service-owner
+      exp_annotations:
+        summary: order-service business telemetry is unavailable
+        description: No complete successful business snapshot younger than 45 seconds with a non-future timestamp,
+          or a notification freshness bucket is missing. Backlog silence is not recovery.
+        dashboard_url: http://localhost:3000/d/polaris-business-flow
+        runbook_url: https://github.com/abdullahsayed30/Polaris/blob/main/docs/runbooks/business-telemetry.md
+  - eval_time: 3m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+- name: future timestamp is invalid even when success is one
+  interval: 15s
+  external_labels:
+    environment: alert-test
+  input_series:
+  - series: up{job="gateway",instance="one"}
+    values: 1x80
+  - series: up{job="order-service",instance="one"}
+    values: 1x80
+  - series: up{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: up{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_success{job="order-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="order-service",instance="one"}
+    values: 99999x80
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_orders{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_order_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="inventory-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="inventory-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="notification-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSING"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSED"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="DEAD_LETTERED"}
+    values: '0x80'
+  alert_rule_test:
+  - eval_time: 3m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts:
+    - exp_labels:
+        job: order-service
+        severity: warning
+        service: order-service
+        environment: alert-test
+        owner: order-service-owner
+      exp_annotations:
+        summary: order-service business telemetry is unavailable
+        description: No complete successful business snapshot younger than 45 seconds with a non-future timestamp,
+          or a notification freshness bucket is missing. Backlog silence is not recovery.
+        dashboard_url: http://localhost:3000/d/polaris-business-flow
+        runbook_url: https://github.com/abdullahsayed30/Polaris/blob/main/docs/runbooks/business-telemetry.md
+  - eval_time: 3m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+- name: missing business gauge is not an empty backlog
+  interval: 15s
+  external_labels:
+    environment: alert-test
+  input_series:
+  - series: up{job="gateway",instance="one"}
+    values: 1x80
+  - series: up{job="order-service",instance="one"}
+    values: 1x80
+  - series: up{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: up{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_success{job="order-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="order-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_order_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="inventory-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="inventory-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="notification-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSING"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSED"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="DEAD_LETTERED"}
+    values: '0x80'
+  alert_rule_test:
+  - eval_time: 3m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts:
+    - exp_labels:
+        job: order-service
+        severity: warning
+        service: order-service
+        environment: alert-test
+        owner: order-service-owner
+      exp_annotations:
+        summary: order-service business telemetry is unavailable
+        description: No complete successful business snapshot younger than 45 seconds with a non-future timestamp,
+          or a notification freshness bucket is missing. Backlog silence is not recovery.
+        dashboard_url: http://localhost:3000/d/polaris-business-flow
+        runbook_url: https://github.com/abdullahsayed30/Polaris/blob/main/docs/runbooks/business-telemetry.md
+  - eval_time: 3m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+- name: NaN business gauge before initialization is not empty
+  interval: 15s
+  external_labels:
+    environment: alert-test
+  input_series:
+  - series: up{job="gateway",instance="one"}
+    values: 1x80
+  - series: up{job="order-service",instance="one"}
+    values: 1x80
+  - series: up{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: up{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_success{job="order-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="order-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_orders{job="order-service",instance="one"}
+    values: NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN
+      NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN
+      NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN
+      NaN NaN
+  - series: polaris_pending_order_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="inventory-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="inventory-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="notification-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSING"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSED"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="DEAD_LETTERED"}
+    values: '0x80'
+  alert_rule_test:
+  - eval_time: 3m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts:
+    - exp_labels:
+        job: order-service
+        severity: warning
+        service: order-service
+        environment: alert-test
+        owner: order-service-owner
+      exp_annotations:
+        summary: order-service business telemetry is unavailable
+        description: No complete successful business snapshot younger than 45 seconds with a non-future timestamp,
+          or a notification freshness bucket is missing. Backlog silence is not recovery.
+        dashboard_url: http://localhost:3000/d/polaris-business-flow
+        runbook_url: https://github.com/abdullahsayed30/Polaris/blob/main/docs/runbooks/business-telemetry.md
+  - eval_time: 3m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+- name: fresh healthy replica does not bless failed stale replica backlog
+  interval: 15s
+  external_labels:
+    environment: alert-test
+  input_series:
+  - series: up{job="gateway",instance="one"}
+    values: 1x80
+  - series: up{job="order-service",instance="one"}
+    values: 1x80
+  - series: up{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: up{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_success{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_timestamp_seconds{job="order-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="FAILED"}
+    values: 99x80
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="order-service",instance="one"}
+    values: 999x80
+  - series: polaris_pending_orders{job="order-service",instance="one"}
+    values: 99x80
+  - series: polaris_pending_order_oldest_age_seconds{job="order-service",instance="one"}
+    values: 999x80
+  - series: polaris_observability_snapshot_success{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="inventory-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="inventory-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="notification-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSING"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSED"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="DEAD_LETTERED"}
+    values: '0x80'
+  - series: up{job="order-service",instance="two"}
+    values: 1x80
+  - series: polaris_observability_snapshot_success{job="order-service",instance="two"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="order-service",instance="two"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="order-service",instance="two",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="two",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="two",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="two",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="order-service",instance="two"}
+    values: '0x80'
+  - series: polaris_pending_orders{job="order-service",instance="two"}
+    values: '0x80'
+  - series: polaris_pending_order_oldest_age_seconds{job="order-service",instance="two"}
+    values: '0x80'
+  alert_rule_test:
+  - eval_time: 8m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+- name: pending orders progress before hold expires
+  interval: 15s
+  external_labels:
+    environment: alert-test
+  input_series:
+  - series: up{job="gateway",instance="one"}
+    values: 1x80
+  - series: up{job="order-service",instance="one"}
+    values: 1x80
+  - series: up{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: up{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_success{job="order-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="order-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_orders{job="order-service",instance="one"}
+    values: 1x4 0x56
+  - series: polaris_pending_order_oldest_age_seconds{job="order-service",instance="one"}
+    values: 300x4 0x56
+  - series: polaris_observability_snapshot_success{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="inventory-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="inventory-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="notification-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSING"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSED"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="DEAD_LETTERED"}
+    values: '0x80'
+  alert_rule_test:
+  - eval_time: 8m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+- name: pending orders pending firing and restored snapshot
+  interval: 15s
+  external_labels:
+    environment: alert-test
+  input_series:
+  - series: up{job="gateway",instance="one"}
+    values: 1x80
+  - series: up{job="order-service",instance="one"}
+    values: 1x80
+  - series: up{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: up{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_success{job="order-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="order-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_orders{job="order-service",instance="one"}
+    values: 1x12 0x68
+  - series: polaris_pending_order_oldest_age_seconds{job="order-service",instance="one"}
+    values: 300x12 0x68
+  - series: polaris_observability_snapshot_success{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="inventory-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="inventory-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="notification-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSING"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSED"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="DEAD_LETTERED"}
+    values: '0x80'
+  alert_rule_test:
+  - eval_time: 1m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 1m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 1m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 1m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 1m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 1m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 1m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 1m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 1m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+  - eval_time: 2m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 2m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 2m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 2m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 2m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts:
+    - exp_labels:
+        job: order-service
+        severity: warning
+        service: order-service
+        environment: alert-test
+        owner: order-service-owner
+      exp_annotations:
+        summary: Pending orders are not converging
+        description: Oldest committed pending order exceeds 120 seconds for 2 minutes with a valid snapshot. Preserve
+          the original order and reservation identity.
+        dashboard_url: http://localhost:3000/d/polaris-business-flow
+        runbook_url: https://github.com/abdullahsayed30/Polaris/blob/main/docs/runbooks/durable-delivery.md
+  - eval_time: 2m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 2m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 2m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 2m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+  - eval_time: 4m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 4m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 4m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 4m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 4m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 4m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 4m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 4m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 4m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+  promql_expr_test:
+  - expr: ALERTS{alertname="PolarisPendingOrdersStalled",alertstate="pending"}
+    eval_time: 1m
+    exp_samples:
+    - labels: ALERTS{alertname="PolarisPendingOrdersStalled",alertstate="pending",job="order-service",service="order-service",severity="warning",environment="alert-test",owner="order-service-owner"}
+      value: 1
+- name: outbox pending firing and drain
+  interval: 15s
+  external_labels:
+    environment: alert-test
+  input_series:
+  - series: up{job="gateway",instance="one"}
+    values: 1x80
+  - series: up{job="order-service",instance="one"}
+    values: 1x80
+  - series: up{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: up{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_success{job="order-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="order-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_orders{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_order_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="inventory-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="RETRY"}
+    values: 2x12 0x68
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="inventory-service",instance="one"}
+    values: 300x12 0x68
+  - series: polaris_observability_snapshot_success{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="notification-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSING"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSED"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="DEAD_LETTERED"}
+    values: '0x80'
+  alert_rule_test:
+  - eval_time: 1m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 1m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 1m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 1m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 1m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 1m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 1m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 1m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 1m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+  - eval_time: 2m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 2m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 2m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 2m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 2m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 2m
+    alertname: PolarisOutboxStalled
+    exp_alerts:
+    - exp_labels:
+        job: inventory-service
+        severity: warning
+        service: inventory-service
+        environment: alert-test
+        owner: inventory-service-owner
+      exp_annotations:
+        summary: inventory-service outbox delivery is stalled
+        description: Oldest committed pending/retry row exceeds 120 seconds for 2 minutes. Replica views are not
+          summed; acknowledged attempts alone do not prove database publication state.
+        dashboard_url: http://localhost:3000/d/polaris-business-flow
+        runbook_url: https://github.com/abdullahsayed30/Polaris/blob/main/docs/runbooks/durable-delivery.md
+  - eval_time: 2m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 2m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 2m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+  - eval_time: 4m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 4m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 4m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 4m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 4m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 4m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 4m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 4m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 4m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+- name: terminal outbox failure survives broker recovery
+  interval: 15s
+  external_labels:
+    environment: alert-test
+  input_series:
+  - series: up{job="gateway",instance="one"}
+    values: 1x80
+  - series: up{job="order-service",instance="one"}
+    values: 1x80
+  - series: up{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: up{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_success{job="order-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="order-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="FAILED"}
+    values: 1x12 0x68
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_orders{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_order_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="inventory-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="inventory-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="notification-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSING"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSED"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="DEAD_LETTERED"}
+    values: '0x80'
+  alert_rule_test:
+  - eval_time: 30s
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 30s
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 30s
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 30s
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 30s
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 30s
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 30s
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 30s
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 30s
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+  - eval_time: 1m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 1m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 1m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 1m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 1m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 1m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 1m
+    alertname: PolarisOutboxFailed
+    exp_alerts:
+    - exp_labels:
+        job: order-service
+        severity: critical
+        service: order-service
+        environment: alert-test
+        owner: order-service-owner
+      exp_annotations:
+        summary: order-service has terminally failed outbox work
+        description: At least one retained committed FAILED row for 1 minute. Restoring Kafka does not automatically
+          requeue terminal rows; controlled replay needs an operator decision.
+        dashboard_url: http://localhost:3000/d/polaris-business-flow
+        runbook_url: https://github.com/abdullahsayed30/Polaris/blob/main/docs/runbooks/durable-delivery.md
+  - eval_time: 1m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 1m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+  - eval_time: 4m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 4m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 4m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 4m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 4m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 4m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 4m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 4m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 4m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+- name: brief scrape interruption does not fire
+  interval: 15s
+  external_labels:
+    environment: alert-test
+  input_series:
+  - series: up{job="gateway",instance="one"}
+    values: 1x3 0x3 1x54
+  - series: up{job="order-service",instance="one"}
+    values: 1x80
+  - series: up{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: up{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_success{job="order-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="order-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_orders{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_order_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="inventory-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="inventory-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="notification-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSING"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSED"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="DEAD_LETTERED"}
+    values: '0x80'
+  alert_rule_test:
+  - eval_time: 8m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+- name: one surviving scraped replica prevents service alert
+  interval: 15s
+  external_labels:
+    environment: alert-test
+  input_series:
+  - series: up{job="gateway",instance="one"}
+    values: '0x80'
+  - series: up{job="order-service",instance="one"}
+    values: 1x80
+  - series: up{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: up{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_success{job="order-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="order-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_orders{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_order_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="inventory-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="inventory-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="notification-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSING"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSED"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="DEAD_LETTERED"}
+    values: '0x80'
+  - series: up{job="gateway",instance="two"}
+    values: 1x80
+  alert_rule_test:
+  - eval_time: 8m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+- name: failed scrape fires then clears
+  interval: 15s
+  external_labels:
+    environment: alert-test
+  input_series:
+  - series: up{job="gateway",instance="one"}
+    values: 1x3 0x12 1x45
+  - series: up{job="order-service",instance="one"}
+    values: 1x80
+  - series: up{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: up{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_success{job="order-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="order-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_orders{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_order_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="inventory-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="inventory-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="notification-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSING"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSED"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="DEAD_LETTERED"}
+    values: '0x80'
+  alert_rule_test:
+  - eval_time: 2m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 2m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 2m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 2m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 2m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 2m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 2m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 2m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 2m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts:
+    - exp_labels:
+        job: gateway
+        severity: warning
+        service: gateway
+        environment: alert-test
+        owner: gateway-owner
+      exp_annotations:
+        summary: gateway has no successful scrape
+        description: No reachable configured target for 2 minutes. This measures monitoring reachability; confirm
+          customer impact separately.
+        dashboard_url: http://localhost:3000/d/polaris-overview
+        runbook_url: https://github.com/abdullahsayed30/Polaris/blob/main/docs/runbooks/service-reachability.md
+  - eval_time: 3m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+  - eval_time: 5m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 5m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 5m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 5m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 5m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 5m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 5m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 5m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 5m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+- name: stale removed scrape target is detected
+  interval: 15s
+  external_labels:
+    environment: alert-test
+  input_series:
+  - series: up{job="gateway",instance="one"}
+    values: 1x3 stale _x56
+  - series: up{job="order-service",instance="one"}
+    values: 1x80
+  - series: up{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: up{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_success{job="order-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="order-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_orders{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_order_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="inventory-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="inventory-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="notification-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSING"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSED"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="DEAD_LETTERED"}
+    values: '0x80'
+  alert_rule_test:
+  - eval_time: 3m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts:
+    - exp_labels:
+        job: gateway
+        severity: warning
+        service: gateway
+        environment: alert-test
+        owner: gateway-owner
+      exp_annotations:
+        summary: gateway has no successful scrape
+        description: No reachable configured target for 2 minutes. This measures monitoring reachability; confirm
+          customer impact separately.
+        dashboard_url: http://localhost:3000/d/polaris-overview
+        runbook_url: https://github.com/abdullahsayed30/Polaris/blob/main/docs/runbooks/service-reachability.md
+  - eval_time: 3m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+- name: order-service sustained server errors with traffic
+  interval: 15s
+  external_labels:
+    environment: alert-test
+  input_series:
+  - series: up{job="gateway",instance="one"}
+    values: 1x80
+  - series: up{job="order-service",instance="one"}
+    values: 1x80
+  - series: up{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: up{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_success{job="order-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="order-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_orders{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_order_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="inventory-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="inventory-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="notification-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSING"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSED"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="DEAD_LETTERED"}
+    values: '0x80'
+  - series: http_server_requests_seconds_count{job="order-service",instance="one",uri="/api/v1/orders",method="POST",status="503"}
+    values: 0+3x32 96x48
+  - series: http_server_requests_seconds_count{job="order-service",instance="one",uri="/api/v1/orders",method="POST",status="201"}
+    values: 0+7x80
+  alert_rule_test:
+  - eval_time: 3m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+  - eval_time: 6m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 6m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 6m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts:
+    - exp_labels:
+        job: order-service
+        severity: critical
+        service: order-service
+        environment: alert-test
+        owner: order-service-owner
+      exp_annotations:
+        summary: order-service order API has sustained system errors
+        description: More than 5 percent server errors for 5 minutes, with at least 20 eligible requests per 5-minute
+          window. Client 4xx and actuator traffic are excluded; this is a demo threshold, not SLO attainment.
+        dashboard_url: http://localhost:3000/d/polaris-overview
+        runbook_url: https://github.com/abdullahsayed30/Polaris/blob/main/docs/runbooks/order-path.md
+  - eval_time: 6m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 6m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 6m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 6m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 6m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 6m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+  - eval_time: 14m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 14m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 14m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 14m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 14m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 14m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 14m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 14m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 14m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+- name: order-service 4xx rejection is excluded
+  interval: 15s
+  external_labels:
+    environment: alert-test
+  input_series:
+  - series: up{job="gateway",instance="one"}
+    values: 1x80
+  - series: up{job="order-service",instance="one"}
+    values: 1x80
+  - series: up{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: up{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_success{job="order-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="order-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_orders{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_order_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="inventory-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="inventory-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="notification-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSING"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSED"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="DEAD_LETTERED"}
+    values: '0x80'
+  - series: http_server_requests_seconds_count{job="order-service",instance="one",uri="/api/v1/orders",method="POST",status="409"}
+    values: 0+10x80
+  - series: http_server_requests_seconds_count{job="order-service",instance="one",uri="/api/v1/orders",method="POST",status="201"}
+    values: 0+10x80
+  alert_rule_test:
+  - eval_time: 8m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+- name: order-service small request volume does not fire
+  interval: 15s
+  external_labels:
+    environment: alert-test
+  input_series:
+  - series: up{job="gateway",instance="one"}
+    values: 1x80
+  - series: up{job="order-service",instance="one"}
+    values: 1x80
+  - series: up{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: up{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_success{job="order-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="order-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_orders{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_order_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="inventory-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="inventory-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="notification-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSING"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSED"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="DEAD_LETTERED"}
+    values: '0x80'
+  - series: http_server_requests_seconds_count{job="order-service",instance="one",uri="/api/v1/orders",method="POST",status="503"}
+    values: 0+0.1x80
+  alert_rule_test:
+  - eval_time: 8m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+- name: order-service zero request volume does not fire
+  interval: 15s
+  external_labels:
+    environment: alert-test
+  input_series:
+  - series: up{job="gateway",instance="one"}
+    values: 1x80
+  - series: up{job="order-service",instance="one"}
+    values: 1x80
+  - series: up{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: up{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_success{job="order-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="order-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_orders{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_order_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="inventory-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="inventory-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="notification-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSING"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSED"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="DEAD_LETTERED"}
+    values: '0x80'
+  - series: http_server_requests_seconds_count{job="order-service",instance="one",uri="/api/v1/orders",method="POST",status="503"}
+    values: '0x80'
+  - series: http_server_requests_seconds_count{job="order-service",instance="one",uri="/api/v1/orders",method="POST",status="201"}
+    values: '0x80'
+  alert_rule_test:
+  - eval_time: 8m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+- name: order-service short server disturbance does not fire
+  interval: 15s
+  external_labels:
+    environment: alert-test
+  input_series:
+  - series: up{job="gateway",instance="one"}
+    values: 1x80
+  - series: up{job="order-service",instance="one"}
+    values: 1x80
+  - series: up{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: up{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_success{job="order-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="order-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_orders{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_order_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="inventory-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="inventory-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="notification-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSING"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSED"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="DEAD_LETTERED"}
+    values: '0x80'
+  - series: http_server_requests_seconds_count{job="order-service",instance="one",uri="/api/v1/orders",method="POST",status="503"}
+    values: 0+3x3 9x57
+  - series: http_server_requests_seconds_count{job="order-service",instance="one",uri="/api/v1/orders",method="POST",status="201"}
+    values: 0+10x80
+  alert_rule_test:
+  - eval_time: 8m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+- name: gateway sustained server errors with traffic
+  interval: 15s
+  external_labels:
+    environment: alert-test
+  input_series:
+  - series: up{job="gateway",instance="one"}
+    values: 1x80
+  - series: up{job="order-service",instance="one"}
+    values: 1x80
+  - series: up{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: up{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_success{job="order-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="order-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_orders{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_order_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="inventory-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="inventory-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="notification-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSING"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSED"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="DEAD_LETTERED"}
+    values: '0x80'
+  - series: spring_cloud_gateway_requests_seconds_count{job="gateway",instance="one",routeId="order-create",httpMethod="POST",status="503"}
+    values: 0+3x32 96x48
+  - series: spring_cloud_gateway_requests_seconds_count{job="gateway",instance="one",routeId="order-create",httpMethod="POST",status="201"}
+    values: 0+7x80
+  alert_rule_test:
+  - eval_time: 3m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+  - eval_time: 6m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 6m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 6m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts:
+    - exp_labels:
+        job: gateway
+        severity: critical
+        service: gateway
+        environment: alert-test
+        owner: gateway-owner
+      exp_annotations:
+        summary: gateway order API has sustained system errors
+        description: More than 5 percent server errors for 5 minutes, with at least 20 eligible requests per 5-minute
+          window. Client 4xx and actuator traffic are excluded; this is a demo threshold, not SLO attainment.
+        dashboard_url: http://localhost:3000/d/polaris-overview
+        runbook_url: https://github.com/abdullahsayed30/Polaris/blob/main/docs/runbooks/order-path.md
+  - eval_time: 6m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 6m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 6m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 6m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 6m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 6m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+  - eval_time: 14m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 14m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 14m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 14m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 14m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 14m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 14m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 14m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 14m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+- name: gateway 4xx rejection is excluded
+  interval: 15s
+  external_labels:
+    environment: alert-test
+  input_series:
+  - series: up{job="gateway",instance="one"}
+    values: 1x80
+  - series: up{job="order-service",instance="one"}
+    values: 1x80
+  - series: up{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: up{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_success{job="order-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="order-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_orders{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_order_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="inventory-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="inventory-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="notification-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSING"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSED"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="DEAD_LETTERED"}
+    values: '0x80'
+  - series: spring_cloud_gateway_requests_seconds_count{job="gateway",instance="one",routeId="order-create",httpMethod="POST",status="409"}
+    values: 0+10x80
+  - series: spring_cloud_gateway_requests_seconds_count{job="gateway",instance="one",routeId="order-create",httpMethod="POST",status="201"}
+    values: 0+10x80
+  alert_rule_test:
+  - eval_time: 8m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+- name: gateway small request volume does not fire
+  interval: 15s
+  external_labels:
+    environment: alert-test
+  input_series:
+  - series: up{job="gateway",instance="one"}
+    values: 1x80
+  - series: up{job="order-service",instance="one"}
+    values: 1x80
+  - series: up{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: up{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_success{job="order-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="order-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_orders{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_order_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="inventory-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="inventory-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="notification-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSING"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSED"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="DEAD_LETTERED"}
+    values: '0x80'
+  - series: spring_cloud_gateway_requests_seconds_count{job="gateway",instance="one",routeId="order-create",httpMethod="POST",status="503"}
+    values: 0+0.1x80
+  alert_rule_test:
+  - eval_time: 8m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+- name: gateway zero request volume does not fire
+  interval: 15s
+  external_labels:
+    environment: alert-test
+  input_series:
+  - series: up{job="gateway",instance="one"}
+    values: 1x80
+  - series: up{job="order-service",instance="one"}
+    values: 1x80
+  - series: up{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: up{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_success{job="order-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="order-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_orders{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_order_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="inventory-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="inventory-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="notification-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSING"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSED"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="DEAD_LETTERED"}
+    values: '0x80'
+  - series: spring_cloud_gateway_requests_seconds_count{job="gateway",instance="one",routeId="order-create",httpMethod="POST",status="503"}
+    values: '0x80'
+  - series: spring_cloud_gateway_requests_seconds_count{job="gateway",instance="one",routeId="order-create",httpMethod="POST",status="201"}
+    values: '0x80'
+  alert_rule_test:
+  - eval_time: 8m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+- name: gateway short server disturbance does not fire
+  interval: 15s
+  external_labels:
+    environment: alert-test
+  input_series:
+  - series: up{job="gateway",instance="one"}
+    values: 1x80
+  - series: up{job="order-service",instance="one"}
+    values: 1x80
+  - series: up{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: up{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_success{job="order-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="order-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_orders{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_order_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="inventory-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="inventory-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="notification-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSING"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSED"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="DEAD_LETTERED"}
+    values: '0x80'
+  - series: spring_cloud_gateway_requests_seconds_count{job="gateway",instance="one",routeId="order-create",httpMethod="POST",status="503"}
+    values: 0+3x3 9x57
+  - series: spring_cloud_gateway_requests_seconds_count{job="gateway",instance="one",routeId="order-create",httpMethod="POST",status="201"}
+    values: 0+10x80
+  alert_rule_test:
+  - eval_time: 8m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+- name: gRPC system errors pending fire and recover
+  interval: 15s
+  external_labels:
+    environment: alert-test
+  input_series:
+  - series: up{job="gateway",instance="one"}
+    values: 1x80
+  - series: up{job="order-service",instance="one"}
+    values: 1x80
+  - series: up{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: up{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_success{job="order-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="order-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_orders{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_order_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="inventory-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="inventory-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="notification-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSING"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSED"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="DEAD_LETTERED"}
+    values: '0x80'
+  - series: grpc_client_processing_duration_seconds_count{job="order-service",instance="one",service="polaris.inventory.v1.InventoryService",method="ReserveStock",methodType="UNARY",statusCode="UNAVAILABLE"}
+    values: 0+3x32 96x48
+  - series: grpc_client_processing_duration_seconds_count{job="order-service",instance="one",service="polaris.inventory.v1.InventoryService",method="ReserveStock",methodType="UNARY",statusCode="OK"}
+    values: 0+7x80
+  alert_rule_test:
+  - eval_time: 3m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+  - eval_time: 6m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 6m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 6m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 6m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts:
+    - exp_labels:
+        job: order-service
+        severity: critical
+        service: inventory-service
+        environment: alert-test
+        owner: inventory-service-owner
+      exp_annotations:
+        summary: Inventory reservation RPC has sustained system errors
+        description: More than 5 percent system failures for 5 minutes, with at least 20 eligible ReserveStock calls
+          per 5-minute window. Expected precondition/input/auth rejections are excluded. Inspect the order client
+          and inventory service.
+        dashboard_url: http://localhost:3000/d/polaris-grpc
+        runbook_url: https://github.com/abdullahsayed30/Polaris/blob/main/docs/runbooks/order-path.md
+  - eval_time: 6m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 6m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 6m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 6m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 6m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+  - eval_time: 14m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 14m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 14m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 14m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 14m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 14m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 14m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 14m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 14m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+- name: gRPC business input and precondition rejections are excluded
+  interval: 15s
+  external_labels:
+    environment: alert-test
+  input_series:
+  - series: up{job="gateway",instance="one"}
+    values: 1x80
+  - series: up{job="order-service",instance="one"}
+    values: 1x80
+  - series: up{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: up{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_success{job="order-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="order-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_orders{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_order_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="inventory-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="inventory-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="notification-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSING"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSED"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="DEAD_LETTERED"}
+    values: '0x80'
+  - series: grpc_client_processing_duration_seconds_count{job="order-service",instance="one",service="polaris.inventory.v1.InventoryService",method="ReserveStock",methodType="UNARY",statusCode="FAILED_PRECONDITION"}
+    values: 0+20x80
+  - series: grpc_client_processing_duration_seconds_count{job="order-service",instance="one",service="polaris.inventory.v1.InventoryService",method="ReserveStock",methodType="UNARY",statusCode="INVALID_ARGUMENT"}
+    values: 0+10x80
+  - series: grpc_client_processing_duration_seconds_count{job="order-service",instance="one",service="polaris.inventory.v1.InventoryService",method="ReserveStock",methodType="UNARY",statusCode="OK"}
+    values: 0+10x80
+  alert_rule_test:
+  - eval_time: 8m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+- name: gRPC low traffic and observation family are not double counted
+  interval: 15s
+  external_labels:
+    environment: alert-test
+  input_series:
+  - series: up{job="gateway",instance="one"}
+    values: 1x80
+  - series: up{job="order-service",instance="one"}
+    values: 1x80
+  - series: up{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: up{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_success{job="order-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="order-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_orders{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_order_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="inventory-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="inventory-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="notification-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSING"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSED"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="DEAD_LETTERED"}
+    values: '0x80'
+  - series: grpc_client_processing_duration_seconds_count{job="order-service",instance="one",service="polaris.inventory.v1.InventoryService",method="ReserveStock",methodType="UNARY",statusCode="UNAVAILABLE"}
+    values: 0+0.1x80
+  - series: grpc_client_seconds_count{job="order-service",grpc_status="UNAVAILABLE"}
+    values: 0+100x80
+  alert_rule_test:
+  - eval_time: 8m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+- name: DLQ acknowledged is an attempt signal then ages out
+  interval: 15s
+  external_labels:
+    environment: alert-test
+  input_series:
+  - series: up{job="gateway",instance="one"}
+    values: 1x80
+  - series: up{job="order-service",instance="one"}
+    values: 1x80
+  - series: up{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: up{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_success{job="order-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="order-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_orders{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_order_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="inventory-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="inventory-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="notification-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSING"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSED"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="DEAD_LETTERED"}
+    values: '0x80'
+  - series: polaris_notification_dlq_publications_total{job="notification-service",instance="one",outcome="acknowledged"}
+    values: 0x3 1x57
+  alert_rule_test:
+  - eval_time: 1m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 1m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 1m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 1m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 1m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 1m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 1m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 1m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 1m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisNotificationFailures
+    exp_alerts:
+    - exp_labels:
+        job: notification-service
+        severity: warning
+        service: notification-service
+        environment: alert-test
+        owner: notification-service-owner
+      exp_annotations:
+        summary: Notification processing or dead-letter delivery needs investigation
+        description: New failed/acknowledged DLQ sends or committed dead-letter observations in the last 5 minutes.
+          These observations are not queue depth or unique failures; failed DLQ sends retain the source record.
+          Delivery is simulated.
+        dashboard_url: http://localhost:3000/d/polaris-business-flow
+        runbook_url: https://github.com/abdullahsayed30/Polaris/blob/main/docs/runbooks/notification-processing.md
+  - eval_time: 3m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+- name: DLQ failed is an attempt signal then ages out
+  interval: 15s
+  external_labels:
+    environment: alert-test
+  input_series:
+  - series: up{job="gateway",instance="one"}
+    values: 1x80
+  - series: up{job="order-service",instance="one"}
+    values: 1x80
+  - series: up{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: up{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_success{job="order-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="order-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_orders{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_order_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="inventory-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="inventory-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="notification-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSING"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSED"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="DEAD_LETTERED"}
+    values: '0x80'
+  - series: polaris_notification_dlq_publications_total{job="notification-service",instance="one",outcome="failed"}
+    values: 0x3 1x57
+  alert_rule_test:
+  - eval_time: 1m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 1m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 1m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 1m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 1m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 1m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 1m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 1m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 1m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisNotificationFailures
+    exp_alerts:
+    - exp_labels:
+        job: notification-service
+        severity: warning
+        service: notification-service
+        environment: alert-test
+        owner: notification-service-owner
+      exp_annotations:
+        summary: Notification processing or dead-letter delivery needs investigation
+        description: New failed/acknowledged DLQ sends or committed dead-letter observations in the last 5 minutes.
+          These observations are not queue depth or unique failures; failed DLQ sends retain the source record.
+          Delivery is simulated.
+        dashboard_url: http://localhost:3000/d/polaris-business-flow
+        runbook_url: https://github.com/abdullahsayed30/Polaris/blob/main/docs/runbooks/notification-processing.md
+  - eval_time: 3m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+- name: committed terminal notification outcome is visible
+  interval: 15s
+  external_labels:
+    environment: alert-test
+  input_series:
+  - series: up{job="gateway",instance="one"}
+    values: 1x80
+  - series: up{job="order-service",instance="one"}
+    values: 1x80
+  - series: up{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: up{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_success{job="order-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="order-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_orders{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_order_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="inventory-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="inventory-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="notification-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSING"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSED"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="DEAD_LETTERED"}
+    values: '0x80'
+  - series: polaris_notification_completions_total{job="notification-service",instance="one",event_type="OrderCreated",outcome="dead_lettered"}
+    values: 0x3 1x57
+  alert_rule_test:
+  - eval_time: 3m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisNotificationFailures
+    exp_alerts:
+    - exp_labels:
+        job: notification-service
+        severity: warning
+        service: notification-service
+        environment: alert-test
+        owner: notification-service-owner
+      exp_annotations:
+        summary: Notification processing or dead-letter delivery needs investigation
+        description: New failed/acknowledged DLQ sends or committed dead-letter observations in the last 5 minutes.
+          These observations are not queue depth or unique failures; failed DLQ sends retain the source record.
+          Delivery is simulated.
+        dashboard_url: http://localhost:3000/d/polaris-business-flow
+        runbook_url: https://github.com/abdullahsayed30/Polaris/blob/main/docs/runbooks/notification-processing.md
+  - eval_time: 3m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+- name: late completed notifications fire and recover
+  interval: 15s
+  external_labels:
+    environment: alert-test
+  input_series:
+  - series: up{job="gateway",instance="one"}
+    values: 1x80
+  - series: up{job="order-service",instance="one"}
+    values: 1x80
+  - series: up{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: up{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_success{job="order-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="order-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_orders{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_order_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="inventory-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="inventory-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="notification-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSING"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSED"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="DEAD_LETTERED"}
+    values: '0x80'
+  - series: polaris_notification_freshness_seconds_count{job="notification-service",instance="one",event_type="OrderCreated"}
+    values: 0+10x80
+  - series: polaris_notification_freshness_seconds_bucket{job="notification-service",instance="one",event_type="OrderCreated",le="3600.0"}
+    values: 0+7x32 224+20x48
+  alert_rule_test:
+  - eval_time: 3m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+  - eval_time: 6m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 6m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 6m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 6m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 6m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 6m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 6m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 6m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 6m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts:
+    - exp_labels:
+        job: notification-service
+        severity: warning
+        service: notification-service
+        environment: alert-test
+        owner: notification-service-owner
+        event_type: OrderCreated
+      exp_annotations:
+        summary: Simulated OrderCreated processing is delayed
+        description: More than 5 percent of at least 20 completed samples per 5-minute window took over one hour
+          for 5 minutes. Includes overflow without a capped quantile. Does not detect unseen broker backlog or prove
+          external delivery.
+        dashboard_url: http://localhost:3000/d/polaris-business-flow
+        runbook_url: https://github.com/abdullahsayed30/Polaris/blob/main/docs/runbooks/notification-processing.md
+  - eval_time: 14m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 14m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 14m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 14m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 14m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 14m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 14m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 14m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 14m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+- name: zero completions do not fabricate freshness
+  interval: 15s
+  external_labels:
+    environment: alert-test
+  input_series:
+  - series: up{job="gateway",instance="one"}
+    values: 1x80
+  - series: up{job="order-service",instance="one"}
+    values: 1x80
+  - series: up{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: up{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_success{job="order-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="order-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_orders{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_order_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="inventory-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="inventory-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="notification-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSING"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSED"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="DEAD_LETTERED"}
+    values: '0x80'
+  - series: polaris_notification_freshness_seconds_count{job="notification-service",instance="one",event_type="OrderCreated"}
+    values: '0x80'
+  - series: polaris_notification_freshness_seconds_bucket{job="notification-service",instance="one",event_type="OrderCreated",le="3600.0"}
+    values: '0x80'
+  alert_rule_test:
+  - eval_time: 8m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+- name: rare late completion below traffic guard does not fire
+  interval: 15s
+  external_labels:
+    environment: alert-test
+  input_series:
+  - series: up{job="gateway",instance="one"}
+    values: 1x80
+  - series: up{job="order-service",instance="one"}
+    values: 1x80
+  - series: up{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: up{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_success{job="order-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="order-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_orders{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_order_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="inventory-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="inventory-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="notification-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSING"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSED"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="DEAD_LETTERED"}
+    values: '0x80'
+  - series: polaris_notification_freshness_seconds_count{job="notification-service",instance="one",event_type="OrderCreated"}
+    values: 0+0.1x80
+  - series: polaris_notification_freshness_seconds_bucket{job="notification-service",instance="one",event_type="OrderCreated",le="3600.0"}
+    values: '0x80'
+  alert_rule_test:
+  - eval_time: 8m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+- name: missing finite bucket during rolling upgrade signals telemetry gap
+  interval: 15s
+  external_labels:
+    environment: alert-test
+  input_series:
+  - series: up{job="gateway",instance="one"}
+    values: 1x80
+  - series: up{job="order-service",instance="one"}
+    values: 1x80
+  - series: up{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: up{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_success{job="order-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="order-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_orders{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_order_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="inventory-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="inventory-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="notification-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSING"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSED"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="DEAD_LETTERED"}
+    values: '0x80'
+  - series: polaris_notification_freshness_seconds_count{job="notification-service",instance="one",event_type="OrderCreated"}
+    values: 0+10x80
+  alert_rule_test:
+  - eval_time: 3m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts:
+    - exp_labels:
+        job: notification-service
+        severity: warning
+        service: notification-service
+        environment: alert-test
+        owner: notification-service-owner
+      exp_annotations:
+        summary: notification-service business telemetry is unavailable
+        description: No complete successful business snapshot younger than 45 seconds with a non-future timestamp,
+          or a notification freshness bucket is missing. Backlog silence is not recovery.
+        dashboard_url: http://localhost:3000/d/polaris-business-flow
+        runbook_url: https://github.com/abdullahsayed30/Polaris/blob/main/docs/runbooks/business-telemetry.md
+  - eval_time: 3m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+- name: more than five percent seven-day overflow still fires without a capped quantile
+  interval: 15s
+  external_labels:
+    environment: alert-test
+  input_series:
+  - series: up{job="gateway",instance="one"}
+    values: 1x80
+  - series: up{job="order-service",instance="one"}
+    values: 1x80
+  - series: up{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: up{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_success{job="order-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="order-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_orders{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_order_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="inventory-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="inventory-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="notification-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSING"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSED"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="DEAD_LETTERED"}
+    values: '0x80'
+  - series: polaris_notification_freshness_seconds_count{job="notification-service",instance="one",event_type="OrderCreated"}
+    values: 0+10x80
+  - series: polaris_notification_freshness_seconds_bucket{job="notification-service",instance="one",event_type="OrderCreated",le="3600.0"}
+    values: 0+9x80
+  - series: polaris_notification_freshness_seconds_bucket{job="notification-service",instance="one",event_type="OrderCreated",le="604800.0"}
+    values: 0+9x80
+  - series: polaris_notification_freshness_overflow_total{job="notification-service",instance="one",event_type="OrderCreated"}
+    values: 0+1x80
+  alert_rule_test:
+  - eval_time: 6m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 6m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 6m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 6m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 6m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 6m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 6m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 6m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 6m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts:
+    - exp_labels:
+        job: notification-service
+        severity: warning
+        service: notification-service
+        environment: alert-test
+        owner: notification-service-owner
+        event_type: OrderCreated
+      exp_annotations:
+        summary: Simulated OrderCreated processing is delayed
+        description: More than 5 percent of at least 20 completed samples per 5-minute window took over one hour
+          for 5 minutes. Includes overflow without a capped quantile. Does not detect unseen broker backlog or prove
+          external delivery.
+        dashboard_url: http://localhost:3000/d/polaris-business-flow
+        runbook_url: https://github.com/abdullahsayed30/Polaris/blob/main/docs/runbooks/notification-processing.md
+- name: exact five percent slow samples do not breach greater-than threshold
+  interval: 15s
+  external_labels:
+    environment: alert-test
+  input_series:
+  - series: up{job="gateway",instance="one"}
+    values: 1x80
+  - series: up{job="order-service",instance="one"}
+    values: 1x80
+  - series: up{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: up{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_success{job="order-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="order-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_orders{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_order_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="inventory-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="inventory-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="notification-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSING"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSED"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="DEAD_LETTERED"}
+    values: '0x80'
+  - series: polaris_notification_freshness_seconds_count{job="notification-service",instance="one",event_type="OrderCreated"}
+    values: 0+20x80
+  - series: polaris_notification_freshness_seconds_bucket{job="notification-service",instance="one",event_type="OrderCreated",le="3600.0"}
+    values: 0+19x80
+  alert_rule_test:
+  - eval_time: 8m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+- name: rolling upgrade excludes old histogram counts while exposing missing bucket
+  interval: 15s
+  external_labels:
+    environment: alert-test
+  input_series:
+  - series: up{job="gateway",instance="one"}
+    values: 1x80
+  - series: up{job="order-service",instance="one"}
+    values: 1x80
+  - series: up{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: up{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_success{job="order-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="order-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_orders{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_order_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="inventory-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="inventory-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="notification-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSING"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSED"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="DEAD_LETTERED"}
+    values: '0x80'
+  - series: polaris_notification_freshness_seconds_count{job="notification-service",instance="one",event_type="OrderCreated"}
+    values: 0+10x80
+  - series: polaris_notification_freshness_seconds_bucket{job="notification-service",instance="one",event_type="OrderCreated",le="3600.0"}
+    values: 0+10x80
+  - series: polaris_notification_freshness_seconds_count{job="notification-service",instance="old",event_type="OrderCreated"}
+    values: 0+100x80
+  alert_rule_test:
+  - eval_time: 6m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 6m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts:
+    - exp_labels:
+        job: notification-service
+        severity: warning
+        service: notification-service
+        environment: alert-test
+        owner: notification-service-owner
+      exp_annotations:
+        summary: notification-service business telemetry is unavailable
+        description: No complete successful business snapshot younger than 45 seconds with a non-future timestamp,
+          or a notification freshness bucket is missing. Backlog silence is not recovery.
+        dashboard_url: http://localhost:3000/d/polaris-business-flow
+        runbook_url: https://github.com/abdullahsayed30/Polaris/blob/main/docs/runbooks/business-telemetry.md
+  - eval_time: 6m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 6m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 6m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 6m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 6m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 6m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 6m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+- name: fresh complete replicas share row gauges without doubling counts
+  interval: 15s
+  external_labels:
+    environment: alert-test
+  input_series:
+  - series: up{job="gateway",instance="one"}
+    values: 1x80
+  - series: up{job="order-service",instance="one"}
+    values: 1x80
+  - series: up{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: up{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_success{job="order-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="order-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_orders{job="order-service",instance="one"}
+    values: 2x80
+  - series: polaris_pending_order_oldest_age_seconds{job="order-service",instance="one"}
+    values: 50x80
+  - series: polaris_observability_snapshot_success{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="inventory-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="inventory-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="notification-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSING"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSED"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="DEAD_LETTERED"}
+    values: '0x80'
+  - series: up{job="order-service",instance="two"}
+    values: 1x80
+  - series: polaris_observability_snapshot_success{job="order-service",instance="two"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="order-service",instance="two"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="order-service",instance="two",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="two",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="two",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="two",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="order-service",instance="two"}
+    values: '0x80'
+  - series: polaris_pending_orders{job="order-service",instance="two"}
+    values: '0x80'
+  - series: polaris_pending_order_oldest_age_seconds{job="order-service",instance="two"}
+    values: '0x80'
+  alert_rule_test:
+  - eval_time: 8m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+  promql_expr_test:
+  - expr: max by(job) (polaris_pending_orders and on(job,instance) polaris:business_snapshot_valid)
+    eval_time: 5m
+    exp_samples:
+    - labels: '{job="order-service"}'
+      value: 2
+- name: snapshot at exactly forty-five seconds is stale
+  interval: 15s
+  external_labels:
+    environment: alert-test
+  input_series:
+  - series: up{job="gateway",instance="one"}
+    values: 1x80
+  - series: up{job="order-service",instance="one"}
+    values: 1x80
+  - series: up{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: up{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_success{job="order-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="order-service",instance="one"}
+    values: -45+15x80
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_orders{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_order_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="inventory-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="inventory-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="notification-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSING"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSED"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="DEAD_LETTERED"}
+    values: '0x80'
+  alert_rule_test:
+  - eval_time: 2m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 2m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts:
+    - exp_labels:
+        job: order-service
+        severity: warning
+        service: order-service
+        environment: alert-test
+        owner: order-service-owner
+      exp_annotations:
+        summary: order-service business telemetry is unavailable
+        description: No complete successful business snapshot younger than 45 seconds with a non-future timestamp,
+          or a notification freshness bucket is missing. Backlog silence is not recovery.
+        dashboard_url: http://localhost:3000/d/polaris-business-flow
+        runbook_url: https://github.com/abdullahsayed30/Polaris/blob/main/docs/runbooks/business-telemetry.md
+  - eval_time: 2m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 2m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 2m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 2m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 2m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 2m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 2m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+- name: brief snapshot sampling failure clears before persistence expires
+  interval: 15s
+  external_labels:
+    environment: alert-test
+  input_series:
+  - series: up{job="gateway",instance="one"}
+    values: 1x80
+  - series: up{job="order-service",instance="one"}
+    values: 1x80
+  - series: up{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: up{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_success{job="order-service",instance="one"}
+    values: 1x3 0x3 1x54
+  - series: polaris_observability_snapshot_timestamp_seconds{job="order-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_orders{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_order_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="inventory-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="inventory-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="notification-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSING"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSED"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="DEAD_LETTERED"}
+    values: '0x80'
+  alert_rule_test:
+  - eval_time: 8m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+- name: brief gRPC system disturbance does not persist five minutes
+  interval: 15s
+  external_labels:
+    environment: alert-test
+  input_series:
+  - series: up{job="gateway",instance="one"}
+    values: 1x80
+  - series: up{job="order-service",instance="one"}
+    values: 1x80
+  - series: up{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: up{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_success{job="order-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="order-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_orders{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_order_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="inventory-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="inventory-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="notification-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSING"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSED"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="DEAD_LETTERED"}
+    values: '0x80'
+  - series: grpc_client_processing_duration_seconds_count{job="order-service",instance="one",service="polaris.inventory.v1.InventoryService",method="ReserveStock",methodType="UNARY",statusCode="UNAVAILABLE"}
+    values: 0+3x3 9x57
+  - series: grpc_client_processing_duration_seconds_count{job="order-service",instance="one",service="polaris.inventory.v1.InventoryService",method="ReserveStock",methodType="UNARY",statusCode="OK"}
+    values: 0+10x80
+  alert_rule_test:
+  - eval_time: 8m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []
+- name: notification counter restart is not a new terminal outcome
+  interval: 15s
+  external_labels:
+    environment: alert-test
+  input_series:
+  - series: up{job="gateway",instance="one"}
+    values: 1x80
+  - series: up{job="order-service",instance="one"}
+    values: 1x80
+  - series: up{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: up{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_success{job="order-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="order-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="order-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_orders{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_pending_order_oldest_age_seconds{job="order-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="inventory-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="inventory-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PENDING"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="RETRY"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="FAILED"}
+    values: '0x80'
+  - series: polaris_outbox_events{job="inventory-service",instance="one",status="PUBLISHED"}
+    values: '0x80'
+  - series: polaris_outbox_oldest_age_seconds{job="inventory-service",instance="one"}
+    values: '0x80'
+  - series: polaris_observability_snapshot_success{job="notification-service",instance="one"}
+    values: 1x80
+  - series: polaris_observability_snapshot_timestamp_seconds{job="notification-service",instance="one"}
+    values: 0+15x80
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSING"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="PROCESSED"}
+    values: '0x80'
+  - series: polaris_notification_inbox_events{job="notification-service",instance="one",status="DEAD_LETTERED"}
+    values: '0x80'
+  - series: polaris_notification_dlq_publications_total{job="notification-service",instance="one",outcome="failed"}
+    values: 10x3 0x57
+  alert_rule_test:
+  - eval_time: 8m
+    alertname: PolarisServiceScrapeUnavailable
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisBusinessTelemetryUnavailable
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOrderApiSystemErrors
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisInventoryRpcSystemErrors
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisPendingOrdersStalled
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOutboxStalled
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisOutboxFailed
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisNotificationFailures
+    exp_alerts: []
+  - eval_time: 8m
+    alertname: PolarisNotificationProcessingLate
+    exp_alerts: []

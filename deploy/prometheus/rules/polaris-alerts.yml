@@ -1,0 +1,167 @@
+# Local demo objectives, not measured production SLOs. See docs/operations.md.
+groups:
+- name: polaris-operational
+  rules:
+  - record: polaris:business_snapshot_valid
+    expr: (up{job=~"order-service|inventory-service|notification-service"} == 1 and on(job,instance) (polaris_observability_snapshot_success
+      == 1) and on(job,instance) (time() - polaris_observability_snapshot_timestamp_seconds >= 0) and on(job,instance)
+      (time() - polaris_observability_snapshot_timestamp_seconds < 45)) and on(job,instance) ((((count by(job,instance)
+      (polaris_outbox_events{status=~"PENDING|RETRY|FAILED|PUBLISHED"} >= 0) == 4) and on(job,instance) (polaris_outbox_oldest_age_seconds
+      >= 0)) and on(job,instance) (polaris_pending_orders{job="order-service"} >= 0) and on(job,instance) (polaris_pending_order_oldest_age_seconds{job="order-service"}
+      >= 0)) or (((count by(job,instance) (polaris_outbox_events{status=~"PENDING|RETRY|FAILED|PUBLISHED"} >= 0)
+      == 4) and on(job,instance) (polaris_outbox_oldest_age_seconds >= 0)) and on(job,instance) up{job="inventory-service"})
+      or ((count by(job,instance) (polaris_notification_inbox_events{job="notification-service",status=~"PROCESSING|PROCESSED|DEAD_LETTERED"}
+      >= 0) == 3)))
+  - alert: PolarisServiceScrapeUnavailable
+    expr: (sum by (job) (up{job=~"gateway|order-service|inventory-service|notification-service"}) == 0) or absent(up{job="gateway"})
+      or absent(up{job="order-service"}) or absent(up{job="inventory-service"}) or absent(up{job="notification-service"})
+    for: 2m
+    labels:
+      severity: warning
+      service: '{{ $labels.job }}'
+      environment: '{{ $externalLabels.environment }}'
+      owner: '{{ $labels.job }}-owner'
+    annotations:
+      summary: '{{ $labels.job }} has no successful scrape'
+      description: No reachable configured target for 2 minutes. This measures monitoring reachability; confirm
+        customer impact separately.
+      dashboard_url: http://localhost:3000/d/polaris-overview
+      runbook_url: https://github.com/abdullahsayed30/Polaris/blob/main/docs/runbooks/service-reachability.md
+  - alert: PolarisBusinessTelemetryUnavailable
+    expr: count by(job) (up{job=~"order-service|inventory-service|notification-service"} == 1) unless on(job) count
+      by(job) (polaris:business_snapshot_valid) or (count by(job) (polaris_notification_freshness_seconds_count{job="notification-service"}
+      unless on(job,instance,event_type) polaris_notification_freshness_seconds_bucket{job="notification-service",le="3600.0"}))
+    for: 2m
+    labels:
+      severity: warning
+      service: '{{ $labels.job }}'
+      environment: '{{ $externalLabels.environment }}'
+      owner: '{{ $labels.job }}-owner'
+    annotations:
+      summary: '{{ $labels.job }} business telemetry is unavailable'
+      description: No complete successful business snapshot younger than 45 seconds with a non-future timestamp,
+        or a notification freshness bucket is missing. Backlog silence is not recovery.
+      dashboard_url: http://localhost:3000/d/polaris-business-flow
+      runbook_url: https://github.com/abdullahsayed30/Polaris/blob/main/docs/runbooks/business-telemetry.md
+  - alert: PolarisOrderApiSystemErrors
+    expr: (sum by(job) (rate(http_server_requests_seconds_count{job="order-service",uri=~"/api/v1/orders.*",status=~"5.."}[5m]))
+      / sum by(job) (rate(http_server_requests_seconds_count{job="order-service",uri=~"/api/v1/orders.*",status=~"2..|3..|5.."}[5m]))
+      > 0.05 and on(job) sum by(job) (increase(http_server_requests_seconds_count{job="order-service",uri=~"/api/v1/orders.*",status=~"2..|3..|5.."}[5m]))
+      >= 20) or (sum by(job) (rate(spring_cloud_gateway_requests_seconds_count{job="gateway",routeId=~"order-create|order-read",status=~"5.."}[5m]))
+      / sum by(job) (rate(spring_cloud_gateway_requests_seconds_count{job="gateway",routeId=~"order-create|order-read",status=~"2..|3..|5.."}[5m]))
+      > 0.05 and on(job) sum by(job) (increase(spring_cloud_gateway_requests_seconds_count{job="gateway",routeId=~"order-create|order-read",status=~"2..|3..|5.."}[5m]))
+      >= 20)
+    for: 5m
+    labels:
+      severity: critical
+      service: '{{ $labels.job }}'
+      environment: '{{ $externalLabels.environment }}'
+      owner: '{{ $labels.job }}-owner'
+    annotations:
+      summary: '{{ $labels.job }} order API has sustained system errors'
+      description: More than 5 percent server errors for 5 minutes, with at least 20 eligible requests per 5-minute
+        window. Client 4xx and actuator traffic are excluded; this is a demo threshold, not SLO attainment.
+      dashboard_url: http://localhost:3000/d/polaris-overview
+      runbook_url: https://github.com/abdullahsayed30/Polaris/blob/main/docs/runbooks/order-path.md
+  - alert: PolarisInventoryRpcSystemErrors
+    expr: sum by(job) (rate(grpc_client_processing_duration_seconds_count{job="order-service",service="polaris.inventory.v1.InventoryService",method="ReserveStock",statusCode=~"UNKNOWN|INTERNAL|UNAVAILABLE|DEADLINE_EXCEEDED|DATA_LOSS|RESOURCE_EXHAUSTED"}[5m]))
+      / sum by(job) (rate(grpc_client_processing_duration_seconds_count{job="order-service",service="polaris.inventory.v1.InventoryService",method="ReserveStock",statusCode=~"OK|UNKNOWN|INTERNAL|UNAVAILABLE|DEADLINE_EXCEEDED|DATA_LOSS|RESOURCE_EXHAUSTED"}[5m]))
+      > 0.05 and on(job) sum by(job) (increase(grpc_client_processing_duration_seconds_count{job="order-service",service="polaris.inventory.v1.InventoryService",method="ReserveStock",statusCode=~"OK|UNKNOWN|INTERNAL|UNAVAILABLE|DEADLINE_EXCEEDED|DATA_LOSS|RESOURCE_EXHAUSTED"}[5m]))
+      >= 20
+    for: 5m
+    labels:
+      severity: critical
+      service: inventory-service
+      environment: '{{ $externalLabels.environment }}'
+      owner: inventory-service-owner
+    annotations:
+      summary: Inventory reservation RPC has sustained system errors
+      description: More than 5 percent system failures for 5 minutes, with at least 20 eligible ReserveStock calls
+        per 5-minute window. Expected precondition/input/auth rejections are excluded. Inspect the order client
+        and inventory service.
+      dashboard_url: http://localhost:3000/d/polaris-grpc
+      runbook_url: https://github.com/abdullahsayed30/Polaris/blob/main/docs/runbooks/order-path.md
+  - alert: PolarisPendingOrdersStalled
+    expr: max by(job) ((polaris_pending_order_oldest_age_seconds{job="order-service"}) and on(job,instance) polaris:business_snapshot_valid)
+      > 120 and on(job) max by(job) ((polaris_pending_orders{job="order-service"}) and on(job,instance) polaris:business_snapshot_valid)
+      > 0
+    for: 2m
+    labels:
+      severity: warning
+      service: '{{ $labels.job }}'
+      environment: '{{ $externalLabels.environment }}'
+      owner: '{{ $labels.job }}-owner'
+    annotations:
+      summary: Pending orders are not converging
+      description: Oldest committed pending order exceeds 120 seconds for 2 minutes with a valid snapshot. Preserve
+        the original order and reservation identity.
+      dashboard_url: http://localhost:3000/d/polaris-business-flow
+      runbook_url: https://github.com/abdullahsayed30/Polaris/blob/main/docs/runbooks/durable-delivery.md
+  - alert: PolarisOutboxStalled
+    expr: max by(job) ((polaris_outbox_oldest_age_seconds{job=~"order-service|inventory-service"}) and on(job,instance)
+      polaris:business_snapshot_valid) > 120 and on(job) max by(job) ((polaris_outbox_events{job=~"order-service|inventory-service",status=~"PENDING|RETRY"})
+      and on(job,instance) polaris:business_snapshot_valid) > 0
+    for: 2m
+    labels:
+      severity: warning
+      service: '{{ $labels.job }}'
+      environment: '{{ $externalLabels.environment }}'
+      owner: '{{ $labels.job }}-owner'
+    annotations:
+      summary: '{{ $labels.job }} outbox delivery is stalled'
+      description: Oldest committed pending/retry row exceeds 120 seconds for 2 minutes. Replica views are not summed;
+        acknowledged attempts alone do not prove database publication state.
+      dashboard_url: http://localhost:3000/d/polaris-business-flow
+      runbook_url: https://github.com/abdullahsayed30/Polaris/blob/main/docs/runbooks/durable-delivery.md
+  - alert: PolarisOutboxFailed
+    expr: max by(job) ((polaris_outbox_events{job=~"order-service|inventory-service",status="FAILED"}) and on(job,instance)
+      polaris:business_snapshot_valid) > 0
+    for: 1m
+    labels:
+      severity: critical
+      service: '{{ $labels.job }}'
+      environment: '{{ $externalLabels.environment }}'
+      owner: '{{ $labels.job }}-owner'
+    annotations:
+      summary: '{{ $labels.job }} has terminally failed outbox work'
+      description: At least one retained committed FAILED row for 1 minute. Restoring Kafka does not automatically
+        requeue terminal rows; controlled replay needs an operator decision.
+      dashboard_url: http://localhost:3000/d/polaris-business-flow
+      runbook_url: https://github.com/abdullahsayed30/Polaris/blob/main/docs/runbooks/durable-delivery.md
+  - alert: PolarisNotificationFailures
+    expr: sum by(job) (increase(polaris_notification_dlq_publications_total{job="notification-service",outcome=~"failed|acknowledged"}[5m]))
+      > 0 or sum by(job) (increase(polaris_notification_completions_total{job="notification-service",outcome="dead_lettered"}[5m]))
+      > 0
+    for: 1m
+    labels:
+      severity: warning
+      service: '{{ $labels.job }}'
+      environment: '{{ $externalLabels.environment }}'
+      owner: '{{ $labels.job }}-owner'
+    annotations:
+      summary: Notification processing or dead-letter delivery needs investigation
+      description: New failed/acknowledged DLQ sends or committed dead-letter observations in the last 5 minutes.
+        These observations are not queue depth or unique failures; failed DLQ sends retain the source record. Delivery
+        is simulated.
+      dashboard_url: http://localhost:3000/d/polaris-business-flow
+      runbook_url: https://github.com/abdullahsayed30/Polaris/blob/main/docs/runbooks/notification-processing.md
+  - alert: PolarisNotificationProcessingLate
+    expr: (1 - sum by(job,event_type) (rate(polaris_notification_freshness_seconds_bucket{job="notification-service",le="3600.0"}[5m]))
+      / sum by(job,event_type) (rate(polaris_notification_freshness_seconds_count{job="notification-service"}[5m])
+      and on(job,instance,event_type) rate(polaris_notification_freshness_seconds_bucket{job="notification-service",le="3600.0"}[5m])))
+      > 0.05 and on(job,event_type) sum by(job,event_type) (increase(polaris_notification_freshness_seconds_count{job="notification-service"}[5m])
+      and on(job,instance,event_type) increase(polaris_notification_freshness_seconds_bucket{job="notification-service",le="3600.0"}[5m]))
+      >= 20
+    for: 5m
+    labels:
+      severity: warning
+      service: '{{ $labels.job }}'
+      environment: '{{ $externalLabels.environment }}'
+      owner: '{{ $labels.job }}-owner'
+    annotations:
+      summary: Simulated {{ $labels.event_type }} processing is delayed
+      description: More than 5 percent of at least 20 completed samples per 5-minute window took over one hour for
+        5 minutes. Includes overflow without a capped quantile. Does not detect unseen broker backlog or prove external
+        delivery.
+      dashboard_url: http://localhost:3000/d/polaris-business-flow
+      runbook_url: https://github.com/abdullahsayed30/Polaris/blob/main/docs/runbooks/notification-processing.md

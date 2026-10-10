@@ -1,0 +1,556 @@
+{
+  "at": "2026-10-10T02:47:51.064432+00:00",
+  "queries": {
+    "up": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": [
+          {
+            "metric": {
+              "__name__": "up",
+              "instance": "order-service:8081",
+              "job": "order-service"
+            },
+            "value": [
+              1791600471.063,
+              "1"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "up",
+              "instance": "inventory-service:8082",
+              "job": "inventory-service"
+            },
+            "value": [
+              1791600471.063,
+              "1"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "up",
+              "instance": "gateway:8080",
+              "job": "gateway"
+            },
+            "value": [
+              1791600471.063,
+              "1"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "up",
+              "instance": "notification-service:8083",
+              "job": "notification-service"
+            },
+            "value": [
+              1791600471.063,
+              "1"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "up",
+              "instance": "prometheus:9090",
+              "job": "prometheus"
+            },
+            "value": [
+              1791600471.063,
+              "1"
+            ]
+          }
+        ]
+      }
+    },
+    "polaris:business_snapshot_valid": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": [
+          {
+            "metric": {
+              "__name__": "polaris:business_snapshot_valid",
+              "instance": "notification-service:8083",
+              "job": "notification-service"
+            },
+            "value": [
+              1791600471.064,
+              "1"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "polaris:business_snapshot_valid",
+              "instance": "inventory-service:8082",
+              "job": "inventory-service"
+            },
+            "value": [
+              1791600471.064,
+              "1"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "polaris:business_snapshot_valid",
+              "instance": "order-service:8081",
+              "job": "order-service"
+            },
+            "value": [
+              1791600471.064,
+              "1"
+            ]
+          }
+        ]
+      }
+    },
+    "polaris_pending_orders": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": [
+          {
+            "metric": {
+              "__name__": "polaris_pending_orders",
+              "instance": "order-service:8081",
+              "job": "order-service"
+            },
+            "value": [
+              1791600471.066,
+              "0"
+            ]
+          }
+        ]
+      }
+    },
+    "polaris_pending_order_oldest_age_seconds": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": [
+          {
+            "metric": {
+              "__name__": "polaris_pending_order_oldest_age_seconds",
+              "instance": "order-service:8081",
+              "job": "order-service"
+            },
+            "value": [
+              1791600471.067,
+              "0"
+            ]
+          }
+        ]
+      }
+    },
+    "polaris_outbox_events": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": [
+          {
+            "metric": {
+              "__name__": "polaris_outbox_events",
+              "instance": "inventory-service:8082",
+              "job": "inventory-service",
+              "status": "FAILED"
+            },
+            "value": [
+              1791600471.068,
+              "0"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "polaris_outbox_events",
+              "instance": "inventory-service:8082",
+              "job": "inventory-service",
+              "status": "PENDING"
+            },
+            "value": [
+              1791600471.068,
+              "0"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "polaris_outbox_events",
+              "instance": "inventory-service:8082",
+              "job": "inventory-service",
+              "status": "PUBLISHED"
+            },
+            "value": [
+              1791600471.068,
+              "1"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "polaris_outbox_events",
+              "instance": "inventory-service:8082",
+              "job": "inventory-service",
+              "status": "RETRY"
+            },
+            "value": [
+              1791600471.068,
+              "0"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "polaris_outbox_events",
+              "instance": "order-service:8081",
+              "job": "order-service",
+              "status": "FAILED"
+            },
+            "value": [
+              1791600471.068,
+              "0"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "polaris_outbox_events",
+              "instance": "order-service:8081",
+              "job": "order-service",
+              "status": "PENDING"
+            },
+            "value": [
+              1791600471.068,
+              "0"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "polaris_outbox_events",
+              "instance": "order-service:8081",
+              "job": "order-service",
+              "status": "PUBLISHED"
+            },
+            "value": [
+              1791600471.068,
+              "1"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "polaris_outbox_events",
+              "instance": "order-service:8081",
+              "job": "order-service",
+              "status": "RETRY"
+            },
+            "value": [
+              1791600471.068,
+              "0"
+            ]
+          }
+        ]
+      }
+    },
+    "polaris_outbox_oldest_age_seconds": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": [
+          {
+            "metric": {
+              "__name__": "polaris_outbox_oldest_age_seconds",
+              "instance": "inventory-service:8082",
+              "job": "inventory-service"
+            },
+            "value": [
+              1791600471.07,
+              "0"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "polaris_outbox_oldest_age_seconds",
+              "instance": "order-service:8081",
+              "job": "order-service"
+            },
+            "value": [
+              1791600471.07,
+              "0"
+            ]
+          }
+        ]
+      }
+    },
+    "polaris_notification_inbox_events": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": [
+          {
+            "metric": {
+              "__name__": "polaris_notification_inbox_events",
+              "instance": "notification-service:8083",
+              "job": "notification-service",
+              "status": "DEAD_LETTERED"
+            },
+            "value": [
+              1791600471.073,
+              "0"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "polaris_notification_inbox_events",
+              "instance": "notification-service:8083",
+              "job": "notification-service",
+              "status": "PROCESSED"
+            },
+            "value": [
+              1791600471.073,
+              "2"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "polaris_notification_inbox_events",
+              "instance": "notification-service:8083",
+              "job": "notification-service",
+              "status": "PROCESSING"
+            },
+            "value": [
+              1791600471.073,
+              "0"
+            ]
+          }
+        ]
+      }
+    },
+    "polaris_notification_completions_total": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": [
+          {
+            "metric": {
+              "__name__": "polaris_notification_completions_total",
+              "event_type": "InventoryAdjusted",
+              "instance": "notification-service:8083",
+              "job": "notification-service",
+              "outcome": "dead_lettered"
+            },
+            "value": [
+              1791600471.076,
+              "0"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "polaris_notification_completions_total",
+              "event_type": "InventoryAdjusted",
+              "instance": "notification-service:8083",
+              "job": "notification-service",
+              "outcome": "processed"
+            },
+            "value": [
+              1791600471.076,
+              "1"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "polaris_notification_completions_total",
+              "event_type": "OrderCreated",
+              "instance": "notification-service:8083",
+              "job": "notification-service",
+              "outcome": "dead_lettered"
+            },
+            "value": [
+              1791600471.076,
+              "0"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "polaris_notification_completions_total",
+              "event_type": "OrderCreated",
+              "instance": "notification-service:8083",
+              "job": "notification-service",
+              "outcome": "processed"
+            },
+            "value": [
+              1791600471.076,
+              "1"
+            ]
+          }
+        ]
+      }
+    },
+    "polaris_notification_dlq_publications_total": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": [
+          {
+            "metric": {
+              "__name__": "polaris_notification_dlq_publications_total",
+              "instance": "notification-service:8083",
+              "job": "notification-service",
+              "outcome": "acknowledged"
+            },
+            "value": [
+              1791600471.079,
+              "0"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "polaris_notification_dlq_publications_total",
+              "instance": "notification-service:8083",
+              "job": "notification-service",
+              "outcome": "failed"
+            },
+            "value": [
+              1791600471.079,
+              "0"
+            ]
+          }
+        ]
+      }
+    },
+    "polaris_notification_freshness_seconds_bucket{le=\"3600.0\"}": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": [
+          {
+            "metric": {
+              "__name__": "polaris_notification_freshness_seconds_bucket",
+              "event_type": "InventoryAdjusted",
+              "instance": "notification-service:8083",
+              "job": "notification-service",
+              "le": "3600.0"
+            },
+            "value": [
+              1791600471.081,
+              "1"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "polaris_notification_freshness_seconds_bucket",
+              "event_type": "OrderCreated",
+              "instance": "notification-service:8083",
+              "job": "notification-service",
+              "le": "3600.0"
+            },
+            "value": [
+              1791600471.081,
+              "1"
+            ]
+          }
+        ]
+      }
+    },
+    "polaris_notification_freshness_overflow_total": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": [
+          {
+            "metric": {
+              "__name__": "polaris_notification_freshness_overflow_total",
+              "event_type": "InventoryAdjusted",
+              "instance": "notification-service:8083",
+              "job": "notification-service"
+            },
+            "value": [
+              1791600471.083,
+              "0"
+            ]
+          },
+          {
+            "metric": {
+              "__name__": "polaris_notification_freshness_overflow_total",
+              "event_type": "OrderCreated",
+              "instance": "notification-service:8083",
+              "job": "notification-service"
+            },
+            "value": [
+              1791600471.083,
+              "0"
+            ]
+          }
+        ]
+      }
+    },
+    "grpc_client_processing_duration_seconds_count{service=\"polaris.inventory.v1.InventoryService\",method=\"ReserveStock\",methodType=\"UNARY\"}": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": [
+          {
+            "metric": {
+              "__name__": "grpc_client_processing_duration_seconds_count",
+              "instance": "order-service:8081",
+              "job": "order-service",
+              "method": "ReserveStock",
+              "methodType": "UNARY",
+              "service": "polaris.inventory.v1.InventoryService",
+              "statusCode": "OK"
+            },
+            "value": [
+              1791600471.085,
+              "1"
+            ]
+          }
+        ]
+      }
+    },
+    "http_server_requests_seconds_count{job=\"order-service\",uri=\"/api/v1/orders\"}": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": [
+          {
+            "metric": {
+              "__name__": "http_server_requests_seconds_count",
+              "error": "none",
+              "exception": "none",
+              "instance": "order-service:8081",
+              "job": "order-service",
+              "method": "POST",
+              "outcome": "SUCCESS",
+              "status": "201",
+              "uri": "/api/v1/orders"
+            },
+            "value": [
+              1791600471.087,
+              "1"
+            ]
+          }
+        ]
+      }
+    },
+    "spring_cloud_gateway_requests_seconds_count{routeId=\"order-create\"}": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": [
+          {
+            "metric": {
+              "__name__": "spring_cloud_gateway_requests_seconds_count",
+              "httpMethod": "POST",
+              "httpStatusCode": "201",
+              "instance": "gateway:8080",
+              "job": "gateway",
+              "outcome": "SUCCESSFUL",
+              "routeId": "order-create",
+              "routeUri": "http://order-service:8081",
+              "status": "CREATED"
+            },
+            "value": [
+              1791600471.088,
+              "1"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

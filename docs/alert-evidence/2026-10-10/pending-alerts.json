@@ -1,0 +1,29 @@
+{
+  "at": "2026-10-10T02:48:08.338578+00:00",
+  "result": {
+    "status": "success",
+    "data": {
+      "alerts": [
+        {
+          "labels": {
+            "alertname": "PolarisServiceScrapeUnavailable",
+            "environment": "docker-demo",
+            "job": "inventory-service",
+            "owner": "inventory-service-owner",
+            "service": "inventory-service",
+            "severity": "warning"
+          },
+          "annotations": {
+            "dashboard_url": "http://localhost:3000/d/polaris-overview",
+            "description": "No reachable configured target for 2 minutes. This measures monitoring reachability; confirm customer impact separately.",
+            "runbook_url": "https://github.com/abdullahsayed30/Polaris/blob/main/docs/runbooks/service-reachability.md",
+            "summary": "inventory-service has no successful scrape"
+          },
+          "state": "pending",
+          "activeAt": "2026-10-10T02:48:05.007207002Z",
+          "value": "0e+00"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "at": "2026-10-10T02:53:39.807353+00:00",
+  "passed": true,
+  "exercised": [
+    "PolarisServiceScrapeUnavailable",
+    "PolarisPendingOrdersStalled"
+  ],
+  "prometheus_alerts_url": "http://127.0.0.1:58223/alerts"
+}

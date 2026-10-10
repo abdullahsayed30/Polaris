@@ -1,0 +1,11 @@
+{
+  "at": "2026-10-10T02:50:01.636919+00:00",
+  "query": "polaris_notification_freshness_seconds_bucket{le=\"60.0\"}",
+  "result": {
+    "status": "success",
+    "data": {
+      "resultType": "vector",
+      "result": []
+    }
+  }
+}
