@@ -1,0 +1,26 @@
+[
+  {
+    "at": "2026-10-10T02:46:00.189793+00:00",
+    "action": "Creating isolated fixture; normal rule thresholds and durations remain unchanged"
+  },
+  {
+    "at": "2026-10-10T02:47:26.139776+00:00",
+    "action": "Fixture ready; local alerts UI: http://127.0.0.1:58223/alerts"
+  },
+  {
+    "at": "2026-10-10T02:47:51.093521+00:00",
+    "action": "Stopping only this fixture inventory service"
+  },
+  {
+    "at": "2026-10-10T02:52:09.799600+00:00",
+    "action": "Restarting only this fixture inventory service; recovery reuses persisted identity"
+  },
+  {
+    "at": "2026-10-10T02:53:39.807092+00:00",
+    "action": "Live fire/recover proof passed; other alert paths have rule-test coverage only"
+  },
+  {
+    "at": "2026-10-10T02:53:39.937231+00:00",
+    "action": "Removing only the disposable fixture containers, network and volumes"
+  }
+]

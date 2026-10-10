@@ -1,0 +1,44 @@
+{
+  "at": "2026-10-10T02:55:07.506177+00:00",
+  "fast_gate": {
+    "tests": 119,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "promtool": {
+    "alert_scenarios": 47,
+    "alert_assertions": 600,
+    "alert_query_assertions": 3,
+    "existing_freshness_scenarios": 6,
+    "existing_freshness_query_assertions": 12,
+    "configuration": "passed",
+    "syntax": "passed"
+  },
+  "compose_configuration": {
+    "main": "passed",
+    "isolated_demo": "passed"
+  },
+  "live": {
+    "source_commit": "bf6c2c9bec104e356fa51510eb709b94fa1db97b",
+    "rules_sha256": "9797dcfbcee24b3fdea8e1f52675d56bb88be2553d94448665d52bc3e00e05c7",
+    "exercised_alerts": [
+      "PolarisServiceScrapeUnavailable",
+      "PolarisPendingOrdersStalled"
+    ],
+    "original_identity_recovered": true,
+    "cleaned_up": true
+  },
+  "limitations": [
+    "No external notification receiver",
+    "Other fault conditions have synthetic rule tests only",
+    "No cluster or measured SLO evidence",
+    "Completed simulated-processing freshness does not detect unseen broker backlog"
+  ],
+  "ci_failure_handling_unit_tests": {
+    "tests": 28,
+    "failures": 0,
+    "errors": 0
+  },
+  "ci_gate": "Blocking step in existing required quality job; remote exact-head results reported separately"
+}

@@ -24,30 +24,50 @@ Every alert should link to an owned runbook and dashboard, identify the environm
 | Order creation latency | 95% below 750 ms over 30 days | Measure at the gateway and keep an internal order-service view for diagnosis |
 | Order read latency | 95% below 300 ms over 30 days | Separate from create because the latter includes inventory RPC work |
 | Inventory gRPC availability | 99.95% non-system-error calls over 30 days | Business rejections such as insufficient stock are valid outcomes, not outages |
-| Notification freshness | 99% processed within 60 seconds over 30 days | Requires broker lag and event-age telemetry not currently bundled |
+| Notification freshness | 99% processed within 60 seconds over 30 days | Completed-event age is instrumented; unseen broker backlog still needs broker/exporter telemetry |
 
-The current application exposes generic HTTP, JVM, Kafka-client, and gRPC instrumentation. It does not yet expose a durable business counter for orders accepted, reservation correctness, notification completion, or DLQ size. Do not claim those business SLOs are observable until custom metrics or broker/exporter metrics are added.
+The application exposes HTTP/gRPC metrics, committed pending/outbox/inbox snapshots and after-commit simulated-notification observations. Process-local completion/attempt counters are not durable lifetime totals or broker queue depth. These signals do not establish a measured SLO, reservation correctness or external notification delivery. Broker backlog remains an instrumentation gap.
 
-## Alert recommendations
+## Evaluated local alerts
 
-Start with multi-window burn-rate alerts for the order API availability SLO rather than static error thresholds. A common first pass is a fast page when both a short and long window burn rapidly, and a ticket for slower sustained burn. Validate query names against the deployed Micrometer version before committing recording rules.
+Prometheus loads `deploy/prometheus/rules/polaris-alerts.yml` through `rule_files`; Compose mounts that directory read-only. Inspect pending/firing states at [local Prometheus Alerts](http://localhost:9090/alerts). Rule evaluation provides local visibility only: no Alertmanager, on-call receiver or external email/Slack/webhook notification is configured. Prometheus itself being unavailable requires an independent monitoring path.
 
-Page-worthy conditions:
+These are initial **demo operational thresholds**, not measured SLOs, error-budget burn rates or production paging policy. An operator must calibrate volume, age and persistence against actual traffic, recovery backoff and service objectives before deploying them. Burn-rate rules require an agreed good-request indicator, measurement policy and observation window first.
 
-- Order API fast-burn consumption of the availability error budget.
-- No ready gateway or order-service replicas for several minutes.
-- Sustained inventory gRPC system errors causing order creation failures.
-- Kafka consumer lag or oldest-message age threatening the notification freshness objective.
-- Database connection exhaustion, loss of primary availability, or Liquibase startup failure during rollout.
+| Alert | Condition / persistence | Response |
+| --- | --- | --- |
+| `PolarisServiceScrapeUnavailable` | No successful target or missing required job / 2m | [Scrape reachability](runbooks/service-reachability.md); confirm customer impact separately |
+| `PolarisBusinessTelemetryUnavailable` | No complete, successful, non-future snapshot younger than 45s among reachable replicas, or missing required freshness bucket / 2m | [Telemetry](runbooks/business-telemetry.md); a hidden backlog is not empty |
+| `PolarisOrderApiSystemErrors` | More than 5% HTTP 5xx among eligible order requests; at least 20 per 5m / sustained 5m | [Order path](runbooks/order-path.md); excludes 4xx and actuator requests |
+| `PolarisInventoryRpcSystemErrors` | More than 5% system errors among eligible `ReserveStock` client calls; at least 20 per 5m / sustained 5m | [Order path](runbooks/order-path.md); excludes expected input/precondition/auth rejections |
+| `PolarisPendingOrdersStalled` | Committed pending count above zero and oldest age over 120s / 2m | [Durable delivery](runbooks/durable-delivery.md); preserve reservation identity |
+| `PolarisOutboxStalled` | Committed pending/retry rows with oldest age over 120s / 2m | [Durable delivery](runbooks/durable-delivery.md); includes scheduled backoff |
+| `PolarisOutboxFailed` | Retained committed `FAILED` row / 1m | [Durable delivery](runbooks/durable-delivery.md); terminal work needs an explicit replay decision |
+| `PolarisNotificationFailures` | New failed/acknowledged DLQ sends or committed dead-letter observations in 5m / 1m | [Notification](runbooks/notification-processing.md); attempts are not unique failures or DLQ depth |
+| `PolarisNotificationProcessingLate` | More than 5% of at least 20 completed samples per 5m took over **one hour** / sustained 5m | [Notification](runbooks/notification-processing.md); completed simulated processing only |
 
-Ticket or warning conditions:
+Backlog rules gate each replica by **its own** scrape, success, timestamp and required gauge presence before `max by(job)` aggregation. Fresh replicas cannot validate stale values from failed replicas. Shared database row gauges are never summed across replicas. A snapshot failure can suppress a backlog alert and raise the telemetry alert instead; that transition is not business recovery. A single scrapeable/fresh replica keeps the corresponding service-level reachability/telemetry alert inactive.
 
-- Slow error-budget burn.
-- p95/p99 latency regression without material errors.
-- CPU throttling, memory approaching the container limit, repeated OOM kills, or HPA saturation at max replicas.
-- Pods unavailable during a rollout, repeated restarts, or PDBs preventing planned maintenance.
-- DLQ growth above zero after excluding an acknowledged test.
-- Trace export failures; these should not by themselves make the customer path unavailable.
+HTTP rules use numeric status and route/URI labels from actual instrumentation. The gRPC rule uses only the starter client `grpc_client_processing_duration_seconds_count` family with verified `service`, `method`, `methodType`, `statusCode` labels; it does not add the Observation family or server calls to the same denominator. No traffic or fewer than 20 eligible calls suppresses ratio alerts, so independent reachability and snapshot alerts remain necessary. Missing request series without prior traffic cannot establish customer-path health.
+
+Notification delay uses the explicitly instrumented `le="3600.0"` bucket versus completed histogram count, rather than a potentially censored p95. Seven-day overflow is included in the slow fraction and remains visible in the Business Flow dashboard's overflow panel. A missing one-hour bucket raises telemetry warning instead of manufacturing zero delay. The proposed 60-second SLO above is not this one-hour demo threshold; there is no explicitly configured 60-second histogram boundary. No completed events means no delay estimate, not proven freshness. Unseen Kafka backlog, external provider delivery and automatic DLQ redrive remain unimplemented.
+
+Alerts carry `environment` from Prometheus external labels (`docker-demo` here), `service`, severity and a `*-owner` responsibility placeholder. HTTP/gRPC system errors and terminal outbox failures are `critical`; other conditions are `warning`. These labels do not establish a real on-call roster. Replace environment, owner mapping, local Grafana URLs and canonical repository runbook URLs for the target deployment. Runbook URLs point to main and become available there when this change is integrated; dashboard UIDs match provisioned files.
+
+## Repeatable alert evidence
+
+```bash
+bash deploy/scripts/validate-alerts.sh
+./mvnw -B -ntp spotless:check checkstyle:check test
+./mvnw -B -ntp -DskipTests package
+python3 deploy/scripts/demo-alerts.py
+```
+
+The existing required CI quality job runs this rule validation as a blocking step; a failure prevents `CI required` from passing. The rule runner uses the same Prometheus 2.55.1 evaluator as Compose, with no network, host ports or persistent resources. Its tests cover healthy/pending/firing/resolved states, brief interruptions, request-volume guards, client/business rejections, missing/stale/future/NaN snapshot data, surviving replicas, a failed stale replica beside a healthy one, missing freshness buckets and seven-day overflow. Synthetic series prove rule behavior, not application recovery.
+
+The Python demo creates an unpredictable unique Compose project from `deploy/alert-demo/compose.yml`, with its own network/disposable volumes, loopback-only dynamic ports, CPU/memory limits and non-root application processes. It mounts current packaged application JARs and unchanged production alert rules, records source commit/JAR/rule hashes, queries actual emitted metric signatures, places an authenticated order, stops **only its inventory fixture**, observes scrape-loss and pending-order alerts, starts that fixture and verifies committed recovery/idempotent replay of the original order. Normal alert thresholds and durations are not accelerated. Tracing export is disabled in this smaller fixture; notification delivery remains simulated. Local Keycloak credentials/password grant are development fixtures. No receiver sends external messages.
+
+Evidence defaults to a new `target/alert-demo/` directory and includes UTC timestamps, pending/firing/recovered alert/rule/query snapshots, committed order checks and cleanup state. The script removes only its generated project in `finally`, including volumes; never point it at an existing stack. It does not touch paused review containers. See [retained proof](alert-evidence/2026-10-10/README.md) for the executed scenario and its limits. Other alert paths require additional fault demonstrations before claiming live coverage.
 
 ## Triage sequence
 

@@ -1,0 +1,11 @@
+{
+  "at": "2026-10-10T02:47:52.904968+00:00",
+  "status": 503,
+  "body": {
+    "type": "about:blank",
+    "title": "Inventory unavailable",
+    "status": 503,
+    "detail": "Inventory service is unavailable",
+    "instance": "/api/v1/orders"
+  }
+}

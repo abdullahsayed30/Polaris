@@ -1,0 +1,94 @@
+rule_files:
+  - ../polaris-alerts.yml
+evaluation_interval: 15s
+tests:
+  - name: healthy then pending firing and recovered
+    interval: 15s
+    external_labels:
+      environment: alert-test
+    input_series:
+      - series: 'up{job="gateway",instance="gateway:8080"}'
+        values: '1x3 0x12 1x8'
+      - series: 'up{job="order-service"}'
+        values: '1x24'
+      - series: 'up{job="inventory-service"}'
+        values: '1x24'
+      - series: 'up{job="notification-service"}'
+        values: '1x24'
+    alert_rule_test:
+      - eval_time: 30s
+        alertname: PolarisServiceScrapeUnavailable
+        exp_alerts: []
+      - eval_time: 2m
+        alertname: PolarisServiceScrapeUnavailable
+        exp_alerts: []
+      - eval_time: 3m
+        alertname: PolarisServiceScrapeUnavailable
+        exp_alerts:
+          - exp_labels:
+              job: gateway
+              service: gateway
+              severity: warning
+              environment: alert-test
+              owner: gateway-owner
+            exp_annotations:
+              summary: gateway has no successful scrape
+              description: 'No reachable configured target for 2 minutes. This measures monitoring reachability; confirm customer impact separately.'
+              dashboard_url: http://localhost:3000/d/polaris-overview
+              runbook_url: https://github.com/abdullahsayed30/Polaris/blob/main/docs/runbooks/service-reachability.md
+      - eval_time: 5m
+        alertname: PolarisServiceScrapeUnavailable
+        exp_alerts: []
+    promql_expr_test:
+      - expr: 'ALERTS{alertname="PolarisServiceScrapeUnavailable",alertstate="pending"}'
+        eval_time: 2m
+        exp_samples:
+          - labels: 'ALERTS{alertname="PolarisServiceScrapeUnavailable",alertstate="pending",job="gateway",service="gateway",severity="warning",environment="alert-test",owner="gateway-owner"}'
+            value: 1
+  - name: brief interruption and one surviving replica do not fire
+    interval: 15s
+    external_labels:
+      environment: alert-test
+    input_series:
+      - series: 'up{job="gateway",instance="one"}'
+        values: '1x3 0x3 1x32'
+      - series: 'up{job="order-service",instance="one"}'
+        values: '0x40'
+      - series: 'up{job="order-service",instance="two"}'
+        values: '1x40'
+      - series: 'up{job="inventory-service"}'
+        values: '1x40'
+      - series: 'up{job="notification-service"}'
+        values: '1x40'
+    alert_rule_test:
+      - eval_time: 5m
+        alertname: PolarisServiceScrapeUnavailable
+        exp_alerts: []
+  - name: removed or stale target is visible instead of silently healthy
+    interval: 15s
+    external_labels:
+      environment: alert-test
+    input_series:
+      - series: 'up{job="gateway"}'
+        values: '1x3 stale _x36'
+      - series: 'up{job="order-service"}'
+        values: '1x40'
+      - series: 'up{job="inventory-service"}'
+        values: '1x40'
+      - series: 'up{job="notification-service"}'
+        values: '1x40'
+    alert_rule_test:
+      - eval_time: 3m
+        alertname: PolarisServiceScrapeUnavailable
+        exp_alerts:
+          - exp_labels:
+              job: gateway
+              service: gateway
+              severity: warning
+              environment: alert-test
+              owner: gateway-owner
+            exp_annotations:
+              summary: gateway has no successful scrape
+              description: 'No reachable configured target for 2 minutes. This measures monitoring reachability; confirm customer impact separately.'
+              dashboard_url: http://localhost:3000/d/polaris-overview
+              runbook_url: https://github.com/abdullahsayed30/Polaris/blob/main/docs/runbooks/service-reachability.md

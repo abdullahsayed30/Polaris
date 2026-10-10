@@ -1,0 +1,290 @@
+# Disposable local demonstration only. No fixed network name or host port; no external notifications.
+services:
+  order-postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_DB: polaris_orders
+      POSTGRES_USER: polaris_order
+      POSTGRES_PASSWORD: polaris_order
+    volumes:
+    - order-postgres-data:/var/lib/postgresql
+    healthcheck:
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+      test:
+      - CMD-SHELL
+      - pg_isready -U polaris_order -d polaris_orders
+    mem_limit: 192m
+    cpus: 0.5
+  inventory-postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_DB: polaris_inventory
+      POSTGRES_USER: polaris_inventory
+      POSTGRES_PASSWORD: polaris_inventory
+    volumes:
+    - inventory-postgres-data:/var/lib/postgresql
+    healthcheck:
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+      test:
+      - CMD-SHELL
+      - pg_isready -U polaris_inventory -d polaris_inventory
+    mem_limit: 192m
+    cpus: 0.5
+  notification-postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_DB: polaris_notifications
+      POSTGRES_USER: polaris_notification
+      POSTGRES_PASSWORD: polaris_notification
+    volumes:
+    - notification-postgres-data:/var/lib/postgresql
+    healthcheck:
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+      test:
+      - CMD-SHELL
+      - pg_isready -U polaris_notification -d polaris_notifications
+    mem_limit: 192m
+    cpus: 0.5
+  kafka:
+    image: confluentinc/cp-kafka:7.7.12
+    environment:
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+      KAFKA_NODE_ID: '1'
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: '1'
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: '1'
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: '1'
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: '0'
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_HEAP_OPTS: -Xms128m -Xmx384m
+    volumes:
+    - kafka-data:/var/lib/kafka/data
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - kafka-topics --bootstrap-server localhost:9092 --list >/dev/null 2>&1
+      interval: 10s
+      timeout: 10s
+      retries: 12
+      start_period: 30s
+    mem_limit: 768m
+    cpus: 1
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0.7
+    command: start-dev --import-realm
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_HEALTH_ENABLED: 'true'
+      KC_HOSTNAME: http://keycloak:8080
+      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: 'true'
+      KC_HTTP_ENABLED: 'true'
+      JAVA_OPTS_APPEND: -Xms64m -Xmx256m
+    volumes:
+    - ../keycloak/polaris-realm.json:/opt/keycloak/data/import/polaris-realm.json:ro
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - 'exec 3<>/dev/tcp/127.0.0.1/9000 && printf ''GET /health/ready HTTP/1.1\r\nHost: localhost\r\nConnection:
+        close\r\n\r\n'' >&3 && grep -q ''200 OK'' <&3'
+      interval: 10s
+      timeout: 5s
+      retries: 18
+      start_period: 30s
+    mem_limit: 512m
+    cpus: 1
+    ports:
+    - 127.0.0.1::8080
+  inventory-service:
+    image: eclipse-temurin:25-jre-alpine@sha256:3c0a9084927a221ccd1d007fcaf614465672c0af37aaa834c5184483afe56d61
+    user: 65532:65532
+    mem_limit: 512m
+    cpus: 1
+    read_only: true
+    tmpfs:
+    - /tmp:rw,noexec,nosuid,size=128m
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      POLARIS_DEPLOYMENT_ENVIRONMENT: alert-demo
+      POLARIS_TRACING_EXPORT_ENABLED: 'false'
+      POLARIS_TRACING_SAMPLING_PROBABILITY: '1.0'
+      SPRING_LIQUIBASE_CONTEXTS: demo
+    entrypoint:
+    - java
+    - -Xms64m
+    - -Xmx256m
+    - -XX:ActiveProcessorCount=2
+    - -jar
+    - /app/service.jar
+    volumes:
+    - ../../inventory-service/target/inventory-service-exec.jar:/app/service.jar:ro
+    ports:
+    - 127.0.0.1::8082
+    depends_on:
+      inventory-postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - wget -q -O /dev/null http://127.0.0.1:8082/actuator/health || exit 1
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 45s
+  order-service:
+    image: eclipse-temurin:25-jre-alpine@sha256:3c0a9084927a221ccd1d007fcaf614465672c0af37aaa834c5184483afe56d61
+    user: 65532:65532
+    mem_limit: 512m
+    cpus: 1
+    read_only: true
+    tmpfs:
+    - /tmp:rw,noexec,nosuid,size=128m
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      POLARIS_DEPLOYMENT_ENVIRONMENT: alert-demo
+      POLARIS_TRACING_EXPORT_ENABLED: 'false'
+      POLARIS_TRACING_SAMPLING_PROBABILITY: '1.0'
+      POLARIS_OAUTH_ISSUER_URI: http://keycloak:8080/realms/polaris
+      POLARIS_OAUTH_JWK_SET_URI: http://keycloak:8080/realms/polaris/protocol/openid-connect/certs
+    entrypoint:
+    - java
+    - -Xms64m
+    - -Xmx256m
+    - -XX:ActiveProcessorCount=2
+    - -jar
+    - /app/service.jar
+    volumes:
+    - ../../order-service/target/order-service-exec.jar:/app/service.jar:ro
+    ports:
+    - 127.0.0.1::8081
+    depends_on:
+      order-postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      inventory-service:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - wget -q -O /dev/null http://127.0.0.1:8081/actuator/health || exit 1
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 45s
+  notification-service:
+    image: eclipse-temurin:25-jre-alpine@sha256:3c0a9084927a221ccd1d007fcaf614465672c0af37aaa834c5184483afe56d61
+    user: 65532:65532
+    mem_limit: 512m
+    cpus: 1
+    read_only: true
+    tmpfs:
+    - /tmp:rw,noexec,nosuid,size=128m
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      POLARIS_DEPLOYMENT_ENVIRONMENT: alert-demo
+      POLARIS_TRACING_EXPORT_ENABLED: 'false'
+      POLARIS_TRACING_SAMPLING_PROBABILITY: '1.0'
+    entrypoint:
+    - java
+    - -Xms64m
+    - -Xmx256m
+    - -XX:ActiveProcessorCount=2
+    - -jar
+    - /app/service.jar
+    volumes:
+    - ../../notification-service/target/notification-service-exec.jar:/app/service.jar:ro
+    ports:
+    - 127.0.0.1::8083
+    depends_on:
+      notification-postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - wget -q -O /dev/null http://127.0.0.1:8083/actuator/health || exit 1
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 45s
+  gateway:
+    image: eclipse-temurin:25-jre-alpine@sha256:3c0a9084927a221ccd1d007fcaf614465672c0af37aaa834c5184483afe56d61
+    user: 65532:65532
+    mem_limit: 512m
+    cpus: 1
+    read_only: true
+    tmpfs:
+    - /tmp:rw,noexec,nosuid,size=128m
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      POLARIS_DEPLOYMENT_ENVIRONMENT: alert-demo
+      POLARIS_TRACING_EXPORT_ENABLED: 'false'
+      POLARIS_TRACING_SAMPLING_PROBABILITY: '1.0'
+      POLARIS_OAUTH_ISSUER_URI: http://keycloak:8080/realms/polaris
+      POLARIS_OAUTH_JWK_SET_URI: http://keycloak:8080/realms/polaris/protocol/openid-connect/certs
+      POLARIS_GATEWAY_RATE_LIMIT_BACKEND: in-memory
+      MANAGEMENT_HEALTH_REDIS_ENABLED: 'false'
+    entrypoint:
+    - java
+    - -Xms64m
+    - -Xmx256m
+    - -XX:ActiveProcessorCount=2
+    - -jar
+    - /app/service.jar
+    volumes:
+    - ../../gateway/target/gateway-exec.jar:/app/service.jar:ro
+    ports:
+    - 127.0.0.1::8080
+    depends_on:
+      order-service:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - wget -q -O /dev/null http://127.0.0.1:8080/actuator/health || exit 1
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 45s
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    mem_limit: 256m
+    cpus: 0.5
+    command:
+    - --config.file=/etc/prometheus/prometheus.yml
+    - --storage.tsdb.path=/prometheus
+    - --storage.tsdb.retention.time=1h
+    volumes:
+    - ../prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    - ../prometheus/rules:/etc/prometheus/rules:ro
+    ports:
+    - 127.0.0.1::9090
+volumes:
+  order-postgres-data: {}
+  inventory-postgres-data: {}
+  notification-postgres-data: {}
+  kafka-data: {}

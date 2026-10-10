@@ -1,0 +1,48 @@
+{
+  "at": "2026-10-10T02:52:09.755026+00:00",
+  "result": {
+    "status": "success",
+    "data": {
+      "alerts": [
+        {
+          "labels": {
+            "alertname": "PolarisServiceScrapeUnavailable",
+            "environment": "docker-demo",
+            "job": "inventory-service",
+            "owner": "inventory-service-owner",
+            "service": "inventory-service",
+            "severity": "warning"
+          },
+          "annotations": {
+            "dashboard_url": "http://localhost:3000/d/polaris-overview",
+            "description": "No reachable configured target for 2 minutes. This measures monitoring reachability; confirm customer impact separately.",
+            "runbook_url": "https://github.com/abdullahsayed30/Polaris/blob/main/docs/runbooks/service-reachability.md",
+            "summary": "inventory-service has no successful scrape"
+          },
+          "state": "firing",
+          "activeAt": "2026-10-10T02:48:05.007207002Z",
+          "value": "0e+00"
+        },
+        {
+          "labels": {
+            "alertname": "PolarisPendingOrdersStalled",
+            "environment": "docker-demo",
+            "job": "order-service",
+            "owner": "order-service-owner",
+            "service": "order-service",
+            "severity": "warning"
+          },
+          "annotations": {
+            "dashboard_url": "http://localhost:3000/d/polaris-business-flow",
+            "description": "Oldest committed pending order exceeds 120 seconds for 2 minutes with a valid snapshot. Preserve the original order and reservation identity.",
+            "runbook_url": "https://github.com/abdullahsayed30/Polaris/blob/main/docs/runbooks/durable-delivery.md",
+            "summary": "Pending orders are not converging"
+          },
+          "state": "firing",
+          "activeAt": "2026-10-10T02:50:05.007207002Z",
+          "value": "2.43323e+02"
+        }
+      ]
+    }
+  }
+}

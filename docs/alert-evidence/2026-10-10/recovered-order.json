@@ -1,0 +1,19 @@
+{
+  "at": "2026-10-10T02:53:39.478906+00:00",
+  "response": {
+    "id": "96296ffd-caaf-3c95-9475-453027e52097",
+    "customerId": "11111111-1111-4111-8111-111111111111",
+    "status": "CONFIRMED",
+    "items": [
+      {
+        "id": "a3b575f9-6bff-420e-8f44-e04ba1643b93",
+        "sku": "SKU-COFFEE-001",
+        "quantity": 1,
+        "unitPrice": 10.0
+      }
+    ],
+    "createdAt": "2026-10-10T02:47:52.787287Z",
+    "updatedAt": "2026-10-10T02:53:26.300927Z"
+  },
+  "committed_status": "CONFIRMED"
+}

@@ -47,6 +47,9 @@ jobs:
       - name: Test CI failure handling and artifact provenance
         run: python3 -m unittest discover -s .github/scripts -p 'test_ci.py' -v
 
+      - name: Validate operational alert configuration and rule scenarios
+        run: bash deploy/scripts/validate-alerts.sh
+
       - name: Run quality checks, all tests and packaging
         if: ${{ inputs.run-integration-tests }}
         run: |
