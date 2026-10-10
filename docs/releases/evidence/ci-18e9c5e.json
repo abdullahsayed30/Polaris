@@ -1,0 +1,163 @@
+{
+  "source_commit": "18e9c5e4d6c298f70dad979ccef5c7741f5aca54",
+  "observed_at": "2026-10-06T02:08:08+03:00",
+  "inspection": "Counts extracted directly from downloaded JUnit XML in the GitHub Actions test report artifact; full XML is not bundled here.",
+  "run_url": "https://github.com/abdullahsayed30/Polaris/actions/runs/37385774642",
+  "quality_job_url": "https://github.com/abdullahsayed30/Polaris/actions/runs/37385774642/job/112018779691",
+  "artifact": {
+    "name": "polaris-test-reports",
+    "id": 11379415450,
+    "github_reported_digest": "sha256:30cfd9dead491ef5a7516540a58c2484eec90f3d12eca2011379a0f226b61b91",
+    "retention_days": 14
+  },
+  "environment": {
+    "runner": "ubuntu-24.04 / x64",
+    "java": "Eclipse Temurin 25.0.4.1",
+    "maven": "3.9.15"
+  },
+  "commands": [
+    "./mvnw -B -ntp spotless:check checkstyle:check",
+    "./mvnw -B -ntp test",
+    "./mvnw -B -ntp test-compile failsafe:integration-test failsafe:verify"
+  ],
+  "command_scope": "These CI commands passed. CI executes Failsafe separately; this record does not claim a local ./mvnw verify or Compose run.",
+  "totals": {
+    "tests": 90,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "suites": [
+    {
+      "suite": "io.polaris.contracts.OrderLifecycleSystemIntegrationTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "io.polaris.contracts.ContractDriftTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "io.polaris.contracts.OrderApiHttpContractTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "io.polaris.contracts.ServiceArchitectureTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "io.polaris.gateway.GatewayRateLimitingTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "io.polaris.gateway.GatewayRouteSecurityTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "io.polaris.inventory.InventoryServiceIntegrationTest",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "io.polaris.inventory.adapter.in.grpc.GrpcServerLoggingInterceptorTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "io.polaris.inventory.adapter.out.messaging.OutboxPublisherTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "io.polaris.notification.NotificationServiceIntegrationTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "io.polaris.notification.adapter.in.messaging.NotificationKafkaListenerTest",
+      "tests": 20,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "io.polaris.notification.adapter.out.logging.LoggingNotificationHandlerTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "io.polaris.notification.adapter.out.messaging.NotificationDeadLetterPublisherTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "io.polaris.order.OrderServiceIntegrationTest",
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "io.polaris.order.OrderServiceSecurityTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "io.polaris.order.adapter.out.grpc.GrpcClientLoggingInterceptorTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "io.polaris.order.adapter.out.messaging.OutboxPublisherTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "io.polaris.order.application.domain.service.ReservationRecoveryTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "limitations": [
+    "Baseline result only; subsequent PR heads and the final combined release candidate need their own checks.",
+    "Counts summarize executed tests, not a performance benchmark, production deployment or live dashboard/trace/alert rehearsal.",
+    "Original artifact expires; this compact summary preserves counts/provenance, not the full XML or an attestation."
+  ]
+}

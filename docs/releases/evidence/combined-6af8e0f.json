@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "inspectionDate": "2026-10-10",
+  "timezone": "Africa/Cairo",
+  "sourceCommit": "6af8e0feacab631106597ea7bc31554822e0ba3d",
+  "scope": "isolated combined rehearsal; not final merged-main verification or published release",
+  "tests": {
+    "unitContract": 119,
+    "integrationSystem": 35,
+    "total": 154,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "basis": "per-class results in inspected full verify log"
+  },
+  "runtimeOwnerReported": {
+    "healthyContainers": 13,
+    "grafanaPrometheusApplicationTargetsUp": 4,
+    "grafanaTempoProxyHttpStatus": 200,
+    "firstColdDemoHttpStatus": 503,
+    "sameIdentityRetryPassed": true,
+    "grafanaActualUiVerified": true
+  },
+  "inspectedTrace": {
+    "orderId": "05791bf1-2143-330c-99dd-0ea02864b51c",
+    "traceId": "3b24564ba49472978cca7cf2aea0b26b",
+    "spanCount": 51,
+    "serviceSpanCounts": {
+      "gateway": 6,
+      "notification-service": 12,
+      "inventory-service": 13,
+      "order-service": 20
+    },
+    "coverage": [
+      "HTTP",
+      "gRPC",
+      "persistence-operation blocks",
+      "both outboxes",
+      "Kafka sends and receives",
+      "simulated notification processing"
+    ],
+    "earlierOwnerReportedSpanCount": 47,
+    "root": {
+      "service": "gateway",
+      "name": "http post",
+      "spanId": "1cfad5816dc8e394",
+      "durationMilliseconds": 1031.085667,
+      "injectedExternalParent": false,
+      "missingParentCount": 0
+    },
+    "earlier47SpanExample": "separate capture with intentionally injected external parent absent from Tempo; not the main presentation trace"
+  },
+  "jarProvenance": {
+    "sourceCommit": "6af8e0f",
+    "applications": {
+      "gateway": "1dd4069dcd8f24cc3b092a8f70bda995d6d13f1d3b9792877fa8e8e97c8afb10",
+      "order-service": "4b11acc743890d46752568ffd794dbe622681f629b635a9d872c5204bf799fcf",
+      "inventory-service": "f6d0252f5b1b4a3c7651954ae0ac78beef79be4caaff8cf7d1226616490a35d2",
+      "notification-service": "84ff12b251b33cb56905f567221d215736411df428c95eac594fb2f719db363c"
+    }
+  },
+  "successfulDemoOrderId": "dce5f1bb-59f7-35cf-9314-e6c306e660a3",
+  "limitations": [
+    "notifications simulated",
+    "first cold request failed before same-identity retry",
+    "no final merged-main runtime proof",
+    "no alert fire-clear result",
+    "no recording, new tag, published release, production deployment, measured SLO or benchmark",
+    "raw input files remain local temporary artifacts; selected facts and hashes retained here"
+  ],
+  "localInputSha256": {
+    "polaris-grafana-review-order.json": "15b5e3eac5d1f8474adaa976c5add5a1ed005304e41cb256669fded0995944d1",
+    "polaris-grafana-review-trace.json": "997ca38ec9c83485261ce5cad6dd7b016b7ec196e8024c764a8991090cbbd2e4",
+    "polaris-grafana-review-jar-provenance.json": "e31ec19e83ebd4c72ebbd67baf0d35ffd363674bc79d518439e6bb5135411745",
+    "polaris-grafana-review-verify.log": "b99e9abb89f81ecd238d561ded0a1ea48fa62682f884fef5f70c892f5b55e4e8",
+    "polaris-grafana-review-demo.log": "4a443f8285aaa33a75a87fceb8722082641112f7e1aadd1fde229aef9645b168",
+    "polaris-grafana-review-root-proof.log": "fed11e2165ce12cd873d9d3300051be336177ae2daae3a4f9d3fbee76d6de7e8"
+  }
+}
