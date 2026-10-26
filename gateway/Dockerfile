@@ -1,4 +1,4 @@
-FROM maven:3.9.15-eclipse-temurin-25 AS build
+FROM maven:3.9-eclipse-temurin-26 AS build
 WORKDIR /workspace
 
 COPY pom.xml .
@@ -24,7 +24,7 @@ EXPOSE 8080
 USER 10001:10001
 ENTRYPOINT ["java", "-jar", "/app/gateway.jar"]
 
-FROM eclipse-temurin:25-jre-alpine@sha256:3c0a9084927a221ccd1d007fcaf614465672c0af37aaa834c5184483afe56d61 AS production
+FROM eclipse-temurin:25-jre-alpine@sha256:b7528962e65d43064d8a8b67ba175367896bc948363ea2d3fcd7f10d34e1f048 AS production
 RUN addgroup -S -g 65532 polaris \
     && adduser -S -D -H -u 65532 -G polaris polaris
 WORKDIR /app
